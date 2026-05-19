@@ -1,0 +1,124 @@
+package com.everycred.automation;
+
+import java.time.Duration;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import io.github.bonigarcia.wdm.WebDriverManager;
+
+public class EveryCredLogin {
+
+    public static void main(String[] args) {
+
+        WebDriverManager.chromedriver().setup();
+        WebDriver driver = new ChromeDriver();
+        driver.manage().window().maximize();
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
+        Actions actions = new Actions(driver);
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+
+        try {
+
+            // ================= LOGIN =================
+            driver.get("https://demo-dcs-issuer-us.everycred.com/auth/login");
+
+            WebElement email = wait.until(
+                    ExpectedConditions.visibilityOfElementLocated(By.id("email")));
+            email.sendKeys("admin.albuquerque@yopmail.com");
+
+            WebElement password = driver.findElement(By.cssSelector("input[type='password']"));
+            password.sendKeys("Everycred@123");
+
+            WebElement loginBtn = driver.findElement(By.xpath("//button[@type='submit']"));
+
+            // Use JS click (more reliable for Angular)
+            js.executeScript("arguments[0].click();", loginBtn);
+
+            // Wait until Subjects menu appears (means login success)
+            WebElement subjectsMenu = wait.until(
+                    ExpectedConditions.visibilityOfElementLocated(
+                            By.xpath("//*[normalize-space()='Subjects']")));
+
+            System.out.println("✅ Login successful");
+
+            // ================= CLICK SUBJECTS =================
+            subjectsMenu.click();
+
+            System.out.println("✅ Subjects page opened");
+
+            // ================= CLICK CREATE NEW =================
+            WebElement createNewBtn = wait.until(
+                    ExpectedConditions.elementToBeClickable(
+                            By.xpath("//button[normalize-space()='Create New']")));
+
+            createNewBtn.click();
+
+            // Wait for dropdown
+            wait.until(ExpectedConditions.visibilityOfElementLocated(
+                    By.xpath("//div[contains(@class,'p-menu')]")));
+
+            // ================= CLICK CREATE GROUP =================
+            WebElement createGroupOption = wait.until(
+                    ExpectedConditions.elementToBeClickable(
+                            By.xpath("//*[normalize-space()='Create Group']")));
+
+            actions.moveToElement(createGroupOption).click().perform();
+
+            // ================= WAIT FOR MODAL =================
+            wait.until(ExpectedConditions.visibilityOfElementLocated(
+                    By.xpath("//input[@placeholder='Enter group name']")));
+
+            System.out.println("✅ Create Group modal opened");
+
+            // ================= ENTER GROUP NAME =================
+            WebElement groupNameInput = driver.findElement(
+                    By.xpath("//input[@placeholder='Enter group name']"));
+
+            groupNameInput.sendKeys("Employee ID Card");
+
+            // ================= CLICK CREATE GROUP BUTTON =================
+            WebElement createGroupBtn = driver.findElement(
+                    By.xpath("//button[normalize-space()='Create Group']"));
+
+            createGroupBtn.click();
+
+            System.out.println("✅ Group created");
+
+            // Wait for modal to close
+            wait.until(ExpectedConditions.invisibilityOf(groupNameInput));
+
+            // ================= CREATE SUBJECT =================
+            createNewBtn = wait.until(
+                    ExpectedConditions.elementToBeClickable(
+                            By.xpath("//button[normalize-space()='Create New']")));
+
+            createNewBtn.click();
+
+            wait.until(ExpectedConditions.visibilityOfElementLocated(
+                    By.xpath("//div[contains(@class,'p-menu')]")));
+
+            WebElement createSubjectOption = wait.until(
+                    ExpectedConditions.elementToBeClickable(
+                            By.xpath("//*[normalize-space()='Create Subject']")));
+
+            actions.moveToElement(createSubjectOption).click().perform();
+
+            System.out.println("✅ Create Subject opened");
+
+            Thread.sleep(15000);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // driver.quit();
+    }
+}

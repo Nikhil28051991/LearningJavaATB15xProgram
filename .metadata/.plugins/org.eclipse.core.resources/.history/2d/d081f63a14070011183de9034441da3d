@@ -1,0 +1,127 @@
+package com.everycred.automation;
+
+import java.time.Duration;
+import java.util.List;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import io.github.bonigarcia.wdm.WebDriverManager;
+
+public class EveryCredLogin {
+
+    public static void main(String[] args) {
+
+        WebDriverManager.chromedriver().setup();
+        WebDriver driver = new ChromeDriver();
+        driver.manage().window().maximize();
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        Actions actions = new Actions(driver);
+
+        try {
+
+            // ================= LOGIN =================
+            driver.get("https://demo-dcs-issuer-us.everycred.com/auth/login");
+
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("email")))
+                    .sendKeys("admin.albuquerque@yopmail.com");
+
+            driver.findElement(By.cssSelector("input[type='password']"))
+                    .sendKeys("Everycred@123");
+
+            WebElement loginBtn = driver.findElement(By.xpath("//button[@type='submit']"));
+            js.executeScript("arguments[0].click();", loginBtn);
+
+            WebElement subjectsMenu = wait.until(
+                    ExpectedConditions.visibilityOfElementLocated(
+                            By.xpath("//*[normalize-space()='Subjects']")));
+
+            System.out.println("✅ Login successful");
+
+            subjectsMenu.click();
+
+            // ================= CLICK CREATE NEW =================
+            WebElement createNewBtn = wait.until(
+                    ExpectedConditions.elementToBeClickable(
+                            By.xpath("//button[contains(.,'Create New')]")));
+
+            createNewBtn.click();
+
+            wait.until(ExpectedConditions.visibilityOfElementLocated(
+                    By.xpath("//div[contains(@class,'p-menu')]")));
+
+            // ================= CLICK CREATE GROUP =================
+            WebElement createGroupOption = wait.until(
+                    ExpectedConditions.elementToBeClickable(
+                            By.xpath("//*[normalize-space()='Create Group']")));
+
+            actions.moveToElement(createGroupOption).click().perform();
+
+            // ================= WAIT FOR DIALOG =================
+            WebElement dialog = wait.until(
+                    ExpectedConditions.visibilityOfElementLocated(
+                            By.xpath("//div[contains(@class,'p-dialog')]")));
+
+            System.out.println("✅ Create Group dialog opened");
+
+            // ================= FIND INPUT FIELD INSIDE DIALOG =================
+            List<WebElement> inputs = dialog.findElements(By.xpath(".//input[@type='text']"));
+
+            if (inputs.size() == 0) {
+                throw new RuntimeException("No text input found inside Create Group dialog.");
+            }
+
+            WebElement groupInput = inputs.get(0);
+            groupInput.clear();
+            groupInput.sendKeys("Employee Id Card");
+
+            System.out.println("✅ Entered Group Name");
+
+            // ================= CLICK CREATE GROUP BUTTON =================
+            WebElement createGroupBtn = dialog.findElement(
+                    By.xpath(".//button[normalize-space()='Create Group']"));
+
+            createGroupBtn.click();
+
+            System.out.println("✅ Clicked Create Group");
+
+            // Wait for dialog to disappear
+            wait.until(ExpectedConditions.invisibilityOf(dialog));
+
+            // ================= OPEN CREATE SUBJECT =================
+            createNewBtn = wait.until(
+                    ExpectedConditions.elementToBeClickable(
+                            By.xpath("//button[contains(.,'Create New')]")));
+
+            createNewBtn.click();
+
+            wait.until(ExpectedConditions.visibilityOfElementLocated(
+                    By.xpath("//div[contains(@class,'p-menu')]")));
+
+            WebElement createSubjectOption = wait.until(
+                    ExpectedConditions.elementToBeClickable(
+                            By.xpath("//*[normalize-space()='Create Subject']")));
+
+            actions.moveToElement(createSubjectOption).click().perform();
+
+            System.out.println("✅ Create Subject opened successfully");
+
+            Thread.sleep(15000);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // driver.quit();
+    }
+}
+
+

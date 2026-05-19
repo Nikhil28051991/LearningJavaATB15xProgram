@@ -1,0 +1,108 @@
+package orderhistory;
+
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import java.io.FileInputStream;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.*;
+
+public class OrderReportTable {
+
+    private static class Stats {
+        int count = 0;
+        double total = 0;
+
+        void add(double price) {
+            count++;
+            total += price;
+        }
+
+        String format() {
+            return count + " (" + (long) total + ")";
+        }
+    }
+
+    // Fixed column order
+    private static final List<String> PAYMENT_ORDER = Arrays.asList(
+            "UPI", "CC", "UPIINT", "UPIICC", "NB", "UPI SALE", "CARD", "CASH"
+    );
+
+    public static void main(String[] args) {
+
+        String filePath = "C:\\Users\\Nikhil Sonawane\\eclipse-workspace\\OrderReport\\2026-04-01 to 2026-04-15_Order_History.xlsx";
+
+        Map<LocalDate, Map<String, Stats>> data = new TreeMap<>();
+
+        try (FileInputStream fis = new FileInputStream(filePath);
+             Workbook wb = new XSSFWorkbook(fis)) {
+
+            Sheet sheet = wb.getSheetAt(0);
+
+            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+
+                Row row = sheet.getRow(i);
+                if (row == null) continue;
+
+                // ===== DATE FIX =====
+                Cell dateCell = row.getCell(8);
+                if (dateCell == null || !DateUtil.isCellDateFormatted(dateCell)) continue;
+
+                LocalDate date = dateCell.getDateCellValue()
+                        .toInstant()
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDate();
+
+                // ===== PAYMENT =====
+                String payment = row.getCell(9).getStringCellValue().trim();
+
+                // ===== PRICE =====
+                double price = 0;
+                try {
+                    price = row.getCell(5).getNumericCellValue();
+                } catch (Exception ignored) {}
+
+                // ===== STORE =====
+                data
+                        .computeIfAbsent(date, d -> new HashMap<>())
+                        .computeIfAbsent(payment, p -> new Stats())
+                        .add(price);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // ===== PRINT HEADER =====
+        System.out.print(String.format("%-12s", "Date"));
+        for (String p : PAYMENT_ORDER) {
+            System.out.print(String.format("| %-12s", p));
+        }
+        System.out.print("| %-12s\n", "Total");
+
+        System.out.println("---------------------------------------------------------------------------------------------");
+
+        // ===== PRINT DATA =====
+        for (LocalDate date : data.keySet()) {
+
+            Map<String, Stats> map = data.get(date);
+
+            System.out.print(String.format("%-12s", date));
+
+            int totalCount = 0;
+            double totalAmount = 0;
+
+            for (String p : PAYMENT_ORDER) {
+                Stats s = map.getOrDefault(p, new Stats());
+                System.out.print(String.format("| %-12s", s.format()));
+
+                totalCount += s.count;
+                totalAmount += s.total;
+            }
+
+            System.out.print("| " + totalCount + " (" + (long) totalAmount + ")");
+            System.out.println();
+        }
+    }
+}

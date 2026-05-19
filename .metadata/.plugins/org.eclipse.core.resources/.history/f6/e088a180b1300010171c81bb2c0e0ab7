@@ -1,0 +1,26 @@
+package Demo_session;
+
+import java.awt.Desktop;
+import java.net.URI;
+
+public class Everygive_Launch 
+{
+
+	public static void main(String[] args) {
+        try {
+            // URL of the portal you want to launch
+            String url = "https://stgv2.prolifeprosper.com/donor";
+
+            // Check if Desktop is supported
+            if (Desktop.isDesktopSupported()) {
+                Desktop desktop = Desktop.getDesktop();
+                desktop.browse(new URI(url));
+            } else {
+                System.out.println("Desktop is not supported on this system.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+}

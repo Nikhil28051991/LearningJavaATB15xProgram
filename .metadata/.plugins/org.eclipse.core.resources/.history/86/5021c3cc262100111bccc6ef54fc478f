@@ -1,0 +1,142 @@
+package com.everycred.pages;
+
+import java.time.Duration;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+public class LoginPage {
+
+    private final WebDriver driver;
+    private final WebDriverWait wait;
+
+    private final By emailField = By.id("email");
+    private final By passwordField = By.cssSelector("input[type='password']");
+    private final By submitButton = By.xpath("//button[@type='submit']");
+    private final By recaptchaError =
+            By.xpath("//*[contains(text(),'Invalid reCAPTCHA')]");
+
+    public LoginPage(WebDriver driver) {
+
+        this.driver = driver;
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(60));
+    }
+
+
+    public void login(String username, String password) throws Exception {
+
+        wait.until(ExpectedConditions.urlContains("login"));
+
+        wait.until(webDriver ->
+                ((JavascriptExecutor) webDriver)
+                        .executeScript("return document.readyState")
+                        .equals("complete"));
+
+
+        int maxAttempts = 3;
+        int attempt = 0;
+        boolean loginSuccess = false;
+
+
+        while (attempt < maxAttempts && !loginSuccess) {
+
+            attempt++;
+
+            System.out.println("Login Attempt: " + attempt);
+
+
+            WebElement email =
+                    wait.until(ExpectedConditions.visibilityOfElementLocated(emailField));
+
+            email.clear();
+            email.sendKeys(username);
+
+            Thread.sleep(1000);
+
+
+            WebElement pass =
+                    wait.until(ExpectedConditions.visibilityOfElementLocated(passwordField));
+
+            pass.clear();
+            pass.sendKeys(password);
+
+            Thread.sleep(1500);
+
+
+            // wait captcha iframe
+
+            try {
+
+                wait.until(ExpectedConditions.presenceOfElementLocated(
+                        By.xpath("//iframe[contains(@title,'reCAPTCHA')]")));
+
+                System.out.println("Captcha loaded");
+
+                Thread.sleep(2000);
+
+            } catch (Exception e) {
+
+                System.out.println("Captcha not found");
+            }
+
+
+            // wait page ready
+
+            wait.until(webDriver ->
+                    ((JavascriptExecutor) webDriver)
+                            .executeScript("return document.readyState")
+                            .equals("complete"));
+
+
+            WebElement loginBtn =
+                    wait.until(ExpectedConditions.elementToBeClickable(submitButton));
+
+
+            Thread.sleep(2000);
+
+            loginBtn.click();
+
+            System.out.println("Login clicked");
+
+            Thread.sleep(5000);
+
+
+            if (driver.getCurrentUrl().contains("dashboard")
+                    || driver.findElements(
+                    By.xpath("//a[contains(@href,'subjects')]")).size() > 0) {
+
+                loginSuccess = true;
+
+                System.out.println("Login success");
+
+                break;
+            }
+
+
+            if (driver.findElements(recaptchaError).size() > 0) {
+
+                System.out.println("Captcha error retry");
+
+                Thread.sleep(4000);
+            }
+        }
+
+
+        if (!loginSuccess) {
+
+            System.out.println("Solve captcha manually");
+
+            Thread.sleep(60000);
+
+            if (driver.getCurrentUrl().contains("dashboard")) {
+                return;
+            }
+
+            throw new RuntimeException("Login failed");
+        }
+    }
+}

@@ -1,0 +1,15 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="EveryCred Suite" parallel="false" preserve-order="true">
+
+    <!--
+        13 @Test methods inside CreateSubjectTest share one browser and run in
+        priority order (1 → 13). Any earlier failure marks the rest as Skipped,
+        so the suite total reflects all logical steps cleanly.
+    -->
+    <test name="Full Flow Test" preserve-order="true">
+        <classes>
+            <class name="com.everycred.tests.CreateSubjectTest" />
+        </classes>
+    </test>
+
+</suite>

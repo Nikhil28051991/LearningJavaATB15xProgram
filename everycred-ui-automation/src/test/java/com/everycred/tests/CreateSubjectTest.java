@@ -1,0 +1,136 @@
+package com.everycred.tests;
+
+import org.testng.annotations.Test;
+import com.everycred.base.BaseTest;
+import com.everycred.pages.*;
+
+public class CreateSubjectTest extends BaseTest {
+
+    @Test
+    public void testCreateSubject() throws Exception {
+
+        System.out.println("===== TEST STARTED =====");
+
+        LoginPage login = new LoginPage(driver);
+        SubjectPage subject = new SubjectPage(driver);
+        AddRecordPage addRecord = new AddRecordPage(driver);
+        IssueCredentialPage issue = new IssueCredentialPage(driver);
+        VerifyCredentialPage verify = new VerifyCredentialPage(driver);
+        RevokeCredentialPage revoke = new RevokeCredentialPage(driver);
+        UploadSpreadsheetPage upload = new UploadSpreadsheetPage(driver);
+
+        // ======================================
+        // LOGIN
+        // ======================================
+
+        System.out.println("Logging into application");
+
+        login.login(
+                prop.getProperty("username"),
+                prop.getProperty("password")
+        );
+
+        subject.delay();
+
+        // ======================================
+        // STEP 1 - NAVIGATE ONCE ONLY
+        // ======================================
+
+        System.out.println("Navigating to Subjects & handling onboarding");
+
+        subject.navigateToSubjectsAndHandleOnboarding();
+
+        subject.delay();
+
+        // ======================================
+        // STEP 2 - CREATE GROUP
+        // ======================================
+
+        System.out.println("Creating Group");
+
+        subject.createGroup();
+
+        subject.delay();
+
+        // ======================================
+        // STEP 3 - DO NOT RE-NAVIGATE ❌ FIX
+        // ======================================
+
+        // ❌ REMOVED THIS LINE (CAUSES YOUR ERROR)
+        // subject.navigateToSubjectsAndHandleOnboarding();
+
+        // ======================================
+        // STEP 4 - CREATE SUBJECT
+        // ======================================
+
+        System.out.println("Creating Subject");
+
+        subject.createSubjectFlow();
+
+        subject.delay();
+
+        // ======================================
+        // STEP 5 - ADD ATTRIBUTES
+        // ======================================
+
+        System.out.println("Adding Subject Attributes");
+
+        subject.addAttributes();
+
+        subject.delay();
+
+        // ======================================
+        // STEP 6 - SELECT ATTRIBUTES
+        // ======================================
+
+        System.out.println("Selecting Attributes and Submitting");
+
+        subject.selectMultipleCheckboxAndSubmit();
+
+        subject.delay();
+
+        // ======================================
+        // STEP 7 - ADD RECORD
+        // ======================================
+
+        addRecord.addRecordFlow();
+
+        subject.delay();
+
+        addRecord.fillAddRecordForm();
+
+        subject.delay();
+
+        // ======================================
+        // STEP 8 - ISSUE
+        // ======================================
+
+        issue.issueCredentialFlow();
+
+        subject.delay();
+
+        // ======================================
+        // STEP 9 - VERIFY
+        // ======================================
+
+        verify.verifyCredentialFlow();
+
+        subject.delay();
+
+        // ======================================
+        // STEP 10 - REVOKE
+        // ======================================
+
+        revoke.revokeCredentialFlow();
+
+        subject.delay();
+
+        // ======================================
+        // STEP 11 - UPLOAD
+        // ======================================
+
+        upload.uploadSpreadsheetFlow();
+
+        System.out.println("===== FLOW COMPLETED SUCCESSFULLY =====");
+    }
+}

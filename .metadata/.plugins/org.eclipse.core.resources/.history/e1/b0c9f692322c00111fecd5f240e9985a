@@ -1,0 +1,178 @@
+package com.everycred.pages;
+
+import java.time.Duration;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+public class VerifyCredentialPage {
+
+    private WebDriver driver;
+    private WebDriverWait wait;
+
+    public VerifyCredentialPage(WebDriver driver) {
+
+        this.driver = driver;
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(40));
+    }
+
+
+    // ======================================
+    // DELAY
+    // ======================================
+
+    public void delay() {
+
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    // ======================================
+    // VERIFY CREDENTIAL FLOW
+    // ======================================
+
+    public void verifyCredentialFlow() throws InterruptedException {
+
+        System.out.println("Starting Verify Credential Flow");
+
+        // ======================================
+        // ENSURE NAVIGATION TO CREDENTIAL PAGE
+        // ======================================
+
+        if (!driver.getCurrentUrl().contains("/credentials")) {
+
+            System.out.println("Navigating to Credentials page manually");
+
+            WebElement credentialTab = wait.until(
+                    ExpectedConditions.elementToBeClickable(
+                            By.xpath("//a[contains(@href,'credentials')]")));
+
+            jsClick(credentialTab);
+
+            wait.until(ExpectedConditions.urlContains("/credentials"));
+        }
+
+        Thread.sleep(2000);
+
+        // =============================
+        // ISSUED TAB
+        // =============================
+
+        System.out.println("Opening Issued tab");
+
+        WebElement issuedTab = wait.until(
+                ExpectedConditions.elementToBeClickable(
+                        By.xpath("//button[normalize-space()='Issued']")));
+
+        jsClick(issuedTab);
+
+        Thread.sleep(3000);
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(
+                By.xpath("//tbody/tr[1]")));
+
+        Thread.sleep(2000);
+
+        System.out.println("Click latest verify");
+
+        WebElement verifyTick = wait.until(
+                ExpectedConditions.elementToBeClickable(
+                        By.xpath("(//button[@aria-label='Verify credential'])[1]")));
+
+        jsClick(verifyTick);
+
+        System.out.println("Switching window");
+
+        String mainWindow = driver.getWindowHandle();
+
+        for (String win : driver.getWindowHandles()) {
+
+            if (!win.equals(mainWindow)) {
+
+                driver.switchTo().window(win);
+                break;
+            }
+        }
+
+        Thread.sleep(4000);
+
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+
+        js.executeScript("window.scrollTo(0,document.body.scrollHeight)");
+
+        delay();
+
+        WebElement verifierBtn = wait.until(
+                ExpectedConditions.elementToBeClickable(
+                        By.xpath("//button[@id='verifier-button']")));
+
+        jsClick(verifierBtn);
+
+        Thread.sleep(5000);
+
+        driver.close();
+
+        driver.switchTo().window(mainWindow);
+
+        delay();
+
+
+        // ======================================
+        // NAVIGATION FIX (IMPORTANT)
+        // ======================================
+
+        System.out.println("Navigating to Subjects tab");
+
+        WebElement subjectsTab = wait.until(
+                ExpectedConditions.elementToBeClickable(
+                        By.xpath("//a[normalize-space()='Subjects']")));
+
+        jsClick(subjectsTab);
+
+        delay();
+
+        System.out.println("Navigating to Credentials tab");
+
+        WebElement credentialTab = wait.until(
+                ExpectedConditions.elementToBeClickable(
+                        By.xpath("//a[normalize-space()='Credentials']")));
+
+        jsClick(credentialTab);
+
+        delay();
+
+        System.out.println("Opening Issued tab again");
+
+        WebElement issuedTabAgain = wait.until(
+                ExpectedConditions.elementToBeClickable(
+                        By.xpath("//button[normalize-space()='Issued']")));
+
+        jsClick(issuedTabAgain);
+
+        Thread.sleep(3000);
+    }
+
+
+    // ======================================
+    // JS CLICK
+    // ======================================
+
+    public void jsClick(WebElement element) {
+
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+
+        js.executeScript("arguments[0].scrollIntoView(true);", element);
+
+        delay();
+
+        js.executeScript("arguments[0].click();", element);
+    }
+}

@@ -1,0 +1,9 @@
+<suite name="EveryCred Suite" parallel="false">
+
+    <test name="Create Subject Test">
+        <classes>
+            <class name="com.everycred.tests.CreateSubjectTest" />
+        </classes>
+    </test>
+
+</suite>

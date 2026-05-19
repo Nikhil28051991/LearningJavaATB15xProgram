@@ -1,0 +1,193 @@
+package com.example.socketio_loadtest;
+
+import io.socket.client.IO;
+import io.socket.client.Socket;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Arrays;
+
+
+
+public class App {
+
+    // ----- CONFIG -----
+    private static final String SOCKET_URL = "https://api.demo.simplertoday.ai";
+    private static final int DURATION_SECONDS = 120;   // run for 2 minutes
+    private static final int ARRIVAL_RATE = 5;         // users per second
+    private static final int MAX_VUS = 500;            // max concurrent users
+    private static final boolean FORCE_WEBSOCKET = true;
+    private static final String HEADER_X_CLIENT_TYPE = "Web_Maverick";
+    private static final String HEADER_ORIGIN = "https://demo.simplertoday.ai";
+    private static final int RESPONSE_TIMEOUT_MS = 10_000;
+
+    private static final String EVENT_NAME = "client-response";
+
+    private static final JSONObject SAMPLE_PAYLOAD = new JSONObject()
+            .put("tenantId", "675ff2ead0b057be61db7650")
+            .put("stage", "conversation")
+            .put("content", "When can I file a complaint?")
+            .put("role", "user")
+            .put("complaint_details", JSONObject.NULL)
+            .put("uuid", "fc706d91-763c-4ea8-bbb8-a0bc5e47d4eb");
+
+    // ----- Runtime stats -----
+    private final AtomicInteger activeVUs = new AtomicInteger(0);
+    private final AtomicInteger totalAttempts = new AtomicInteger(0);
+    private final AtomicInteger successes = new AtomicInteger(0);
+    private final AtomicInteger failures = new AtomicInteger(0);
+    private final List<Long> latencies = Collections.synchronizedList(new ArrayList<>());
+
+    // Executor services
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
+    private final ExecutorService vuExecutor = Executors.newCachedThreadPool();
+
+    public static void main(String[] args) throws Exception {
+        App test = new App();
+        test.run();
+    }
+
+    public void run() throws Exception {
+        System.out.println("Starting Socket.IO load test");
+        System.out.printf("Target: %s, duration: %ds, arrivalRate: %d/s, maxVusers: %d%n",
+                SOCKET_URL, DURATION_SECONDS, ARRIVAL_RATE, MAX_VUS);
+
+        // Calculate interval between starting users (ms)
+        long intervalMs = 1000L / ARRIVAL_RATE;
+
+        // Schedule virtual users at steady arrival rate
+        final Runnable arrivalTask = () -> {
+            if (activeVUs.get() < MAX_VUS) {
+                vuExecutor.submit(this::virtualUserFlow);
+            }
+        };
+
+        final ScheduledFuture<?> arrivalHandle =
+                scheduler.scheduleAtFixedRate(arrivalTask, 0, intervalMs, TimeUnit.MILLISECONDS);
+
+        // Stop arrivals after duration
+        scheduler.schedule(() -> {
+            arrivalHandle.cancel(false);
+            System.out.println("Arrival phase ended. No more VUs will be started.");
+        }, DURATION_SECONDS, TimeUnit.SECONDS);
+
+        // Schedule final shutdown + report after duration + buffer
+        scheduler.schedule(this::shutdownAndReport, DURATION_SECONDS + 20, TimeUnit.SECONDS);
+
+        // Keep main thread alive until shutdown
+        Thread.sleep((DURATION_SECONDS + 25) * 1000L);
+    }
+
+    private void virtualUserFlow() {
+        activeVUs.incrementAndGet();
+        totalAttempts.incrementAndGet();
+        long startTime = System.nanoTime();
+
+        Socket socket = null;
+        try {
+        	IO.Options opts = new IO.Options();
+        	if (FORCE_WEBSOCKET) opts.transports = new String[]{"websocket"};
+
+        	// Set headers using HashMap (compatible with Java 8)
+        	Map<String, List<String>> headers = new HashMap<>();
+        	headers.put("x-client-type", Arrays.asList(HEADER_X_CLIENT_TYPE));
+        	headers.put("origin", Arrays.asList(HEADER_ORIGIN));
+        	
+        	opts.extraHeaders = headers;
+
+        	opts.reconnection = false;
+
+        	// Create socket
+        	socket = IO.socket(SOCKET_URL, opts);
+
+
+            CountDownLatch latch = new CountDownLatch(1);
+            final AtomicInteger status = new AtomicInteger(0); // 1 = success, -1 = fail
+
+            // Listen for server response
+            socket.on(EVENT_NAME, args -> {
+                status.set(1);
+                latch.countDown();
+            });
+
+         // Connect event
+            socket.on(Socket.EVENT_CONNECT, args -> socket.emit(EVENT_NAME, SAMPLE_PAYLOAD.toString()));
+
+            // Connect error
+            socket.on(Socket.EVENT_CONNECT_ERROR, args -> {
+                status.set(-1);
+                latch.countDown();
+            });
+
+            // Optional: custom server-side error event
+            socket.on("error", args -> {
+                status.set(-1);
+                latch.countDown();
+            });
+
+
+            socket.connect();
+
+            boolean received = latch.await(RESPONSE_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+
+            long latencyMs = (System.nanoTime() - startTime) / 1_000_000;
+            latencies.add(latencyMs);
+
+            if (received && status.get() == 1) successes.incrementAndGet();
+            else failures.incrementAndGet();
+
+        } catch (Exception ex) {
+            failures.incrementAndGet();
+        } finally {
+            try {
+                if (socket != null && socket.connected()) socket.disconnect();
+            } catch (Exception ignored) {
+            }
+            activeVUs.decrementAndGet();
+        }
+    }
+
+    private void shutdownAndReport() {
+        try {
+            System.out.println("Shutting down executors...");
+            vuExecutor.shutdown();
+            scheduler.shutdown();
+
+            vuExecutor.awaitTermination(5, TimeUnit.SECONDS);
+            scheduler.awaitTermination(5, TimeUnit.SECONDS);
+        } catch (InterruptedException ignored) {
+        }
+
+        int total = totalAttempts.get();
+        int succ = successes.get();
+        int fail = failures.get();
+
+        long min = Long.MAX_VALUE, max = Long.MIN_VALUE;
+        long sum = 0;
+        if (latencies.isEmpty()) min = max = sum = 0;
+        else {
+            for (long v : latencies) {
+                if (v < min) min = v;
+                if (v > max) max = v;
+                sum += v;
+            }
+        }
+        double avg = latencies.isEmpty() ? 0 : ((double) sum) / latencies.size();
+
+        System.out.println("---- TEST SUMMARY ----");
+        System.out.printf("Total attempts: %d%n", total);
+        System.out.printf("Successes: %d, Failures: %d%n", succ, fail);
+        System.out.printf("Active VUs at end: %d%n", activeVUs.get());
+        System.out.printf("Latency (ms) - min: %d, avg: %.2f, max: %d%n", min, avg, max);
+        System.out.println("----------------------");
+    }
+
+}

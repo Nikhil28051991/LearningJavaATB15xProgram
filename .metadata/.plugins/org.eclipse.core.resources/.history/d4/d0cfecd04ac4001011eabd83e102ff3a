@@ -1,0 +1,209 @@
+package orderhistory;
+
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
+
+public class OrderReportTable {
+
+    private static class Stats {
+        int count = 0;
+        double totalPrice = 0.0;
+
+        void add(double price) {
+            count++;
+            totalPrice += price;
+        }
+
+        String format() {
+            return String.format("%d (%.0f)", count, totalPrice);
+        }
+    }
+
+    /** Exact order as in your "Analytics" sheet */
+    private static final String[] PAYMENT_ORDER = {
+        "UPI SALE", "FREE", "CARD", "CASH", "UPI", "NB", "UPICC"
+    };
+
+    public static void main(String[] args) {
+        String filePath = "C:\\Users\\Nikhil Sonawane\\eclipse-workspace\\OrderReport\\2025-11-01 to 2025-11-15_Order_History.xlsx";
+
+        Map<LocalDate, Map<String, Stats>> grouped = new TreeMap<>();
+        Map<LocalDate, Stats> dayTotals = new HashMap<>();
+        Map<String, Stats> grandTotals = new HashMap<>();
+        Stats overallTotal = new Stats();
+
+        try (FileInputStream fis = new FileInputStream(filePath);
+             Workbook wb = new XSSFWorkbook(fis)) {
+
+            Sheet sheet = wb.getSheet("Order History");
+            if (sheet == null) {
+                System.err.println("Sheet 'Order History' not found.");
+                return;
+            }
+
+            for (int r = 1; r <= sheet.getLastRowNum(); r++) {
+                Row row = sheet.getRow(r);
+                if (row == null) continue;
+
+                // Purchased On (col 8)
+                Cell purchasedCell = row.getCell(8);
+                if (purchasedCell == null || purchasedCell.getCellType() == CellType.BLANK) continue;
+
+                String purchasedStr = "";
+                if (purchasedCell.getCellType() == CellType.STRING) {
+                    purchasedStr = purchasedCell.getStringCellValue().trim();
+                } else if (purchasedCell.getCellType() == CellType.NUMERIC) {
+                    // fallback if stored as date
+                    purchasedStr = purchasedCell.getDateCellValue().toString();
+                }
+                if (purchasedStr.isEmpty()) continue;
+
+                LocalDate date = LocalDateTime.parse(purchasedStr).toLocalDate();
+
+                // Payment Method (col 9)
+                Cell payCell = row.getCell(9);
+                String payment = (payCell != null && payCell.getCellType() != CellType.BLANK)
+                        ? payCell.getStringCellValue().trim()
+                        : "Unknown";
+
+                // Ticket Price (col 5)
+                Cell priceCell = row.getCell(5);
+                double price = 0.0;
+                if (priceCell != null) {
+                    if (priceCell.getCellType() == CellType.NUMERIC) {
+                        price = priceCell.getNumericCellValue();
+                    } else if (priceCell.getCellType() == CellType.STRING) {
+                        try {
+                            price = Double.parseDouble(priceCell.getStringCellValue().trim());
+                        } catch (Exception ignored) {}
+                    }
+                }
+
+                // Daily per method
+                grouped.computeIfAbsent(date, k -> new HashMap<>())
+                       .computeIfAbsent(payment, k -> new Stats())
+                       .add(price);
+
+                // Daily total
+                dayTotals.computeIfAbsent(date, k -> new Stats()).add(price);
+
+                // Grand per method
+                grandTotals.computeIfAbsent(payment, k -> new Stats()).add(price);
+
+                // Overall
+                overallTotal.add(price);
+            }
+
+        } catch (IOException e) {
+            System.err.println("Error reading file: " + e.getMessage());
+            return;
+        }
+
+        // --------------------------------------------------------------
+        // Build table
+        // --------------------------------------------------------------
+        List<String[]> table = new ArrayList<>();
+
+        int colCount = PAYMENT_ORDER.length + 2; // Date + payments + Total
+        String[] header = new String[colCount];
+        header[0] = "Date";
+        for (int i = 0; i < PAYMENT_ORDER.length; i++) {
+            header[i + 1] = PAYMENT_ORDER[i];
+        }
+        header[colCount - 1] = "Total";
+        table.add(header);
+
+        for (LocalDate date : grouped.keySet()) {
+            Map<String, Stats> dayMap = grouped.get(date);
+            Stats dayTotal = dayTotals.get(date);
+
+            String[] row = new String[colCount];
+            row[0] = date.toString();
+
+            for (int i = 0; i < PAYMENT_ORDER.length; i++) {
+                String method = PAYMENT_ORDER[i];
+                Stats s = dayMap.get(method);
+                row[i + 1] = (s != null) ? s.format() : "0 (0)";
+            }
+
+            row[colCount - 1] = dayTotal.format();
+            table.add(row);
+        }
+
+        // Grand total row
+        String[] grandRow = new String[colCount];
+        grandRow[0] = "GRAND TOTAL";
+        for (int i = 0; i < PAYMENT_ORDER.length; i++) {
+            String method = PAYMENT_ORDER[i];
+            Stats s = grandTotals.getOrDefault(method, new Stats());
+            grandRow[i + 1] = s.format();
+        }
+        grandRow[colCount - 1] = overallTotal.format();
+        table.add(grandRow);
+
+        // --------------------------------------------------------------
+        // Print beautiful ASCII table
+        // --------------------------------------------------------------
+        printTable(table);
+    }
+
+    private static void printTable(List<String[]> rows) {
+        if (rows.isEmpty()) return;
+
+        int cols = rows.get(0).length;
+        int[] widths = new int[cols];
+
+        for (String[] row : rows) {
+            for (int c = 0; c < cols; c++) {
+                // account for * * on grand total
+                int len = row[c].length() + (row[0].equals("GRAND TOTAL") ? 4 : 0);
+                widths[c] = Math.max(widths[c], len);
+            }
+        }
+
+        String separator = Arrays.stream(widths)
+                .mapToObj(w -> "-" .repeat(w + 2))
+                .collect(Collectors.joining("+", "+", "+"));
+
+        System.out.println(separator);
+
+        // Header
+        printRow(rows.get(0), widths);
+
+        System.out.println(separator);
+
+        // Data rows
+        for (int i = 1; i < rows.size() - 1; i++) {
+            printRow(rows.get(i), widths);
+        }
+
+        // Grand total
+        System.out.println(separator);
+        printRow(rows.get(rows.size() - 1), widths);
+
+        System.out.println(separator);
+    }
+
+    private static void printRow(String[] row, int[] widths) {
+        StringBuilder line = new StringBuilder();
+        for (int c = 0; c < row.length; c++) {
+            String cell = row[c];
+            if (row[0].equals("GRAND TOTAL")) {
+                cell = "**" + cell + "**";
+            }
+            String padded = (c == 0)
+                    ? String.format("%-" + widths[c] + "s", cell)  // left align date
+                    : String.format("%" + widths[c] + "s", cell);  // right align numbers
+            line.append("| ").append(padded).append(" ");
+        }
+        line.append("|");
+        System.out.println(line);
+    }
+}

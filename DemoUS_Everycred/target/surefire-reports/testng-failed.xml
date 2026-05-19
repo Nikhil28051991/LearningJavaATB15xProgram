@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Failed suite [EveryCred Suite]" guice-stage="DEVELOPMENT" verbose="0">
+  <test thread-count="5" name="Full Flow Test(failed)" verbose="0">
+    <classes>
+      <class name="com.everycred.tests.CreateSubjectTest">
+        <methods>
+          <include name="step03_Login"/>
+          <include name="step02_IssuerProfile"/>
+          <include name="step06_CreateSubject"/>
+          <include name="step09_AddRecord"/>
+          <include name="step12_RevokeCredential"/>
+          <include name="step11_VerifyCredential"/>
+          <include name="step13_UploadSpreadsheet"/>
+          <include name="setUp"/>
+          <include name="initPages"/>
+          <include name="step07_AddAttributes"/>
+          <include name="step10_IssueCredential"/>
+          <include name="step01_SignUp"/>
+          <include name="step04_NavigateToSubjects"/>
+          <include name="tearDown"/>
+          <include name="step08_SelectAttributesAndSubmit"/>
+          <include name="step05_CreateGroup"/>
+        </methods>
+      </class> <!-- com.everycred.tests.CreateSubjectTest -->
+    </classes>
+  </test> <!-- Full Flow Test(failed) -->
+</suite> <!-- Failed suite [EveryCred Suite] -->

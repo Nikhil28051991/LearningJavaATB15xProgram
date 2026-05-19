@@ -1,0 +1,592 @@
+package com.everycred.pages;
+
+import java.time.Duration;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+public class RevokeCredentialPage {
+
+    private WebDriver driver;
+    private WebDriverWait wait;
+
+    public RevokeCredentialPage(WebDriver driver) {
+
+        this.driver = driver;
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(40));
+    }
+
+
+    // ======================================
+    // DELAY
+    // ======================================
+
+    public void delay() {
+
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    // ======================================
+    // REVOKE CREDENTIAL FLOW
+    // ======================================
+
+    public void revokeCredentialFlow() throws InterruptedException {
+
+        System.out.println("Starting Revoke Credential Flow");
+
+        String currentUrl = driver.getCurrentUrl();
+
+        System.out.println("Current URL = " + currentUrl);
+
+
+        // ======================================
+        // ENSURE NAVIGATION TO CREDENTIAL PAGE
+        // ======================================
+
+        if (!currentUrl.contains("/credentials")) {
+
+            System.out.println("Navigating to Credentials page manually");
+
+            WebElement credentialTab = wait.until(
+                    ExpectedConditions.elementToBeClickable(
+                            By.xpath("//a[contains(@href,'credentials')]")));
+
+            jsClick(credentialTab);
+
+            wait.until(ExpectedConditions.urlContains("/credentials"));
+        }
+
+        Thread.sleep(2000);
+
+
+     // ======================================
+     // ENSURE PAGE LOAD (NEW FIX ✅)
+     // ======================================
+
+     wait.until(ExpectedConditions.presenceOfElementLocated(
+             By.xpath("//a[normalize-space()='Credentials']")));
+
+     // ✅ ADD THIS (STRONG PAGE LOAD FIX)
+     wait.until(ExpectedConditions.visibilityOfElementLocated(
+             By.xpath("//button[normalize-space()='Issued']")));
+
+     Thread.sleep(2000);
+
+
+        // ======================================
+        // CLICK ISSUED TAB
+        // ======================================
+
+        System.out.println("Opening Issued tab");
+
+        WebElement issuedTab = wait.until(
+                ExpectedConditions.elementToBeClickable(
+                        By.xpath("//button[normalize-space()='Issued']")));
+
+        jsClick(issuedTab);
+
+        Thread.sleep(3000);
+
+
+        // ======================================
+        // WAIT FOR TABLE
+        // ======================================
+
+        wait.until(ExpectedConditions.presenceOfElementLocated(
+                By.xpath("//tbody/tr[1]")));
+
+        wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(
+                By.xpath("//tbody/tr"), 0));
+
+        Thread.sleep(2000);
+
+
+     // ======================================
+     // SELECT LATEST RECORD CHECKBOX (FINAL FIX)
+     // ======================================
+
+     System.out.println("Selecting latest credential");
+
+     // Step 1: Locate REAL checkbox input (IMPORTANT)
+     WebElement checkboxInput = wait.until(
+             ExpectedConditions.presenceOfElementLocated(
+                     By.xpath("(//p-tablecheckbox//input[@type='checkbox'])[1]")));
+
+     // Step 2: Scroll into view
+     ((JavascriptExecutor) driver)
+             .executeScript("arguments[0].scrollIntoView({block:'center'});", checkboxInput);
+
+     Thread.sleep(500);
+
+     // Step 3: Click using JS (REQUIRED for hidden input)
+     ((JavascriptExecutor) driver)
+             .executeScript("arguments[0].click();", checkboxInput);
+
+     Thread.sleep(1000);
+
+
+     // ======================================
+     // VERIFY CHECKBOX SELECTED (REAL FIX)
+     // ======================================
+
+     if (!checkboxInput.isSelected()) {
+
+         System.out.println("Retry clicking checkbox...");
+
+         ((JavascriptExecutor) driver)
+                 .executeScript("arguments[0].click();", checkboxInput);
+
+         Thread.sleep(1000);
+     }
+
+     // EXTRA VALIDATION (IMPORTANT)
+     boolean isSelected = checkboxInput.isSelected();
+
+     System.out.println("Checkbox selected = " + isSelected);
+
+     if (!isSelected) {
+         throw new RuntimeException("Checkbox selection failed → Cannot proceed with revoke");
+     }
+
+     System.out.println("Checkbox selected successfully");
+
+     delay();
+
+        // ======================================
+        // CLICK REVOKE BUTTON
+        // ======================================
+
+        System.out.println("Click Revoke button");
+
+        WebElement revokeBtn = wait.until(
+                ExpectedConditions.elementToBeClickable(
+                        By.xpath("//span[normalize-space()='Revoke']")));
+
+        jsClick(revokeBtn);
+
+        delay();
+
+
+        // ======================================
+        // ENTER REMARK IN POPUP
+        // ======================================
+
+        System.out.println("Entering revoke reason");
+
+        WebElement remarkBox = wait.until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        By.xpath("//textarea[@id='remark']")));
+
+        remarkBox.sendKeys("Wrongly Issued");
+
+        delay();
+
+
+     // ======================================
+     // CLICK FINAL REVOKE BUTTON
+     // ======================================
+
+     System.out.println("Confirm revoke");
+
+     WebElement dialog = wait.until(
+             ExpectedConditions.visibilityOfElementLocated(
+                     By.xpath("//div[contains(@class,'p-dialog')]")));
+
+     WebElement confirmRevoke = wait.until(
+             ExpectedConditions.elementToBeClickable(
+                     By.xpath("//div[contains(@class,'p-dialog')]//button[contains(@class,'p-button-danger')]")));
+
+     // EXTRA SAFETY
+     Thread.sleep(1000);
+
+     // ======================================
+     // SINGLE CLEAN CLICK (FIXED)
+     // ======================================
+
+     try {
+         confirmRevoke.click();
+     } catch (Exception e) {
+         System.out.println("Normal click failed, using JS click");
+         ((JavascriptExecutor) driver)
+                 .executeScript("arguments[0].click();", confirmRevoke);
+     }
+
+
+     // ======================================
+     // FIX SCROLL ISSUE
+     // ======================================
+
+     ((JavascriptExecutor) driver)
+             .executeScript("window.scrollTo(0, 0);");
+
+     delay();
+        
+  // ======================================
+  // WAIT FOR REVOKE COMPLETION (FINAL FIX)
+  // ======================================
+
+  System.out.println("Waiting for revoke to complete");
+
+  // Wait for dialog to disappear (CONFIRM ACTION DONE)
+  wait.until(ExpectedConditions.invisibilityOfElementLocated(
+          By.xpath("//div[contains(@class,'p-dialog')]")));
+
+  Thread.sleep(1000);
+
+
+  // OPTIONAL: Try to capture toast if exists (NON-BLOCKING)
+  try {
+      WebElement toast = wait.until(
+              ExpectedConditions.visibilityOfElementLocated(
+                      By.xpath("//div[contains(@class,'p-toast-message')]")));
+
+      System.out.println("Toast message: " + toast.getText());
+
+  } catch (Exception e) {
+      System.out.println("Toast not found (but revoke may still be successful)");
+  }
+
+
+  // ======================================
+  // CLICK REVOKED TAB
+  // ======================================
+
+  System.out.println("Opening Revoked tab");
+
+  WebElement revokedTab = wait.until(
+          ExpectedConditions.elementToBeClickable(
+                  By.xpath("//button[normalize-space()='Revoked']")));
+
+  jsClick(revokedTab);
+
+  Thread.sleep(3000);
+
+
+     //======================================
+    //WAIT FOR REVOKED DATA
+   //======================================
+
+   //✅ STRONGER WAIT (REPLACED)
+     wait.until(ExpectedConditions.or(
+       ExpectedConditions.visibilityOfElementLocated(By.xpath("//tbody/tr")),
+       ExpectedConditions.presenceOfElementLocated(By.xpath("//tbody"))
+     ));
+
+  // ======================================
+  // OPTIONAL: HARD REFRESH (ONLY IF DATA NOT LOADED)
+  // ======================================
+
+  if (driver.findElements(By.xpath("//tbody/tr")).size() == 0) {
+
+      System.out.println("No data found → refreshing");
+
+      driver.navigate().refresh();
+
+      wait.until(ExpectedConditions.urlContains("credentials"));
+
+      Thread.sleep(3000);
+  }
+  
+  
+     // ======================================
+     // OPEN SUBJECTS TAB (FIXED FLOW)
+     // ======================================
+
+     System.out.println("Opening Subjects Tab");
+
+     WebElement subjectsTab = wait.until(
+             ExpectedConditions.elementToBeClickable(
+                     By.xpath("//a[normalize-space()='Subjects']")));
+
+     jsClick(subjectsTab);
+
+     wait.until(ExpectedConditions.or(
+    	        ExpectedConditions.visibilityOfElementLocated(By.xpath("//tbody//tr")),
+    	        ExpectedConditions.visibilityOfElementLocated(By.xpath("//span[contains(text(),'in-process records')]"))
+    	));
+
+     delay();
+
+
+     // ======================================
+     // CLICK ADD RECORD FROM TABLE ROW
+     // ======================================
+
+     WebElement addRecordButton = wait.until(
+             ExpectedConditions.elementToBeClickable(
+                     By.xpath("//tbody/tr[1]//button[contains(.,'Add Record')]")));
+
+     jsClick(addRecordButton);
+
+     System.out.println("Add Record button clicked");
+
+     delay();
+
+
+  // ======================================
+  // WAIT FOR ADD RECORD PAGE (FIXED)
+  // ======================================
+
+  System.out.println("Ensuring Add Record page is fully loaded");
+
+  // Header check
+  wait.until(ExpectedConditions.visibilityOfElementLocated(
+          By.xpath("//span[normalize-space()='Add New Record']")));
+
+  // IMPORTANT: Wait for page container
+  wait.until(ExpectedConditions.visibilityOfElementLocated(
+	        By.xpath("//button[.//span[normalize-space()='Upload Spreadsheet']]")));
+  Thread.sleep(2000);
+
+  System.out.println("Add Credential Page Loaded Successfully");
+
+
+     // ======================================
+     // UPLOAD SPREADSHEET
+     // ======================================
+
+     uploadSpreadsheet();
+
+     Thread.sleep(3000);
+
+     System.out.println("Revoke Flow Completed");    }
+
+
+    // ======================================
+    // UPLOAD SPREADSHEET
+    // ======================================
+
+    public void uploadSpreadsheet() throws InterruptedException {
+
+        String filePath =
+                "C:\\Users\\Nikhil Sonawane\\Downloads\\Employees ID Cards-template.xlsx";
+
+        System.out.println("Upload started");
+
+        try {
+            wait.until(ExpectedConditions.invisibilityOfElementLocated(
+                    By.xpath("//span[contains(text(),'Issue Credential')]")));
+        } catch (Exception e) {
+        }
+
+        By uploadMainLocator = By.xpath("//button[.//span[normalize-space()='Upload Spreadsheet']]");
+
+        WebElement uploadMain = wait.until(
+                ExpectedConditions.elementToBeClickable(uploadMainLocator));
+
+        // SCROLL FIRST (VERY IMPORTANT)
+        ((JavascriptExecutor) driver)
+                .executeScript("arguments[0].scrollIntoView({block:'center'});", uploadMain);
+
+        Thread.sleep(1000);
+
+        // SAFE CLICK
+        try {
+            uploadMain.click();
+        } catch (Exception e) {
+            ((JavascriptExecutor) driver)
+                    .executeScript("arguments[0].click();", uploadMain);
+        }
+        
+     // ✅ ADD THIS
+        ((JavascriptExecutor) driver)
+                .executeScript("window.scrollTo(0, 0);");
+
+        delay();
+
+        wait.until(ExpectedConditions.presenceOfElementLocated(
+                By.xpath("//input[@type='file']")));
+
+        WebElement fileInput = driver.findElement(
+                By.xpath("//input[@type='file']"));
+
+        ((JavascriptExecutor) driver)
+                .executeScript("arguments[0].style.display='block';", fileInput);
+
+        fileInput.sendKeys(filePath);
+
+        delay();
+
+        WebElement uploadBtn = wait.until(
+                ExpectedConditions.elementToBeClickable(
+                        By.xpath("//button[contains(.,'Upload Spreadsheet')]")));
+
+        jsClick(uploadBtn);
+
+        System.out.println("Upload done → now clicking Add Record(s)");
+
+        // DO NOT WAIT FOR TABLE HERE
+        Thread.sleep(2000);
+    
+    
+    
+ // ======================================
+ // CLICK ADD RECORD(S) BUTTON
+ // ======================================
+
+ System.out.println("Clicking Add Record(s) button");
+
+ WebElement addRecordBtn = wait.until(
+         ExpectedConditions.elementToBeClickable(
+                 By.xpath("//button[.//span[normalize-space()='Add Record(s)']]")));
+
+ // Scroll to element (IMPORTANT FIX)
+ ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", addRecordBtn);
+
+ // Click using JS (if normal click fails)
+ ((JavascriptExecutor) driver).executeScript("arguments[0].click();", addRecordBtn);
+
+ Thread.sleep(2000);
+ 
+
+
+ // ======================================
+ // WAIT FOR ADD RECORD POPUP
+ // ======================================
+
+ System.out.println("Waiting for Add Record popup");
+
+ wait.until(ExpectedConditions.visibilityOfElementLocated(
+         By.xpath("//span[normalize-space()='Add Records']")));
+
+ Thread.sleep(1000);
+
+
+ // ======================================
+ // CLICK SELECT SUBJECT DROPDOWN
+ // ======================================
+
+ System.out.println("Opening Select Subject dropdown");
+
+ WebElement subjectDropdown = wait.until(
+         ExpectedConditions.elementToBeClickable(
+                 By.xpath("//span[@aria-label='Select a subject']")));
+
+ jsClick(subjectDropdown);
+
+ Thread.sleep(1000);
+
+
+ // ======================================
+ // SELECT LATEST SUBJECT
+ // ======================================
+
+ System.out.println("Selecting latest subject");
+
+ WebElement latestSubject = wait.until(
+         ExpectedConditions.elementToBeClickable(
+                 By.xpath("//li[@id='selectedSubject_0']")));
+
+ jsClick(latestSubject);
+
+ Thread.sleep(1000);
+
+
+ // ======================================
+ // CLICK ADD RECORDS BUTTON IN POPUP
+ // ======================================
+
+ System.out.println("Confirm Add Records");
+
+ WebElement confirmAddRecords = wait.until(
+         ExpectedConditions.elementToBeClickable(
+                 By.xpath("//button[.//span[normalize-space()='Add Record(s)']]")));
+
+ jsClick(confirmAddRecords);
+
+ Thread.sleep(3000);
+ 
+ wait.until(ExpectedConditions.elementToBeClickable(
+	        By.xpath("//button[.//span[normalize-space()='Upload Spreadsheet']]")));
+
+
+//======================================
+//CLICK UPLOAD SPREADSHEET BUTTON AGAIN (FIXED)
+//======================================
+
+System.out.println("Click Upload Spreadsheet again");
+
+WebElement uploadSpreadsheetBtn = wait.until(
+	      ExpectedConditions.elementToBeClickable(
+	              By.xpath("//button[.//span[normalize-space()='Upload Spreadsheet']]")));
+
+//✅ ADD THIS LINE HERE (VERY IMPORTANT)
+((JavascriptExecutor) driver).executeScript("window.scrollTo(0, 0);");
+
+//OPTIONAL: small wait for stability
+Thread.sleep(500);
+
+//Use JS click
+jsClick(uploadSpreadsheetBtn);
+
+Thread.sleep(2000);
+
+//======================================
+//HANDLE TABLE OR IN-PROCESS MESSAGE (FINAL FIX)
+//======================================
+
+System.out.println("Checking for uploaded data or in-process message");
+
+//Wait for either table OR message
+wait.until(ExpectedConditions.or(
+     ExpectedConditions.visibilityOfElementLocated(By.xpath("//tbody//tr")),
+     ExpectedConditions.visibilityOfElementLocated(By.xpath("//span[contains(text(),'in-process records')]"))
+));
+
+//IF in-process message exists → click it
+if (driver.findElements(By.xpath("//span[contains(text(),'in-process records')]")).size() > 0) {
+
+ System.out.println("In-process message found → clicking");
+
+ WebElement inProcessMsg = wait.until(
+         ExpectedConditions.elementToBeClickable(
+                 By.xpath("//span[contains(text(),'in-process records')]")));
+
+ jsClick(inProcessMsg);
+
+ Thread.sleep(3000);
+}
+
+//Final wait for table data
+wait.until(ExpectedConditions.visibilityOfElementLocated(
+     By.xpath("//tbody//tr")));
+
+
+ // ======================================
+ // VERIFY RECORDS LOADED
+ // ======================================
+
+ System.out.println("Verifying uploaded records");
+
+ wait.until(ExpectedConditions.or(
+	        ExpectedConditions.visibilityOfElementLocated(By.xpath("//tbody//tr")),
+	        ExpectedConditions.visibilityOfElementLocated(By.xpath("//span[contains(text(),'in-process records')]"))
+	));
+
+ System.out.println("✅ Uploaded records are visible");
+
+}
+    // ======================================
+    // JS CLICK
+    // ======================================
+
+    public void jsClick(WebElement element) {
+
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+
+        js.executeScript("arguments[0].scrollIntoView(true);", element);
+
+        delay();
+
+        js.executeScript("arguments[0].click();", element);
+    }
+}

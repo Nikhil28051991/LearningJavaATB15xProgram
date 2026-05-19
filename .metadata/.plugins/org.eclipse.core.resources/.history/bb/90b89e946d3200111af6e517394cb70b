@@ -1,0 +1,90 @@
+package com.everycred.pages;
+
+import java.time.Duration;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+public class LoginPage {
+
+    private WebDriver driver;
+    private WebDriverWait wait;
+
+    // Locators
+    private By emailField = By.id("email");
+    private By passwordField = By.cssSelector("input[type='password']");
+    private By submitButton = By.xpath("//button[@type='submit']");
+    private By dashboardLink = By.xpath("//a[contains(@href,'subjects')]");
+
+    public LoginPage(WebDriver driver) {
+        this.driver = driver;
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(30));
+    }
+
+    public void login(String username, String password) {
+        System.out.println("Waiting for login page...");
+        wait.until(ExpectedConditions.urlContains("login"));
+        waitForPageReady();
+
+        boolean success = false;
+        int attempt = 1;
+        int maxAttempts = 5;
+
+        while (attempt <= maxAttempts && !success) {
+            try {
+                System.out.println("Login attempt " + attempt);
+
+                // Locate fresh email element and type
+                WebElement email = wait.until(ExpectedConditions.refreshed(
+                        ExpectedConditions.visibilityOfElementLocated(emailField)));
+                email.clear();
+                email.sendKeys(username);
+
+                // Locate fresh password element and type
+                WebElement pass = wait.until(ExpectedConditions.refreshed(
+                        ExpectedConditions.visibilityOfElementLocated(passwordField)));
+                pass.clear();
+                pass.sendKeys(password);
+
+                // Locate and click login button **only once per attempt using JS**
+                WebElement loginBtn = wait.until(ExpectedConditions.refreshed(
+                        ExpectedConditions.elementToBeClickable(submitButton)));
+
+                ((JavascriptExecutor) driver).executeScript("arguments[0].click();", loginBtn);
+                System.out.println("Login clicked");
+
+                // Wait until page is fully loaded
+                waitForPageReady();
+
+                // Check if login was successful
+                if (driver.getCurrentUrl().contains("dashboard") ||
+                        !driver.findElements(dashboardLink).isEmpty()) {
+                    success = true;
+                    System.out.println("Login successful");
+                    break;
+                }
+
+            } catch (org.openqa.selenium.StaleElementReferenceException e) {
+                System.out.println("Stale element detected. Retrying...");
+                waitForPageReady(); // retry same attempt
+            }
+
+            attempt++;
+        }
+
+        if (!success) {
+            throw new RuntimeException("Login failed. Please check credentials or test environment.");
+        }
+    }
+
+    // Wait until page is fully loaded
+    private void waitForPageReady() {
+        wait.until(driver -> ((JavascriptExecutor) driver)
+                .executeScript("return document.readyState").equals("complete"));
+    }
+}

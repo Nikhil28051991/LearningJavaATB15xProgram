@@ -1,0 +1,436 @@
+package com.everycred.pages;
+
+import java.time.Duration;
+import java.util.Set;
+
+import org.openqa.selenium.*;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+public class SubjectPage {
+
+    private WebDriver driver;
+    private WebDriverWait wait;
+
+    private boolean onboardingHandled = false;
+
+    public SubjectPage(WebDriver driver) {
+        this.driver = driver;
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(30));
+    }
+
+    // ======================================
+    // DELAY METHOD
+    // ======================================
+
+    public void delay() {
+        try {
+            Thread.sleep(40);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // ======================================
+    // 🔥 NEW: UI STABILITY FIX (ADDED)
+    // ======================================
+
+    public void waitForUIToSettle() {
+        try {
+            Thread.sleep(400);
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("body")));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // ======================================
+    // SWITCH TO ACTIVE WINDOW
+    // ======================================
+
+    public void switchToActiveWindow() {
+        String lastHandle = null;
+
+        Set<String> handles = driver.getWindowHandles();
+        for (String handle : handles) {
+            lastHandle = handle;
+        }
+
+        if (lastHandle != null) {
+            driver.switchTo().window(lastHandle);
+        }
+    }
+
+    // ======================================
+    // COLLAPSE PANEL
+    // ======================================
+
+    public void clickCollapseArrow() {
+
+        System.out.println("Clicking Collapse Arrow");
+
+        try {
+            By collapseArrow = By.xpath("//button[@type='button']//i[contains(@class,'pi-chevron-down')]");
+
+            WebElement icon = wait.until(ExpectedConditions.presenceOfElementLocated(collapseArrow));
+            WebElement button = icon.findElement(By.xpath("./ancestor::button"));
+
+            jsClick(button);
+
+            System.out.println("Collapse clicked successfully");
+
+            // 🔥 ADDED
+            waitForUIToSettle();
+
+        } catch (Exception e) {
+            System.out.println("Collapse not found");
+        }
+    }
+
+    // ======================================
+    // NAVIGATE TO SUBJECTS
+    // ======================================
+
+    public void navigateToSubjects() {
+
+        System.out.println("Navigating to Subjects");
+
+        WebElement subjectsTab = wait.until(
+                ExpectedConditions.elementToBeClickable(
+                        By.xpath("//a[normalize-space()='Subjects']")));
+
+        jsClick(subjectsTab);
+
+        wait.until(ExpectedConditions.urlContains("/subjects"));
+
+        // 🔥 ADDED
+        waitForUIToSettle();
+
+        clickCollapseArrow();
+    }
+
+    // ======================================
+    // NAVIGATE + ONBOARDING
+    // ======================================
+
+    public void navigateToSubjectsAndHandleOnboarding() {
+
+        System.out.println("Navigating to Subjects & handling onboarding");
+
+        navigateToSubjects();
+
+        delay();
+
+        if (!onboardingHandled) {
+
+            try {
+                WebElement closeBtn = wait.until(
+                        ExpectedConditions.elementToBeClickable(
+                                By.xpath("//button[contains(@class,'p-dialog-header-close')]")));
+
+                jsClick(closeBtn);
+
+                System.out.println("Onboarding closed");
+
+            } catch (Exception e) {
+                System.out.println("Onboarding not present");
+            }
+
+            onboardingHandled = true;
+        }
+    }
+
+    // ======================================
+    // CREATE GROUP
+    // ======================================
+
+    public void createGroup() {
+
+        System.out.println("Navigating to Subjects → Groups");
+
+        switchToActiveWindow();
+
+        click(By.xpath("//a[contains(@href,'subjects/groups')]"));
+
+        wait.until(ExpectedConditions.urlContains("groups"));
+
+        wait.until(ExpectedConditions.presenceOfElementLocated(
+                By.xpath("//div[contains(@class,'p-datatable')]")));
+
+        delay();
+
+        System.out.println("Waiting for Create New button");
+
+        By createNewBtnLocator = By.xpath(
+                "//button[.//span[text()='Create New'] or contains(.,'Create New')]");
+
+        WebElement createNewBtn = wait.until(
+                ExpectedConditions.elementToBeClickable(createNewBtnLocator));
+
+        jsClick(createNewBtn);
+
+        System.out.println("Create New clicked");
+
+        // 🔥 ADDED
+        waitForUIToSettle();
+
+        delay();
+        delay();
+
+        By createGroupOption = By.xpath(
+                "//li[.//span[normalize-space()='Create Group']] | //span[normalize-space()='Create Group']/ancestor::li");
+
+        WebElement groupOption = null;
+
+        for (int i = 0; i < 5; i++) {
+            try {
+                groupOption = wait.until(ExpectedConditions.elementToBeClickable(createGroupOption));
+                break;
+            } catch (Exception e) {
+                delay();
+            }
+        }
+
+        if (groupOption == null) {
+            throw new RuntimeException("Create Group option not visible after clicking Create New");
+        }
+
+        jsClick(groupOption);
+
+        System.out.println("Create Group clicked");
+
+        // 🔥 ADDED
+        waitForUIToSettle();
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(
+                By.xpath("//div[contains(@class,'p-dialog')]")));
+
+        delay();
+
+        WebElement groupName = wait.until(
+                ExpectedConditions.visibilityOfElementLocated(By.id("groupName")));
+
+        groupName.clear();
+        groupName.sendKeys("Employee Department");
+
+        delay();
+
+        WebElement createBtn = wait.until(
+                ExpectedConditions.elementToBeClickable(
+                        By.xpath("//button[.//span[normalize-space()='Create Group']]"
+                                + " | //button[contains(.,'Create Group')]")));
+
+        jsClick(createBtn);
+
+        System.out.println("Create Group button clicked");
+
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(
+                By.xpath("//div[contains(@class,'p-dialog')]")));
+
+        System.out.println("Group Created Successfully");
+    }
+
+    // ======================================
+    // CREATE SUBJECT
+    // ======================================
+
+    public void createSubjectFlow() {
+
+        System.out.println("Opening Create Subject");
+
+        // 🔥 ADDED
+        waitForUIToSettle();
+
+        WebElement createNewBtn = wait.until(
+                ExpectedConditions.elementToBeClickable(
+                        By.xpath("//button[contains(.,'Create New')]")));
+
+        jsClick(createNewBtn);
+
+        delay();
+
+        WebElement createSubjectBtn = wait.until(
+                ExpectedConditions.elementToBeClickable(
+                        By.xpath("//span[normalize-space()='Create Subject']")));
+
+        jsClick(createSubjectBtn);
+
+        // 🔥 ADDED
+        waitForUIToSettle();
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credentialTitle")));
+
+        driver.findElement(By.id("credentialTitle"))
+                .sendKeys("Employee ID Card");
+
+        driver.findElement(By.id("description"))
+                .sendKeys("Employee ID Card 2026");
+
+        delay();
+
+        WebElement groupDropdown = wait.until(
+                ExpectedConditions.elementToBeClickable(By.id("group")));
+
+        jsClick(groupDropdown);
+
+        wait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("//li[normalize-space()='Employee Department']"))).click();
+
+        delay();
+
+        WebElement credentialDesign = wait.until(
+                ExpectedConditions.elementToBeClickable(
+                        By.xpath("//span[@aria-label='Select a credential design']")));
+
+        jsClick(credentialDesign);
+
+        wait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("//li[@aria-label='Dark Template']"))).click();
+
+        delay();
+
+        WebElement verifyDropdown = wait.until(
+                ExpectedConditions.elementToBeClickable(By.id("verifierDesign")));
+
+        jsClick(verifyDropdown);
+
+        wait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("//li[normalize-space()='Theme 1']"))).click();
+
+        System.out.println("Subject Basic Details Completed");
+    }
+
+    // ======================================
+    // ADD ATTRIBUTES (UNCHANGED)
+    // ======================================
+
+    public void addAttributes() {
+
+        System.out.println("Adding Attributes");
+
+        addAttribute("Employees ID", "fieldType_0", "EPID-401-04837");
+        addAttribute("Designation", "fieldType_1", "Designation");
+        addAttribute("Personal Email ID", "fieldType_2", "Email");
+        addAttribute("Personal Contact Number", "fieldType_3", "Contact");
+        addAttribute("Joining Date", "fieldType_4", "Joining Date");
+        addAttribute("Expiry Date", "fieldType_5", "Expiry Date");
+        addAttribute("Company URL", "fieldType_6", "URL");
+        addAttribute("Address", "fieldType_1", "Address");
+
+        System.out.println("All Attributes Added Successfully");
+    }
+
+    // ======================================
+    // ADD ATTRIBUTE (UNCHANGED)
+    // ======================================
+
+    public void addAttribute(String title, String fieldTypeId, String descriptionText) {
+
+        try {
+
+            WebElement addNewBtn = wait.until(
+                    ExpectedConditions.elementToBeClickable(
+                            By.xpath("//span[normalize-space()='Add New']")));
+
+            jsClick(addNewBtn);
+
+            WebElement titleField = wait.until(
+                    ExpectedConditions.visibilityOfElementLocated(By.id("fieldTitle")));
+
+            titleField.clear();
+            titleField.sendKeys(title);
+
+            WebElement fieldType = wait.until(
+                    ExpectedConditions.elementToBeClickable(By.id("fieldType")));
+
+            jsClick(fieldType);
+
+            wait.until(ExpectedConditions.elementToBeClickable(
+                    By.xpath("//li[@id='" + fieldTypeId + "']"))).click();
+
+            WebElement description = wait.until(
+                    ExpectedConditions.visibilityOfElementLocated(By.id("fieldDescription")));
+
+            description.clear();
+            description.sendKeys(descriptionText);
+
+            jsClick(wait.until(ExpectedConditions.presenceOfElementLocated(By.id("isRequired"))));
+
+            jsClick(wait.until(ExpectedConditions.elementToBeClickable(
+                    By.xpath("//span[normalize-space()='Save']"))));
+
+            wait.until(ExpectedConditions.invisibilityOfElementLocated(By.id("fieldTitle")));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // ======================================
+    // SELECT CHECKBOX (UNCHANGED)
+    // ======================================
+
+    public void selectMultipleCheckboxAndSubmit() {
+
+        System.out.println("Selecting attributes");
+
+        String[] attributes = {
+                "Employees ID",
+                "Designation",
+                "Personal Email ID",
+                "Personal Contact Number",
+                "Joining Date",
+                "Expiry Date",
+                "Company URL",
+                "Address"
+        };
+
+        for (String attr : attributes) {
+
+            By checkboxLocator = By.xpath(
+                    "//tbody/tr/td[normalize-space()='" + attr + "']/preceding-sibling::td//input");
+
+            WebElement checkbox = wait.until(
+                    ExpectedConditions.presenceOfElementLocated(checkboxLocator));
+
+            jsClick(checkbox);
+        }
+
+        jsClick(wait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("//span[@class='p-button-label']"))));
+
+        System.out.println("Submit clicked");
+    }
+
+    // ======================================
+    // CLICK UTIL
+    // ======================================
+
+    public void click(By locator) {
+        WebElement element = wait.until(ExpectedConditions.elementToBeClickable(locator));
+        jsClick(element);
+    }
+
+    // ======================================
+    // JS CLICK
+    // ======================================
+
+    public void jsClick(WebElement element) {
+
+        try {
+            JavascriptExecutor js = (JavascriptExecutor) driver;
+
+            js.executeScript("arguments[0].scrollIntoView({block:'center'});", element);
+            Thread.sleep(50);
+
+            if (element.isDisplayed() && element.isEnabled()) {
+                element.click();
+            } else {
+                js.executeScript("arguments[0].click();", element);
+            }
+
+        } catch (Exception e) {
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", element);
+        }
+    }
+}

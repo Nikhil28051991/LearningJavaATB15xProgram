@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="TestSuite" time="419.397" tests="13" errors="0" skipped="0" failures="0">
+  <properties>
+    <property name="java.specification.version" value="24"/>
+    <property name="webdriver.chrome.driver" value="C:\Users\Nikhil Sonawane\.cache\selenium\chromedriver\win64\148.0.7778.167\chromedriver.exe"/>
+    <property name="sun.cpu.isalist" value="amd64"/>
+    <property name="sun.jnu.encoding" value="Cp1252"/>
+    <property name="java.class.path" value="C:\Users\Nikhil Sonawane\eclipse-workspace\DemoUS_Everycred\target\test-classes;C:\Users\Nikhil Sonawane\eclipse-workspace\DemoUS_Everycred\target\classes;C:\Users\Nikhil Sonawane\.m2\repository\org\seleniumhq\selenium\selenium-java\4.17.0\selenium-java-4.17.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\seleniumhq\selenium\selenium-api\4.17.0\selenium-api-4.17.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\seleniumhq\selenium\selenium-chrome-driver\4.17.0\selenium-chrome-driver-4.17.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\com\google\auto\service\auto-service-annotations\1.1.1\auto-service-annotations-1.1.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\seleniumhq\selenium\selenium-chromium-driver\4.17.0\selenium-chromium-driver-4.17.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\seleniumhq\selenium\selenium-json\4.17.0\selenium-json-4.17.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\seleniumhq\selenium\selenium-manager\4.17.0\selenium-manager-4.17.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\seleniumhq\selenium\selenium-devtools-v119\4.17.0\selenium-devtools-v119-4.17.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\seleniumhq\selenium\selenium-devtools-v120\4.17.0\selenium-devtools-v120-4.17.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\seleniumhq\selenium\selenium-devtools-v121\4.17.0\selenium-devtools-v121-4.17.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\seleniumhq\selenium\selenium-devtools-v85\4.17.0\selenium-devtools-v85-4.17.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\seleniumhq\selenium\selenium-edge-driver\4.17.0\selenium-edge-driver-4.17.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\seleniumhq\selenium\selenium-firefox-driver\4.17.0\selenium-firefox-driver-4.17.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\seleniumhq\selenium\selenium-http\4.17.0\selenium-http-4.17.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\dev\failsafe\failsafe\3.3.2\failsafe-3.3.2.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\seleniumhq\selenium\selenium-ie-driver\4.17.0\selenium-ie-driver-4.17.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\seleniumhq\selenium\selenium-remote-driver\4.17.0\selenium-remote-driver-4.17.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\com\google\guava\guava\33.0.0-jre\guava-33.0.0-jre.jar;C:\Users\Nikhil Sonawane\.m2\repository\com\google\guava\failureaccess\1.0.2\failureaccess-1.0.2.jar;C:\Users\Nikhil Sonawane\.m2\repository\com\google\guava\listenablefuture\9999.0-empty-to-avoid-conflict-with-guava\listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar;C:\Users\Nikhil Sonawane\.m2\repository\com\google\code\findbugs\jsr305\3.0.2\jsr305-3.0.2.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\checkerframework\checker-qual\3.41.0\checker-qual-3.41.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\com\google\errorprone\error_prone_annotations\2.23.0\error_prone_annotations-2.23.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\com\google\j2objc\j2objc-annotations\2.8\j2objc-annotations-2.8.jar;C:\Users\Nikhil Sonawane\.m2\repository\io\opentelemetry\semconv\opentelemetry-semconv\1.23.1-alpha\opentelemetry-semconv-1.23.1-alpha.jar;C:\Users\Nikhil Sonawane\.m2\repository\io\opentelemetry\opentelemetry-api\1.34.1\opentelemetry-api-1.34.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\io\opentelemetry\opentelemetry-context\1.34.1\opentelemetry-context-1.34.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\io\opentelemetry\opentelemetry-exporter-logging\1.34.1\opentelemetry-exporter-logging-1.34.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\io\opentelemetry\opentelemetry-sdk-common\1.34.1\opentelemetry-sdk-common-1.34.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\io\opentelemetry\opentelemetry-sdk-extension-autoconfigure-spi\1.34.1\opentelemetry-sdk-extension-autoconfigure-spi-1.34.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\io\opentelemetry\opentelemetry-sdk-extension-autoconfigure\1.34.1\opentelemetry-sdk-extension-autoconfigure-1.34.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\io\opentelemetry\opentelemetry-api-events\1.34.1-alpha\opentelemetry-api-events-1.34.1-alpha.jar;C:\Users\Nikhil Sonawane\.m2\repository\io\opentelemetry\opentelemetry-sdk-trace\1.34.1\opentelemetry-sdk-trace-1.34.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\io\opentelemetry\opentelemetry-sdk\1.34.1\opentelemetry-sdk-1.34.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\io\opentelemetry\opentelemetry-sdk-metrics\1.34.1\opentelemetry-sdk-metrics-1.34.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\io\opentelemetry\opentelemetry-extension-incubator\1.34.1-alpha\opentelemetry-extension-incubator-1.34.1-alpha.jar;C:\Users\Nikhil Sonawane\.m2\repository\io\opentelemetry\opentelemetry-sdk-logs\1.34.1\opentelemetry-sdk-logs-1.34.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\seleniumhq\selenium\selenium-os\4.17.0\selenium-os-4.17.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\apache\commons\commons-exec\1.3\commons-exec-1.3.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\seleniumhq\selenium\selenium-safari-driver\4.17.0\selenium-safari-driver-4.17.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\seleniumhq\selenium\selenium-support\4.17.0\selenium-support-4.17.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\testng\testng\7.9.0\testng-7.9.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\com\beust\jcommander\1.82\jcommander-1.82.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\webjars\jquery\3.7.1\jquery-3.7.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\io\github\bonigarcia\webdrivermanager\5.6.3\webdrivermanager-5.6.3.jar;C:\Users\Nikhil Sonawane\.m2\repository\com\google\code\gson\gson\2.10.1\gson-2.10.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\com\github\docker-java\docker-java\3.3.4\docker-java-3.3.4.jar;C:\Users\Nikhil Sonawane\.m2\repository\com\github\docker-java\docker-java-core\3.3.4\docker-java-core-3.3.4.jar;C:\Users\Nikhil Sonawane\.m2\repository\com\github\docker-java\docker-java-api\3.3.4\docker-java-api-3.3.4.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\bouncycastle\bcpkix-jdk18on\1.76\bcpkix-jdk18on-1.76.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\bouncycastle\bcprov-jdk18on\1.76\bcprov-jdk18on-1.76.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\bouncycastle\bcutil-jdk18on\1.76\bcutil-jdk18on-1.76.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\slf4j\jcl-over-slf4j\1.7.30\jcl-over-slf4j-1.7.30.jar;C:\Users\Nikhil Sonawane\.m2\repository\com\github\docker-java\docker-java-transport-httpclient5\3.3.4\docker-java-transport-httpclient5-3.3.4.jar;C:\Users\Nikhil Sonawane\.m2\repository\com\github\docker-java\docker-java-transport\3.3.4\docker-java-transport-3.3.4.jar;C:\Users\Nikhil Sonawane\.m2\repository\net\java\dev\jna\jna\5.13.0\jna-5.13.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\brotli\dec\0.1.2\dec-0.1.2.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\apache\commons\commons-compress\1.25.0\commons-compress-1.25.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\apache\httpcomponents\client5\httpclient5\5.2.1\httpclient5-5.2.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\apache\httpcomponents\core5\httpcore5\5.2\httpcore5-5.2.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\apache\httpcomponents\core5\httpcore5-h2\5.2\httpcore5-h2-5.2.jar;C:\Users\Nikhil Sonawane\.m2\repository\commons-io\commons-io\2.15.1\commons-io-2.15.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\apache\commons\commons-lang3\3.14.0\commons-lang3-3.14.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\json\json\20240303\json-20240303.jar;C:\Users\Nikhil Sonawane\.m2\repository\com\fasterxml\jackson\core\jackson-databind\2.16.1\jackson-databind-2.16.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\com\fasterxml\jackson\core\jackson-annotations\2.16.1\jackson-annotations-2.16.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\com\fasterxml\jackson\core\jackson-core\2.16.1\jackson-core-2.16.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\com\aventstack\extentreports\5.1.1\extentreports-5.1.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\io\reactivex\rxjava3\rxjava\3.1.6\rxjava-3.1.6.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\reactivestreams\reactive-streams\1.0.4\reactive-streams-1.0.4.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\freemarker\freemarker\2.3.32\freemarker-2.3.32.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\projectlombok\lombok\1.18.26\lombok-1.18.26.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\apache\logging\log4j\log4j-api\2.22.1\log4j-api-2.22.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\apache\logging\log4j\log4j-core\2.22.1\log4j-core-2.22.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\assertj\assertj-core\3.25.1\assertj-core-3.25.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\net\bytebuddy\byte-buddy\1.14.11\byte-buddy-1.14.11.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\slf4j\slf4j-api\2.0.12\slf4j-api-2.0.12.jar;"/>
+    <property name="java.vm.vendor" value="Oracle Corporation"/>
+    <property name="sun.arch.data.model" value="64"/>
+    <property name="user.variant" value=""/>
+    <property name="java.vendor.url" value="https://java.oracle.com/"/>
+    <property name="user.timezone" value="Asia/Calcutta"/>
+    <property name="os.name" value="Windows 11"/>
+    <property name="java.vm.specification.version" value="24"/>
+    <property name="sun.java.launcher" value="SUN_STANDARD"/>
+    <property name="user.country" value="IN"/>
+    <property name="sun.boot.library.path" value="C:\Program Files\Java\jdk-24\bin"/>
+    <property name="sun.java.command" value="C:\Users\Nikhil Sonawane\AppData\Local\Temp\surefire10700233842915207902\surefirebooter-20260518152409498_3.jar C:\Users\Nikhil Sonawane\AppData\Local\Temp\surefire10700233842915207902 2026-05-18T15-24-09_233-jvmRun1 surefire-20260518152409498_1tmp surefire_0-20260518152409498_2tmp"/>
+    <property name="jdk.debug" value="release"/>
+    <property name="surefire.test.class.path" value="C:\Users\Nikhil Sonawane\eclipse-workspace\DemoUS_Everycred\target\test-classes;C:\Users\Nikhil Sonawane\eclipse-workspace\DemoUS_Everycred\target\classes;C:\Users\Nikhil Sonawane\.m2\repository\org\seleniumhq\selenium\selenium-java\4.17.0\selenium-java-4.17.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\seleniumhq\selenium\selenium-api\4.17.0\selenium-api-4.17.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\seleniumhq\selenium\selenium-chrome-driver\4.17.0\selenium-chrome-driver-4.17.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\com\google\auto\service\auto-service-annotations\1.1.1\auto-service-annotations-1.1.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\seleniumhq\selenium\selenium-chromium-driver\4.17.0\selenium-chromium-driver-4.17.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\seleniumhq\selenium\selenium-json\4.17.0\selenium-json-4.17.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\seleniumhq\selenium\selenium-manager\4.17.0\selenium-manager-4.17.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\seleniumhq\selenium\selenium-devtools-v119\4.17.0\selenium-devtools-v119-4.17.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\seleniumhq\selenium\selenium-devtools-v120\4.17.0\selenium-devtools-v120-4.17.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\seleniumhq\selenium\selenium-devtools-v121\4.17.0\selenium-devtools-v121-4.17.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\seleniumhq\selenium\selenium-devtools-v85\4.17.0\selenium-devtools-v85-4.17.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\seleniumhq\selenium\selenium-edge-driver\4.17.0\selenium-edge-driver-4.17.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\seleniumhq\selenium\selenium-firefox-driver\4.17.0\selenium-firefox-driver-4.17.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\seleniumhq\selenium\selenium-http\4.17.0\selenium-http-4.17.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\dev\failsafe\failsafe\3.3.2\failsafe-3.3.2.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\seleniumhq\selenium\selenium-ie-driver\4.17.0\selenium-ie-driver-4.17.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\seleniumhq\selenium\selenium-remote-driver\4.17.0\selenium-remote-driver-4.17.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\com\google\guava\guava\33.0.0-jre\guava-33.0.0-jre.jar;C:\Users\Nikhil Sonawane\.m2\repository\com\google\guava\failureaccess\1.0.2\failureaccess-1.0.2.jar;C:\Users\Nikhil Sonawane\.m2\repository\com\google\guava\listenablefuture\9999.0-empty-to-avoid-conflict-with-guava\listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar;C:\Users\Nikhil Sonawane\.m2\repository\com\google\code\findbugs\jsr305\3.0.2\jsr305-3.0.2.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\checkerframework\checker-qual\3.41.0\checker-qual-3.41.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\com\google\errorprone\error_prone_annotations\2.23.0\error_prone_annotations-2.23.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\com\google\j2objc\j2objc-annotations\2.8\j2objc-annotations-2.8.jar;C:\Users\Nikhil Sonawane\.m2\repository\io\opentelemetry\semconv\opentelemetry-semconv\1.23.1-alpha\opentelemetry-semconv-1.23.1-alpha.jar;C:\Users\Nikhil Sonawane\.m2\repository\io\opentelemetry\opentelemetry-api\1.34.1\opentelemetry-api-1.34.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\io\opentelemetry\opentelemetry-context\1.34.1\opentelemetry-context-1.34.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\io\opentelemetry\opentelemetry-exporter-logging\1.34.1\opentelemetry-exporter-logging-1.34.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\io\opentelemetry\opentelemetry-sdk-common\1.34.1\opentelemetry-sdk-common-1.34.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\io\opentelemetry\opentelemetry-sdk-extension-autoconfigure-spi\1.34.1\opentelemetry-sdk-extension-autoconfigure-spi-1.34.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\io\opentelemetry\opentelemetry-sdk-extension-autoconfigure\1.34.1\opentelemetry-sdk-extension-autoconfigure-1.34.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\io\opentelemetry\opentelemetry-api-events\1.34.1-alpha\opentelemetry-api-events-1.34.1-alpha.jar;C:\Users\Nikhil Sonawane\.m2\repository\io\opentelemetry\opentelemetry-sdk-trace\1.34.1\opentelemetry-sdk-trace-1.34.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\io\opentelemetry\opentelemetry-sdk\1.34.1\opentelemetry-sdk-1.34.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\io\opentelemetry\opentelemetry-sdk-metrics\1.34.1\opentelemetry-sdk-metrics-1.34.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\io\opentelemetry\opentelemetry-extension-incubator\1.34.1-alpha\opentelemetry-extension-incubator-1.34.1-alpha.jar;C:\Users\Nikhil Sonawane\.m2\repository\io\opentelemetry\opentelemetry-sdk-logs\1.34.1\opentelemetry-sdk-logs-1.34.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\seleniumhq\selenium\selenium-os\4.17.0\selenium-os-4.17.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\apache\commons\commons-exec\1.3\commons-exec-1.3.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\seleniumhq\selenium\selenium-safari-driver\4.17.0\selenium-safari-driver-4.17.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\seleniumhq\selenium\selenium-support\4.17.0\selenium-support-4.17.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\testng\testng\7.9.0\testng-7.9.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\com\beust\jcommander\1.82\jcommander-1.82.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\webjars\jquery\3.7.1\jquery-3.7.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\io\github\bonigarcia\webdrivermanager\5.6.3\webdrivermanager-5.6.3.jar;C:\Users\Nikhil Sonawane\.m2\repository\com\google\code\gson\gson\2.10.1\gson-2.10.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\com\github\docker-java\docker-java\3.3.4\docker-java-3.3.4.jar;C:\Users\Nikhil Sonawane\.m2\repository\com\github\docker-java\docker-java-core\3.3.4\docker-java-core-3.3.4.jar;C:\Users\Nikhil Sonawane\.m2\repository\com\github\docker-java\docker-java-api\3.3.4\docker-java-api-3.3.4.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\bouncycastle\bcpkix-jdk18on\1.76\bcpkix-jdk18on-1.76.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\bouncycastle\bcprov-jdk18on\1.76\bcprov-jdk18on-1.76.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\bouncycastle\bcutil-jdk18on\1.76\bcutil-jdk18on-1.76.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\slf4j\jcl-over-slf4j\1.7.30\jcl-over-slf4j-1.7.30.jar;C:\Users\Nikhil Sonawane\.m2\repository\com\github\docker-java\docker-java-transport-httpclient5\3.3.4\docker-java-transport-httpclient5-3.3.4.jar;C:\Users\Nikhil Sonawane\.m2\repository\com\github\docker-java\docker-java-transport\3.3.4\docker-java-transport-3.3.4.jar;C:\Users\Nikhil Sonawane\.m2\repository\net\java\dev\jna\jna\5.13.0\jna-5.13.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\brotli\dec\0.1.2\dec-0.1.2.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\apache\commons\commons-compress\1.25.0\commons-compress-1.25.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\apache\httpcomponents\client5\httpclient5\5.2.1\httpclient5-5.2.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\apache\httpcomponents\core5\httpcore5\5.2\httpcore5-5.2.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\apache\httpcomponents\core5\httpcore5-h2\5.2\httpcore5-h2-5.2.jar;C:\Users\Nikhil Sonawane\.m2\repository\commons-io\commons-io\2.15.1\commons-io-2.15.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\apache\commons\commons-lang3\3.14.0\commons-lang3-3.14.0.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\json\json\20240303\json-20240303.jar;C:\Users\Nikhil Sonawane\.m2\repository\com\fasterxml\jackson\core\jackson-databind\2.16.1\jackson-databind-2.16.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\com\fasterxml\jackson\core\jackson-annotations\2.16.1\jackson-annotations-2.16.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\com\fasterxml\jackson\core\jackson-core\2.16.1\jackson-core-2.16.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\com\aventstack\extentreports\5.1.1\extentreports-5.1.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\io\reactivex\rxjava3\rxjava\3.1.6\rxjava-3.1.6.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\reactivestreams\reactive-streams\1.0.4\reactive-streams-1.0.4.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\freemarker\freemarker\2.3.32\freemarker-2.3.32.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\projectlombok\lombok\1.18.26\lombok-1.18.26.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\apache\logging\log4j\log4j-api\2.22.1\log4j-api-2.22.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\apache\logging\log4j\log4j-core\2.22.1\log4j-core-2.22.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\assertj\assertj-core\3.25.1\assertj-core-3.25.1.jar;C:\Users\Nikhil Sonawane\.m2\repository\net\bytebuddy\byte-buddy\1.14.11\byte-buddy-1.14.11.jar;C:\Users\Nikhil Sonawane\.m2\repository\org\slf4j\slf4j-api\2.0.12\slf4j-api-2.0.12.jar;"/>
+    <property name="sun.cpu.endian" value="little"/>
+    <property name="user.home" value="C:\Users\Nikhil Sonawane"/>
+    <property name="user.language" value="en"/>
+    <property name="java.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.version.date" value="2025-04-15"/>
+    <property name="java.home" value="C:\Program Files\Java\jdk-24"/>
+    <property name="file.separator" value="\"/>
+    <property name="basedir" value="C:\Users\Nikhil Sonawane\eclipse-workspace\DemoUS_Everycred"/>
+    <property name="java.vm.compressedOopsMode" value="32-bit"/>
+    <property name="line.separator" value="&#10;"/>
+    <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.specification.name" value="Java Platform API Specification"/>
+    <property name="surefire.real.class.path" value="C:\Users\Nikhil Sonawane\AppData\Local\Temp\surefire10700233842915207902\surefirebooter-20260518152409498_3.jar"/>
+    <property name="user.script" value=""/>
+    <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
+    <property name="java.runtime.version" value="24.0.1+9-30"/>
+    <property name="user.name" value="Nikhil Sonawane"/>
+    <property name="stdout.encoding" value="Cp1252"/>
+    <property name="path.separator" value=";"/>
+    <property name="os.version" value="10.0"/>
+    <property name="java.runtime.name" value="Java(TM) SE Runtime Environment"/>
+    <property name="file.encoding" value="UTF-8"/>
+    <property name="java.vm.name" value="Java HotSpot(TM) 64-Bit Server VM"/>
+    <property name="localRepository" value="C:\Users\Nikhil Sonawane\.m2\repository"/>
+    <property name="java.vendor.url.bug" value="https://bugreport.java.com/bugreport/"/>
+    <property name="java.io.tmpdir" value="C:\Users\NIKHIL~1\AppData\Local\Temp\"/>
+    <property name="java.version" value="24.0.1"/>
+    <property name="user.dir" value="C:\Users\Nikhil Sonawane\eclipse-workspace\DemoUS_Everycred"/>
+    <property name="os.arch" value="amd64"/>
+    <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+    <property name="sun.os.patch.level" value=""/>
+    <property name="native.encoding" value="Cp1252"/>
+    <property name="java.library.path" value="C:\Program Files\Java\jdk-24\bin;C:\WINDOWS\Sun\Java\bin;C:\WINDOWS\system32;C:\WINDOWS;c:\Users\Nikhil Sonawane\AppData\Local\Programs\cursor\resources\app\resources\helpers;C:\Program Files\Common Files\Oracle\Java\javapath;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\Git\cmd;C:\Program Files\Apache\maven\apache-maven-3.9.11\bin;C:\Program Files\nodejs\;C:\Users\Nikhil Sonawane\AppData\Local\Microsoft\WindowsApps;C:\Users\Nikhil Sonawane\AppData\Local\Programs\Microsoft VS Code\bin;C:\Program Files\JetBrains\IntelliJ IDEA 2025.3\bin;C:\Users\Nikhil Sonawane\AppData\Local\Programs\cursor\resources\app\bin;C:\Users\Nikhil Sonawane\AppData\Roaming\npm;C:\Program Files\nodejs\;;."/>
+    <property name="java.vm.info" value="mixed mode, sharing"/>
+    <property name="stderr.encoding" value="Cp1252"/>
+    <property name="java.vendor" value="Oracle Corporation"/>
+    <property name="java.vm.version" value="24.0.1+9-30"/>
+    <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
+    <property name="java.class.version" value="68.0"/>
+  </properties>
+  <testcase name="step01_SignUp" classname="com.everycred.tests.CreateSubjectTest" time="37.344">
+    <system-out><![CDATA[===== TEST START =====
+Browser launched → https://demo-dcs-issuer-us.everycred.com/auth/login
+--- STEP 1: Sign Up ---
+===== STARTING SIGN UP FLOW =====
+Waiting 2 seconds for login page to fully render...
+Clicking Sign Up link on Login page
+Sign Up page loaded
+Filling Sign Up form
+Terms and Conditions accepted
+Sign Up form filled successfully
+Submitting Sign Up form
+Sign Up click attempt 1/15
+'Verifying Email...' popup appeared — email is being sent (attempt 1)
+Sign Up popup confirmed — waiting 2s before opening YOPmail for democredtesting57404@yopmail.com
+Opening YOPmail to verify email
+YOPmail load attempt 1 → https://yopmail.com/en/
+YOPmail loaded successfully on attempt 1
+YOPmail loaded
+YOPmail Go triggered via Enter key
+Looking for 'EveryCred | Issuer Email Verification' in YOPmail inbox...
+Inbox check attempt 1/6...
+Clicked 'EveryCred | Issuer Email Verification' email row
+Verification email clicked on attempt 1
+Switching to email body iframe (ifmail)...
+Email body loaded in ifmail iframe
+Clicking Verify Email button...
+Verify Email button clicked!
+Verification page loaded: https://demo-dcs-issuer-us.everycred.com/verify-registration/.eJxNkU1LAzEQhv-KBI-tJGmyye5JrLWCXhQU9VImyaRuu18kWepa-t9NBcHbzLzPDO_MHMkYMWwcJCDVkXTQIqnILbb9xTKgwy7V0MQLqQQVZEawhbrJgMuAzXrCmOpu-ytfT_1wlq9s32Z0gBgPfXCZjjZMQ6oWXBW60hW73N3bIYwyfLftWg2FuKSacm-oAFsyMAgGrFIWwdlCOV8uNHUoSsZRKU5tCUZqzjUTXAIo6UtJmQKPXlLvPUJheE4Ul4KqwgPVxmnGpUfGzbmBUyE9B1ioBVhhvc9-297UTV6-G5tmRvbQ4BRgE9BvavdXHcdzTArNDXMe54U1fi4403NjSpgrp0W2rIQpNTnNSMBtHVOAVPfdZo9Tbt09x90THPrVQ_x8W72nmA-xbPb3dwpet-zwchM-2OvX-jEbStNw_sX_IeT0A8J5iew.agrh0g.GJ2nduRtRLYLVNl3ju1zXb5XQR8
+Checking verification result page...
+Verification page text: Email Verification Success Registration verified successfully! You will be redirected to the dashboard shortly... Go to Dashboard
+Clicking: Go to Dashboard
+Button clicked! Waiting for dashboard navigation...
+Page after click: https://demo-dcs-issuer-us.everycred.com/admin/dashboard
+YOPmail tab closed
+Email verification step completed — current page: https://demo-dcs-issuer-us.everycred.com/admin/dashboard
+===== SIGN UP FLOW COMPLETED =====
+⏱ STEP TIME [Step 1 - Sign Up]: 37 sec
+]]></system-out>
+    <system-err><![CDATA[SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+May 18, 2026 3:24:13 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 148
+May 18, 2026 3:24:13 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+WARNING: Unable to find version of CDP to use for 148.0.7778.168. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.17.0` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
+]]></system-err>
+  </testcase>
+  <testcase name="step02_IssuerProfile" classname="com.everycred.tests.CreateSubjectTest" time="51.258">
+    <system-out><![CDATA[--- STEP 2: Issuer Profile ---
+===== STARTING ISSUER PROFILE FLOW =====
+Issuer Name  : City of Albuquerque (For Dem 1805)
+Issuer Email : admin.albuquerque18051524@yopmail.com
+Current URL before Issuer Profile: https://demo-dcs-issuer-us.everycred.com/admin/dashboard
+Already on dashboard — waiting for page to fully mount...
+Waiting for Get Started onboarding panel to load...
+Get Started panel collapsed
+Opening profile dropdown...
+Profile dropdown opened
+Add Issuer clicked — navigating to Issuer Details page
+Issuer Details page loaded
+Filling Issuer Details...
+Clicking Next (Issuer Details → Blockchain Credential Setup)
+Blockchain Credential Setup page loaded
+Blockchain Credential Setup — keeping defaults, clicking Next
+Issuer Branding page loaded
+Filling Issuer Branding...
+Logo uploaded: C:\Users\Nikhil Sonawane\Downloads\istockphoto-902800822-612x612.jpg
+Checking for crop/editor dialog after Logo upload...
+Crop dialog detected — clicking: [Crop] for Logo
+Scoped preview img wait missed for Logo — trying painted-image JS check...
+Preview rendered after crop for Logo ✅ (JS dimension check)
+Crop dialog dismissed for Logo
+Banner uploaded: C:\Users\Nikhil Sonawane\Downloads\download (35).jpg
+Checking for crop/editor dialog after Banner upload...
+Crop dialog detected — clicking: [Crop] for Banner
+Scoped preview img wait missed for Banner — trying painted-image JS check...
+Preview rendered after crop for Banner ✅ (JS dimension check)
+Crop dialog dismissed for Banner
+Clicking Save...
+Waiting for OTP verification popup...
+OTP popup appeared
+Opening YOPmail to retrieve OTP for: admin.albuquerque18051524@yopmail.com
+YOPmail load attempt 1 → https://yopmail.com/en/
+YOPmail loaded on attempt 1
+YOPmail loaded
+YOPmail Go triggered via Enter key
+Looking for OTP Verification email in inbox...
+Switched into ifinbox iframe
+OTP email row clicked
+Extracting OTP from email body...
+OTP found on attempt 1: 254038
+OTP extracted: 254038
+Entering OTP '254038' into popup...
+OTP input fields found: 6
+Verify Code clicked — waiting for issuer activation success before logout...
+Issuer activation confirmed — proceeding to sign out.
+Verifying dashboard and logging out...
+Confirmed on Dashboard page
+Profile dropdown opened for Sign Out
+Signed out — back on Login page: https://demo-dcs-issuer-us.everycred.com/auth/login
+===== ISSUER PROFILE FLOW COMPLETED =====
+⏱ STEP TIME [Step 2 - Issuer Profile]: 51 sec
+]]></system-out>
+  </testcase>
+  <testcase name="step03_Login" classname="com.everycred.tests.CreateSubjectTest" time="4.525">
+    <system-out><![CDATA[--- STEP 3: Login with signup credentials ---
+Login email: democredtesting57404@yopmail.com
+===== LOGIN ATTEMPT: 1 =====
+✅ Login successful
+⏱ STEP TIME [Step 3 - Login]: 4 sec
+]]></system-out>
+  </testcase>
+  <testcase name="step04_NavigateToSubjects" classname="com.everycred.tests.CreateSubjectTest" time="2.506">
+    <system-out><![CDATA[--- STEP 4: Navigate to Subjects ---
+Onboarding not present
+Get Started panel collapsed
+⏱ STEP TIME [Step 4 - Navigate to Subjects]: 2 sec
+]]></system-out>
+  </testcase>
+  <testcase name="step05_CreateGroup" classname="com.everycred.tests.CreateSubjectTest" time="8.788">
+    <system-out><![CDATA[--- STEP 5: Create Group ---
+Onboarding not present
+Collapse not found
+Attempting Group Name (timestamp-based): Employee Department 59163
+Trying group name: Employee Department 59163 (attempt 1)
+Clicked Create Group submit button (attempt 1)
+Group Created Successfully: Employee Department 59163
+⏱ STEP TIME [Step 5 - Create Group]: 8 sec
+]]></system-out>
+  </testcase>
+  <testcase name="step06_CreateSubject" classname="com.everycred.tests.CreateSubjectTest" time="9.451">
+    <system-out><![CDATA[--- STEP 6: Create Subject ---
+Opening Create Subject
+Highest subject sequence on page: -1 → next: 0
+Attempting Subject Name: Employee ID Card
+Clicking Create New...
+Clicking Create Subject option...
+Subject Basic Details Completed
+⏱ STEP TIME [Step 6 - Create Subject]: 9 sec
+]]></system-out>
+  </testcase>
+  <testcase name="step07_AddAttributes" classname="com.everycred.tests.CreateSubjectTest" time="23.473">
+    <system-out><![CDATA[--- STEP 7: Add Subject Attributes ---
+Onboarding not present
+Adding Attributes
+All Attributes Added Successfully
+⏱ STEP TIME [Step 7 - Add Attributes]: 23 sec
+]]></system-out>
+  </testcase>
+  <testcase name="step08_SelectAttributesAndSubmit" classname="com.everycred.tests.CreateSubjectTest" time="7.05">
+    <system-out><![CDATA[--- STEP 8: Select Attributes and Submit ---
+Onboarding not present
+Selecting attribute: Employees ID
+Selecting attribute: Designation
+Selecting attribute: Personal Email ID
+Selecting attribute: Personal Contact Number
+Selecting attribute: Joining Date
+Selecting attribute: Expiry Date
+Selecting attribute: Company URL
+Selecting attribute: Address
+Attributes selected before submit: 8
+Submit clicked
+⏱ STEP TIME [Step 8 - Select Attributes & Submit]: 6 sec
+]]></system-out>
+  </testcase>
+  <testcase name="step09_AddRecord" classname="com.everycred.tests.CreateSubjectTest" time="57.039">
+    <system-out><![CDATA[--- STEP 9: Add Record ---
+Opening Subjects Tab
+Get Started panel collapsed
+Get Started panel collapsed
+Subject row not visible yet, refreshing once...
+Employee ID Card Subject Found
+Add Record button clicked
+Waiting for Add Credential Page to Load
+Add Credential Page Loaded Successfully
+Add Record dialog form fields rendered
+Add Record form popup opened (attempt 1)
+Starting Add Record Form Filling
+Get Started panel collapsed
+Get Started panel collapsed
+Get Started panel still present after 6s — proceeding with form fill
+Selecting Joining Date (Current Date)
+Joining Date Selected
+Selecting Expiry Date
+Expiry Date Selected Successfully (Time auto-filled by system)
+Save button clicked
+Record Added Successfully
+Waiting 2 seconds before closing form
+Form already closed
+Form Closed Successfully
+Navigated to Draft credentials list after add record
+⏱ STEP TIME [Step 9 - Add Record]: 57 sec
+]]></system-out>
+  </testcase>
+  <testcase name="step10_IssueCredential" classname="com.everycred.tests.CreateSubjectTest" time="12.624">
+    <system-out><![CDATA[--- STEP 10: Issue Credential ---
+Starting Issue Credential Flow
+Ensuring we are on Credentials page
+Draft tab selected
+Current URL = https://demo-dcs-issuer-us.everycred.com/admin/credentials?status=draft
+Waiting for Draft Credential table
+Credential table rows are visible
+Selecting record checkbox
+Get Started panel collapsed
+Record checkbox selected
+Issue Credentials button clicked (attempt 1)
+Waiting for Issue Credentials popup...
+Selected 'No' for Send credentials via email
+Issue popup open. Selecting Valid From date...
+Selecting current date
+Valid From date selected via calendar: 05/18/2026 15:27
+Validity date selection confirmed: 05/18/2026
+Click Issue button in popup
+Waiting popup to close
+Switching to Issued tab to show issued credential
+Credential issued and page stabilized
+⏱ STEP TIME [Step 10 - Issue Credential]: 12 sec
+]]></system-out>
+  </testcase>
+  <testcase name="step11_VerifyCredential" classname="com.everycred.tests.CreateSubjectTest" time="25.179">
+    <system-out><![CDATA[--- STEP 11: Verify Credential ---
+Starting Verify Credential Flow
+'Onboarding Complete' modal detected — clicking 'Go To Dashboard'
+'Onboarding Complete' modal dismissed
+Navigating to Credentials page manually
+Opening Issued tab
+No 'Onboarding Complete' modal found — continuing
+Waiting for issued credential to appear in table...
+Credential row found on attempt 1
+Locating verify button in issued credentials row...
+Clicking verify button...
+Intercepted verification URL: https://demo-dcs-verifier-us.everycred.com/VCEID-11111-7098245
+Verifier tab opened — switching to it (main tab stays on app)
+Focused verifier workflow tab — URL: https://demo-dcs-verifier-us.everycred.com/VCEID-11111-7098245
+Verifier tab URL: https://demo-dcs-verifier-us.everycred.com/VCEID-11111-7098245
+✅ Verify button clicked: #verifier-button
+Waiting ~4.5s after Verify click for verification to progress...
+Waiting for verification to complete...
+✅ Verification complete — In Progress status gone
+Closing verifier tab — returning to main window...
+✅ Back on main window
+Navigating to Credentials > Issued tab
+✅ Back on Credentials > Issued tab
+⏱ STEP TIME [Step 11 - Verify Credential]: 25 sec
+]]></system-out>
+  </testcase>
+  <testcase name="step12_RevokeCredential" classname="com.everycred.tests.CreateSubjectTest" time="23.111">
+    <system-out><![CDATA[--- STEP 12: Revoke Credential ---
+Starting Revoke Credential Flow
+Get Started panel collapsed (Revoke)
+Issued tab selected
+Revoke checkbox selected
+Waiting for revoke popup to close
+Get Started panel collapsed (Revoke)
+Clicking Draft tab after revoke
+Clicking Issued tab
+Get Started panel collapsed (Revoke)
+Active status dropdown opened
+Revoked option clicked via span XPath (attempt 1)
+Revoke completed successfully
+Revoke completed successfully
+⏱ STEP TIME [Step 12 - Revoke Credential]: 23 sec
+]]></system-out>
+  </testcase>
+  <testcase name="step13_UploadSpreadsheet" classname="com.everycred.tests.CreateSubjectTest" time="149.136">
+    <system-out><![CDATA[--- STEP 13: Upload Spreadsheet ---
+Starting Upload Spreadsheet Flow
+Get Started panel collapsed on upload page
+Draft tab selected
+Get Started panel collapsed on upload page
+Opening Subjects Tab
+Clicking Add Record button
+⚠️ Popup not opened, checking fallback...
+✅ Already on Add Credential Page
+Add Credential Page Loaded
+Get Started panel collapsed on upload page
+Upload Spreadsheet trigger clicked (first) on attempt 1
+Blue Upload Spreadsheet button clicked inside popup
+Uploading file
+✅ File uploaded
+Waiting for upload to complete...
+✅ Upload done signal detected
+Upload processing checkpoint reached (confirmed)
+Back arrow clicked — returning to Add Credential page
+Get Started panel collapsed on upload page
+Upload Spreadsheet trigger clicked (second) on attempt 1
+Upload Spreadsheet popup ready
+Get Started panel collapsed on upload page
+Yellow in-process hint clicked via span[@class='text-sm text-yellow-800 font-medium'] (attempt 1)
+Processing rows wait timed out — still waiting 3s then Close
+Upload dialog Close button clicked
+Could not confirm Draft tab immediately, continuing
+Draft table empty — refreshing Draft credentials list...
+Uploaded rows still not detected — UI may still be processing (non-fatal)
+✅ Upload flow completed successfully
+⏱ STEP TIME [Step 13 - Upload Spreadsheet]: 149 sec
+===== FULL FLOW COMPLETED SUCCESSFULLY =====
+]]></system-out>
+  </testcase>
+</testsuite>

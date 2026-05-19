@@ -1,0 +1,101 @@
+package com.everycred.automation;
+
+import java.time.Duration;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import io.github.bonigarcia.wdm.WebDriverManager;
+
+public class EveryCredLogin {
+
+    public static void main(String[] args) {
+
+        WebDriverManager.chromedriver().setup();
+        WebDriver driver = new ChromeDriver();
+        driver.manage().window().maximize();
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+
+        try {
+
+            // ================= LOGIN =================
+            driver.get("https://demo-dcs-issuer-us.everycred.com/auth/login");
+
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("email")))
+                    .sendKeys("admin.albuquerque@yopmail.com");
+
+            driver.findElement(By.cssSelector("input[type='password']"))
+                    .sendKeys("Everycred@123");
+
+            driver.findElement(By.xpath("//button[@type='submit']")).click();
+
+            // Wait for URL change after login
+            wait.until(ExpectedConditions.urlContains("issuer"));
+
+            System.out.println("✅ Login successful");
+
+            // ================= CLICK SUBJECTS =================
+            WebElement subjectsMenu = wait.until(
+                    ExpectedConditions.elementToBeClickable(
+                            By.xpath("//a[.//span[normalize-space()='Subjects']]")));
+
+            js.executeScript("arguments[0].click();", subjectsMenu);
+
+            System.out.println("✅ Clicked Subjects");
+
+            // ================= CLICK CREATE NEW =================
+            WebElement createNewBtn = wait.until(
+                    ExpectedConditions.elementToBeClickable(
+                            By.xpath("//button[contains(.,'Create New')]")));
+
+            createNewBtn.click();
+
+            // ================= CLICK CREATE GROUP =================
+            WebElement createGroupOption = wait.until(
+                    ExpectedConditions.elementToBeClickable(
+                            By.xpath("//span[normalize-space()='Create Group']")));
+
+            createGroupOption.click();
+
+            // ================= WAIT FOR PRIMENG DIALOG =================
+            WebElement dialog = wait.until(
+                    ExpectedConditions.visibilityOfElementLocated(
+                            By.xpath("//div[contains(@class,'p-dialog') and contains(@class,'p-dialog-visible')]")));
+
+            System.out.println("✅ Create Group dialog opened");
+
+            // ================= ENTER GROUP NAME =================
+            WebElement groupInput = wait.until(
+                    ExpectedConditions.elementToBeClickable(
+                            By.xpath("//label[normalize-space()='Group Name']/following::input[1]")));
+
+            groupInput.clear();
+            groupInput.sendKeys("Employee ID Card");
+
+            System.out.println("✅ Entered Employee ID Card");
+
+            // ================= CLICK CREATE GROUP BUTTON =================
+            WebElement createBtn = wait.until(
+                    ExpectedConditions.elementToBeClickable(
+                            By.xpath("//button[normalize-space()='Create Group']")));
+
+            createBtn.click();
+
+            System.out.println("✅ Clicked Create Group");
+
+            Thread.sleep(5000);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // driver.quit();
+    }
+}

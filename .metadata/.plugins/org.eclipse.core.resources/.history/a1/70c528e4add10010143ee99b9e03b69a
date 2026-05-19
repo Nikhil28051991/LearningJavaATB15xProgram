@@ -1,0 +1,127 @@
+package com.example.loadtest;
+
+import io.socket.client.IO;
+import io.socket.client.Socket;
+import org.json.JSONObject;
+
+import java.net.URI;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class SocketIOPerformanceTest {
+
+    private static final String SOCKET_URL = "https://api.demo.simplertoday.ai";
+
+    // headers equivalent to your artillery script
+    private static IO.Options socketOptions() {
+        IO.Options opts = new IO.Options();
+        opts.transports = new String[]{"websocket"};
+        opts.forceNew = true;
+        opts.reconnection = false;
+
+        // extraHeaders expects Map<String, List<String>>
+        Map<String, List<String>> extra = new ConcurrentHashMap<>();
+        extra.put("x-client-type", List.of("Web_Maverick"));
+        extra.put("origin", List.of("https://demo.simplertoday.ai"));
+        opts.extraHeaders = extra;
+
+        return opts;
+    }
+
+    public static void main(String[] args) throws Exception {
+
+        int totalUsers = 500;      // same as maxVusers: 500
+        int durationSeconds = 120; // “Phase 2 - 500 users”
+
+        ExecutorService executor = Executors.newFixedThreadPool(100);
+        CountDownLatch latch = new CountDownLatch(totalUsers);
+
+        AtomicInteger successCount = new AtomicInteger();
+        AtomicInteger failureCount = new AtomicInteger();
+
+        List<Long> latencies = new CopyOnWriteArrayList<>();
+
+        System.out.println("🚀 Starting WebSocket Load Test with " + totalUsers + " users...");
+
+        for (int i = 0; i < totalUsers; i++) {
+            executor.submit(() -> {
+                try {
+                    long startTime = System.currentTimeMillis();
+
+                    Socket socket = IO.socket(new URI(SOCKET_URL), socketOptions());
+
+                    CompletableFuture<Void> connected = new CompletableFuture<>();
+
+                    socket.on(Socket.EVENT_CONNECT, args1 -> connected.complete(null));
+                    socket.on(Socket.EVENT_CONNECT_ERROR, args1 -> {
+                        failureCount.incrementAndGet();
+                        connected.completeExceptionally(new RuntimeException("Connection Failed"));
+                    });
+
+                    socket.connect();
+
+                    // Wait until connected
+                    connected.get(10, TimeUnit.SECONDS);
+
+                    // Build event data JSON (same as Node script)
+                    JSONObject data = new JSONObject();
+                    data.put("tenantId", "675ff2ead0b057be61db7650");
+                    data.put("stage", "conversation");
+                    data.put("content", "When can I file a complaint?");
+                    data.put("role", "user");
+                    data.put("complaint_details", JSONObject.NULL);
+                    data.put("uuid", UUID.randomUUID().toString());
+
+                    CountDownLatch responseLatch = new CountDownLatch(1);
+
+                    socket.on("ai-response", args1 -> {
+                        long latency = System.currentTimeMillis() - startTime;
+                        latencies.add(latency);
+                        successCount.incrementAndGet();
+                        responseLatch.countDown();
+                    });
+
+                    // Send message (equivalent to emit: client-response)
+                    socket.emit("client-response", data);
+
+                    // Wait for server reply, max 10 seconds
+                    if (!responseLatch.await(10, TimeUnit.SECONDS)) {
+                        failureCount.incrementAndGet();
+                    }
+
+                    socket.close();
+
+                } catch (Exception e) {
+                    failureCount.incrementAndGet();
+                    // Optionally log e.printStackTrace();
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+
+        // Wait for all tasks to finish or timeout after durationSeconds
+        latch.await(durationSeconds, TimeUnit.SECONDS);
+        executor.shutdownNow();
+
+        System.out.println("\n📊 Performance Test Results");
+        System.out.println("Total Users           : " + totalUsers);
+        System.out.println("Successful Replies    : " + successCount.get());
+        System.out.println("Failed Replies        : " + failureCount.get());
+
+        if (!latencies.isEmpty()) {
+            double avg = latencies.stream().mapToLong(v -> v).average().orElse(0);
+            long max = latencies.stream().mapToLong(v -> v).max().orElse(0);
+
+            System.out.println("Average Latency (ms)  : " + avg);
+            System.out.println("Max Latency (ms)      : " + max);
+        }
+
+        System.out.println("Test Duration (sec)   : " + durationSeconds);
+        System.out.println("Status                : Completed");
+    }
+}

@@ -1,0 +1,186 @@
+package orderhistory;
+
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import java.io.FileInputStream;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.*;
+
+public class OrderReportTable {
+
+    private static class Stats {
+        int count = 0;
+        double totalPrice = 0.0;
+
+        void add(double price) {
+            count++;
+            totalPrice += price;
+        }
+
+        String format() {
+            return String.format("%d (%.0f)", count, totalPrice);
+        }
+    }
+
+    private static final String[] PAYMENT_ORDER = {
+        "UPI", "CC", "UPIPPI", "UPICC", "NB", "UPI SALE", "CARD", "CASH"
+    };
+
+    public static void main(String[] args) {
+        String filePath = "C:\\Users\\Nikhil Sonawane\\eclipse-workspace\\OrderReport\\2026-03-16 to 2026-03-31_Order_History.xlsx";
+
+        Map<LocalDate, Map<String, Stats>> dailyData = new TreeMap<>();
+        Map<String, Stats> grandTotals = new HashMap<>();
+        Stats overallTotal = new Stats();
+        Map<LocalDate, Stats> dayTotals = new HashMap<>();
+
+        try (FileInputStream fis = new FileInputStream(filePath);
+             Workbook wb = new XSSFWorkbook(fis)) {
+
+            Sheet sheet = wb.getSheet("Order History");
+            if (sheet == null) {
+                System.err.println("Sheet 'Order History' not found!");
+                return;
+            }
+
+            for (int r = 1; r <= sheet.getLastRowNum(); r++) {
+                Row row = sheet.getRow(r);
+                if (row == null) continue;
+
+                Cell dateCell = row.getCell(8);
+                if (dateCell == null || dateCell.toString().trim().isEmpty()) continue;
+
+                String dateStr = dateCell.getStringCellValue().trim();
+                LocalDate date = LocalDateTime.parse(dateStr).toLocalDate();
+
+                Cell payCell = row.getCell(9);
+                String payment = (payCell != null && payCell.getCellType() != CellType.BLANK)
+                        ? payCell.getStringCellValue().trim() : "Unknown";
+
+                Cell priceCell = row.getCell(5);
+                double price = 0.0;
+                if (priceCell != null) {
+                    if (priceCell.getCellType() == CellType.NUMERIC) {
+                        price = priceCell.getNumericCellValue();
+                    } else if (priceCell.getCellType() == CellType.STRING) {
+                        try {
+                            price = Double.parseDouble(priceCell.getStringCellValue().trim().replace(",", ""));
+                        } catch (Exception ignored) {}
+                    }
+                }
+
+                // Daily
+                dailyData.computeIfAbsent(date, k -> new HashMap<>())
+                         .computeIfAbsent(payment, k -> new Stats())
+                         .add(price);
+
+                dayTotals.computeIfAbsent(date, k -> new Stats()).add(price);
+                grandTotals.computeIfAbsent(payment, k -> new Stats()).add(price);
+                overallTotal.add(price);
+            }
+
+        } catch (Exception e) {
+            System.err.println("Error reading Excel: " + e.getMessage());
+            e.printStackTrace();
+            return;
+        }
+
+        // Build table
+        List<String[]> table = new ArrayList<>();
+
+        // Header
+        String[] header = new String[PAYMENT_ORDER.length + 2];
+        header[0] = "Date";
+        System.arraycopy(PAYMENT_ORDER, 0, header, 1, PAYMENT_ORDER.length);
+        header[header.length - 1] = "Total";
+        table.add(header);
+
+        // Daily rows
+        for (LocalDate date : dailyData.keySet()) {
+            Map<String, Stats> dayMap = dailyData.get(date);
+            Stats dayTotal = dayTotals.get(date);
+
+            String[] row = new String[PAYMENT_ORDER.length + 2];
+            row[0] = date.toString();
+
+            for (int i = 0; i < PAYMENT_ORDER.length; i++) {
+                Stats s = dayMap.get(PAYMENT_ORDER[i]);
+                row[i + 1] = s != null ? s.format() : "0 (0)";
+            }
+            row[row.length - 1] = dayTotal.format();
+            table.add(row);
+        }
+
+        // GRAND TOTAL ROW (per payment method)
+        String[] grandRow = new String[PAYMENT_ORDER.length + 2];
+        grandRow[0] = "GRAND TOTAL";
+        for (int i = 0; i < PAYMENT_ORDER.length; i++) {
+            Stats s = grandTotals.getOrDefault(PAYMENT_ORDER[i], new Stats());
+            grandRow[i + 1] = s.format();
+        }
+        grandRow[grandRow.length - 1] = overallTotal.format();
+        table.add(grandRow);
+
+        // FINAL TOTAL ROW — repeat overall total in EVERY column
+        String totalStr = overallTotal.format(); // e.g., "2369 (230120)"
+        String[] finalRow = new String[PAYMENT_ORDER.length + 2];
+        finalRow[0] = "TOTAL";
+        Arrays.fill(finalRow, 1, finalRow.length, totalStr);
+        table.add(finalRow);
+
+        // Print table
+        printTable(table);
+    }
+
+    private static void printTable(List<String[]> rows) {
+        int cols = rows.get(0).length;
+        int[] widths = new int[cols];
+
+        for (String[] row : rows) {
+            for (int c = 0; c < cols; c++) {
+                int len = row[c].length();
+                if (row[0].equals("GRAND TOTAL") || row[0].equals("TOTAL")) {
+                    len += 4; // for **
+                }
+                widths[c] = Math.max(widths[c], len);
+            }
+        }
+
+        String line = "+" + java.util.stream.IntStream.range(0, cols)
+                .mapToObj(i -> "-".repeat(widths[i] + 2))
+                .collect(java.util.stream.Collectors.joining("+", "", "+"));
+
+        System.out.println(line);
+        printRow(rows.get(0), widths, false); // Header
+        System.out.println(line);
+
+        // Daily data
+        for (int i = 1; i < rows.size() - 2; i++) {
+            printRow(rows.get(i), widths, false);
+        }
+
+        // GRAND TOTAL
+        System.out.println(line);
+        printRow(rows.get(rows.size() - 2), widths, true);
+
+        // FINAL TOTAL ROW
+        System.out.println(line);
+        printRow(rows.get(rows.size() - 1), widths, true);
+
+        System.out.println(line);
+    }
+
+    private static void printRow(String[] row, int[] widths, boolean bold) {
+        for (int c = 0; c < row.length; c++) {
+            String cell = row[c];
+            if (bold) {
+                cell = "**" + cell + "**";
+            }
+            String fmt = c == 0 ? "%-" + widths[c] + "s" : "%" + widths[c] + "s";
+            System.out.print("| " + String.format(fmt, cell) + " ");
+        }
+        System.out.println("|");
+    }
+}

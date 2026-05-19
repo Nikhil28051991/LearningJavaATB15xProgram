@@ -1,0 +1,210 @@
+package pinelabreport;
+
+import java.io.*;
+import java.time.LocalDate;
+import java.util.*;
+
+public class PinelabReportTable {
+
+    static class Stats {
+        int count = 0;
+        double amount = 0;
+        double discount = 0;
+
+        void add(double price, double disc) {
+            count++;
+            amount += price;
+            discount += disc;
+        }
+
+        String format() {
+            return String.format("%d (%.0f | %.0f)", count, amount, discount);
+        }
+    }
+
+    // ✅ SAME ORDER AS YOUR REQUIRED OUTPUT
+    private static final String[] PAYMENT_ORDER = {
+            "UPI", "CC", "UPIPPI", "UPICC", "NB", "UPI SALE", "CARD", "CASH"
+    };
+
+    public static void main(String[] args) {
+
+        String filePath = "C:\\Users\\Nikhil Sonawane\\eclipse-workspace\\PinelabReport\\transactionReport (86).csv";
+
+        Map<LocalDate, Map<String, Stats>> daily = new TreeMap<>();
+        Map<String, Stats> grand = new HashMap<>();
+        Map<LocalDate, Stats> dayTotal = new HashMap<>();
+        Stats overall = new Stats();
+
+        LocalDate minDate = null;
+        LocalDate maxDate = null;
+
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+
+            String line;
+            boolean first = true;
+
+            while ((line = br.readLine()) != null) {
+
+                if (first) {
+                    first = false;
+                    continue;
+                }
+
+                String[] values = parseCsvLine(line);
+                if (values.length < 23) continue;
+
+                String payment = values[0].trim().toUpperCase();
+                String priceStr = values[20].replace(",", "").trim();
+                String dateStr = values[22].trim();
+
+                double price;
+                try {
+                    price = Double.parseDouble(priceStr);
+                } catch (Exception e) {
+                    continue;
+                }
+
+                // ✅ No discount in CSV → default 0
+                double discount = 0;
+
+                LocalDate date;
+                try {
+                    date = LocalDate.parse(dateStr.substring(0, 10));
+                } catch (Exception e) {
+                    continue;
+                }
+
+                // Track range
+                if (minDate == null || date.isBefore(minDate)) minDate = date;
+                if (maxDate == null || date.isAfter(maxDate)) maxDate = date;
+
+                // Store
+                daily
+                        .computeIfAbsent(date, k -> new HashMap<>())
+                        .computeIfAbsent(payment, k -> new Stats())
+                        .add(price, discount);
+
+                dayTotal.computeIfAbsent(date, k -> new Stats()).add(price, discount);
+                grand.computeIfAbsent(payment, k -> new Stats()).add(price, discount);
+                overall.add(price, discount);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return;
+        }
+
+        // ---------- BUILD TABLE ----------
+        List<String[]> table = new ArrayList<>();
+
+        String[] header = new String[PAYMENT_ORDER.length + 3];
+        header[0] = "Date";
+        System.arraycopy(PAYMENT_ORDER, 0, header, 1, PAYMENT_ORDER.length);
+        header[header.length - 2] = "Discount";
+        header[header.length - 1] = "Total";
+        table.add(header);
+
+        // ✅ Fill missing dates
+        for (LocalDate d = minDate; !d.isAfter(maxDate); d = d.plusDays(1)) {
+
+            Map<String, Stats> map = daily.getOrDefault(d, new HashMap<>());
+            Stats t = dayTotal.getOrDefault(d, new Stats());
+
+            String[] row = new String[PAYMENT_ORDER.length + 3];
+            row[0] = d.toString();
+
+            for (int i = 0; i < PAYMENT_ORDER.length; i++) {
+                Stats s = map.get(PAYMENT_ORDER[i]);
+                row[i + 1] = (s != null) ? s.format() : "0 (0 | 0)";
+            }
+
+            row[row.length - 2] = String.format("%.0f", t.discount);
+            row[row.length - 1] = t.format();
+
+            table.add(row);
+        }
+
+        // GRAND TOTAL
+        String[] g = new String[PAYMENT_ORDER.length + 3];
+        g[0] = "GRAND TOTAL";
+
+        for (int i = 0; i < PAYMENT_ORDER.length; i++) {
+            g[i + 1] = grand.getOrDefault(PAYMENT_ORDER[i], new Stats()).format();
+        }
+
+        g[g.length - 2] = String.format("%.0f", overall.discount);
+        g[g.length - 1] = overall.format();
+        table.add(g);
+
+        // TOTAL ROW
+        String totalStr = overall.format();
+        String[] totalRow = new String[PAYMENT_ORDER.length + 3];
+        totalRow[0] = "TOTAL";
+        Arrays.fill(totalRow, 1, totalRow.length, totalStr);
+        table.add(totalRow);
+
+        printTable(table);
+    }
+
+    // CSV parser
+    private static String[] parseCsvLine(String line) {
+        List<String> result = new ArrayList<>();
+        StringBuilder field = new StringBuilder();
+        boolean inQuotes = false;
+
+        for (char c : line.toCharArray()) {
+            if (c == '"') {
+                inQuotes = !inQuotes;
+            } else if (c == ',' && !inQuotes) {
+                result.add(field.toString());
+                field = new StringBuilder();
+            } else {
+                field.append(c);
+            }
+        }
+        result.add(field.toString());
+        return result.toArray(new String[0]);
+    }
+
+    // ---------- TABLE PRINT ----------
+    private static void printTable(List<String[]> rows) {
+
+        int cols = rows.get(0).length;
+        int[] widths = new int[cols];
+
+        for (String[] row : rows) {
+            for (int c = 0; c < cols; c++) {
+                widths[c] = Math.max(widths[c], row[c].length());
+            }
+        }
+
+        StringBuilder line = new StringBuilder("+");
+        for (int w : widths) line.append("-".repeat(w + 2)).append("+");
+
+        System.out.println(line);
+        printRow(rows.get(0), widths);
+        System.out.println(line);
+
+        for (int i = 1; i < rows.size(); i++) {
+            printRow(rows.get(i), widths);
+            if (rows.get(i)[0].equals("GRAND TOTAL")) {
+                System.out.println(line);
+            }
+        }
+
+        System.out.println(line);
+    }
+
+    private static void printRow(String[] row, int[] widths) {
+        System.out.print("|");
+        for (int c = 0; c < row.length; c++) {
+            if (c == 0) {
+                System.out.printf(" %-"+widths[c]+"s |", row[c]);
+            } else {
+                System.out.printf(" %"+widths[c]+"s |", row[c]);
+            }
+        }
+        System.out.println();
+    }
+}

@@ -1,0 +1,504 @@
+package com.everycred.pages;
+
+import java.time.Duration;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+
+import org.openqa.selenium.*;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+public class AddRecordPage {
+
+    private WebDriver driver;
+    private WebDriverWait wait;
+
+    public AddRecordPage(WebDriver driver) {
+
+        this.driver = driver;
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(40));
+    }
+
+    // ======================================
+    // DELAY METHOD
+    // ======================================
+
+    public void delay() {
+
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();   // improved (no logic change)
+        }
+    }
+
+    // ======================================
+    // COMMON WAIT METHODS (ADDED)
+    // ======================================
+
+    private WebElement waitVisible(By locator) {
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
+    }
+
+    private WebElement waitClickable(By locator) {
+        return wait.until(ExpectedConditions.elementToBeClickable(locator));
+    }
+
+    private void scrollIntoView(WebElement element) {
+        ((JavascriptExecutor) driver)
+                .executeScript("arguments[0].scrollIntoView({block:'center'});", element);
+    }
+
+    // ======================================
+    // COLUMN INDEX METHOD (ADDED)
+    // ======================================
+
+    public int getColumnIndex(String columnName) {
+
+        int columnIndex = -1;
+
+        List<WebElement> headers =
+                driver.findElements(By.xpath("//thead//th"));
+
+        for (int i = 0; i < headers.size(); i++) {
+
+            String text = headers.get(i).getText().trim();
+
+            System.out.println("Header found = " + text);
+
+            if (text.toLowerCase().contains(columnName.toLowerCase())) {
+
+                columnIndex = i + 1;
+                break;
+            }
+        }
+
+        if (columnIndex == -1) {
+            throw new RuntimeException("Column not found: " + columnName);
+        }
+
+        System.out.println("Column " + columnName + " index = " + columnIndex);
+
+        return columnIndex;
+    }
+
+
+//======================================
+//ADD RECORD FLOW (FIXED)                                       // changes during run 
+//======================================
+
+public void addRecordFlow() {
+
+  System.out.println("Opening Subjects Tab");
+
+  click(By.xpath("//a[normalize-space()='Subjects']"));
+
+  waitVisible(By.xpath("//body"));
+
+  delay();
+
+  By subjectRow = By.xpath("//tr[.//text()[contains(.,'Employee ID Card20')]]");   //
+
+  int refreshCount = 0;
+  int maxRefresh = 10;
+
+  while (driver.findElements(subjectRow).size() == 0 && refreshCount < maxRefresh) {
+
+      System.out.println("Subject not visible yet. Refreshing page...");
+
+      driver.navigate().refresh();
+
+      waitVisible(By.xpath("//tbody"));
+
+      delay();
+
+      refreshCount++;
+  }
+
+  if (driver.findElements(subjectRow).size() == 0) {
+
+      throw new RuntimeException("Employee ID Card20 subject not found after refresh attempts");  //
+  }
+
+  System.out.println("Employee ID Card20 Subject Found");                     //
+
+
+WebElement addRecordButton = waitClickable(
+       By.xpath("//tbody/tr[1]//button[contains(.,'Add Record')]")
+);
+
+scrollIntoView(addRecordButton);
+
+jsClick(addRecordButton);
+
+System.out.println("Add Record button clicked");
+
+delay();
+
+
+System.out.println("Waiting for Add Credential Page to Load");
+
+waitVisible(By.xpath("//span[normalize-space()='Add New Record']"));
+
+System.out.println("Add Credential Page Loaded Successfully");
+
+delay();
+
+}
+
+
+//======================================
+//FILL ADD RECORD FORM                                         // changes during run
+//======================================
+
+public void fillAddRecordForm() throws InterruptedException {
+
+System.out.println("Starting Add Record Form Filling");
+
+WebElement addNewRecord = waitClickable(
+         By.xpath("//span[normalize-space()='Add New Record']"));
+
+jsClick(addNewRecord);
+delay();
+
+
+//NAME (FIXED)
+
+int nameCol = getColumnIndex("Name");
+
+WebElement nameField = waitVisible(
+      By.xpath("//tbody/tr[1]/td[" + nameCol + "]//input"));
+
+nameField.sendKeys("Nikhil Sonawane");
+delay();
+
+
+// EMAIL (FIXED)
+
+int emailCol = getColumnIndex("Email");
+
+WebElement emailField = waitVisible(
+        By.xpath("//tbody/tr[1]/td[" + emailCol + "]//input"));
+
+emailField.sendKeys("nikhil.sonawane@viitor.cloud");
+delay();
+
+
+// EMPLOYEE ID
+WebElement empId = waitVisible(
+         By.xpath("//tbody/tr/td[4]/div[1]/p-celleditor[1]/div[1]/input[1]"));
+
+empId.sendKeys("VCEID-11111-0483600");                             //
+delay();
+
+
+// DESIGNATION
+WebElement designation = waitVisible(
+         By.xpath("//tbody/tr/td[5]/div[1]/p-celleditor[1]/div[1]/input[1]"));
+
+designation.sendKeys("QA Engineer");
+delay();
+
+
+// PERSONAL EMAIL
+WebElement personalEmail = waitVisible(
+         By.xpath("//tbody/tr/td[6]/div[1]/p-celleditor[1]/div[1]/input[1]"));
+
+personalEmail.sendKeys("sonawanenikhil2805@gmail.com");
+delay();
+
+
+// CONTACT NUMBER
+WebElement contactNumber = waitVisible(
+         By.xpath("//input[@type='number']"));
+
+contactNumber.sendKeys("8788270435");
+delay();
+
+
+JavascriptExecutor js = (JavascriptExecutor) driver;
+
+//=====================================
+//JOINING DATE : CURRENT DATE (DYNAMIC)
+//=====================================
+
+System.out.println("Selecting Joining Date (Current Date)");
+
+WebElement joiningInput = waitVisible(
+       By.xpath("//input[@id='iconDisplay']"));
+
+scrollIntoView(joiningInput);
+
+delay();
+
+js.executeScript("arguments[0].click();", joiningInput);
+
+waitVisible(By.xpath("//div[contains(@class,'p-datepicker')]"));    // 12 Mar 2026
+
+
+/*
+====================================================
+STATIC DATE SELECTION (KEEPED FOR FUTURE USE)
+If you want to select a specific date manually
+====================================================
+
+WebElement currentYear = wait.until(
+      ExpectedConditions.elementToBeClickable(
+              By.xpath("//button[normalize-space()='2026']")));
+currentYear.click();
+
+WebElement year2024 = wait.until(
+      ExpectedConditions.elementToBeClickable(
+              By.xpath("//span[normalize-space()='2024']")));
+year2024.click();
+
+WebElement aprilMonth = wait.until(
+      ExpectedConditions.elementToBeClickable(
+              By.xpath("//span[normalize-space()='Apr']")));
+aprilMonth.click();
+
+WebElement joiningDate = wait.until(
+      ExpectedConditions.elementToBeClickable(
+              By.xpath("//span[normalize-space()='22']")));
+joiningDate.click();
+
+*/                                                              // 22 Apr 2024
+
+
+//====================================================
+//DYNAMIC CURRENT DATE (IST)
+//====================================================
+
+ZonedDateTime istDate =
+       ZonedDateTime.now(ZoneId.of("Asia/Kolkata"));
+
+int today = istDate.getDayOfMonth();
+
+WebElement todayDate = waitClickable(
+       By.xpath("//span[normalize-space()='" + today + "']"));
+
+scrollIntoView(todayDate);
+
+delay();
+
+js.executeScript("arguments[0].click();", todayDate);
+
+delay();
+
+System.out.println("Joining Date Selected");
+
+
+//=====================================
+//EXPIRY DATE : IST TIMEZONE (+2 YEARS)
+//=====================================
+
+System.out.println("Selecting Expiry Date");
+
+ZonedDateTime expiryDateTime =
+       ZonedDateTime.now(ZoneId.of("Asia/Kolkata")).plusYears(2);
+
+int expiryDay = expiryDateTime.getDayOfMonth();
+int expiryYear = expiryDateTime.getYear();
+
+DateTimeFormatter monthFormatter =
+       DateTimeFormatter.ofPattern("MMMM");
+
+String targetMonth = expiryDateTime.format(monthFormatter);
+String targetYear = String.valueOf(expiryYear);
+
+
+//open expiry picker
+WebElement expiryInput = waitVisible(
+       By.cssSelector("input[name='expiry_date0']"));
+
+scrollIntoView(expiryInput);
+
+delay();
+
+js.executeScript("arguments[0].click();", expiryInput);
+
+waitVisible(By.xpath("//div[contains(@class,'p-datepicker')]"));
+
+
+/*
+====================================================
+STATIC DATE SELECTION (KEEPED FOR FUTURE USE)
+If you want to select a specific expiry date manually
+====================================================
+
+WebElement currentYear = wait.until(
+    ExpectedConditions.elementToBeClickable(
+            By.xpath("//button[contains(@class,'p-datepicker-year')]")));
+currentYear.click();
+
+WebElement yearSelect = wait.until(
+    ExpectedConditions.elementToBeClickable(
+            By.xpath("//span[normalize-space()='2028']")));
+yearSelect.click();
+
+WebElement monthSelect = wait.until(
+    ExpectedConditions.elementToBeClickable(
+            By.xpath("//span[normalize-space()='Mar']")));
+monthSelect.click();
+
+WebElement expiryDate = wait.until(
+    ExpectedConditions.elementToBeClickable(
+            By.xpath("//span[normalize-space()='10']")));
+expiryDate.click();
+
+*/                                                     // 22 Oct 2026
+
+
+//====================================================
+//DYNAMIC EXPIRY DATE SELECTION (+2 YEARS)
+//====================================================
+
+while (true)
+{
+   WebElement header = driver.findElement(
+           By.xpath("//div[contains(@class,'p-datepicker-title')]"));
+
+   String headerText = header.getText();
+
+   if(headerText.contains(targetMonth) && headerText.contains(targetYear))
+       break;
+
+   driver.findElement(
+           By.xpath("//button[contains(@class,'p-datepicker-next')]"))
+           .click();
+
+   Thread.sleep(500);
+}
+
+
+WebElement expiryDayElement = waitClickable(
+       By.xpath("//td[not(contains(@class,'p-datepicker-other-month'))]//span[text()='" + expiryDay + "']"));
+
+scrollIntoView(expiryDayElement);
+
+delay();
+
+js.executeScript("arguments[0].click();", expiryDayElement);
+
+delay();
+
+System.out.println("Expiry Date Selected Successfully (Time auto-filled by system)");
+
+
+// COMPANY URL
+waitVisible(By.xpath("//input[@type='url']"))
+        .sendKeys("https://viitorcloud.com/");
+delay();
+
+
+// ADDRESS
+waitVisible(By.xpath("//tbody/tr/td[11]/div[1]/p-celleditor[1]/div[1]/input[1]"))
+        .sendKeys("Ahmedabad, Gujarat");
+delay();
+
+
+// SAVE RECORD
+WebElement tickButton = waitClickable(
+         By.xpath("//span[@class='pi pi-check p-button-icon ng-star-inserted']"));
+
+jsClick(tickButton);
+
+System.out.println("Record Added Successfully");
+
+
+//=====================================
+//CLICK CROSS BUTTON AFTER SAVE
+//=====================================
+
+System.out.println("Waiting 2 seconds before closing form");
+
+Thread.sleep(2000);
+
+By crossLocator = By.xpath("//span[contains(@class,'pi-times')]");
+
+int retry = 0;
+
+while (retry < 5) {
+  try {
+
+      WebElement crossButton = wait.until(
+              ExpectedConditions.presenceOfElementLocated(crossLocator));
+
+      scrollIntoView(crossButton);
+
+      delay();
+
+      ((JavascriptExecutor) driver)
+              .executeScript("arguments[0].click();", crossButton);
+
+      System.out.println("Cross button clicked successfully");
+
+      break;
+
+  } catch (StaleElementReferenceException e) {
+
+      System.out.println("Retrying cross button due to stale element...");
+      retry++;
+      Thread.sleep(1000);
+
+  } catch (Exception e) {
+
+      System.out.println("Retrying due to unknown issue...");
+      retry++;
+      Thread.sleep(1000);
+  }
+}
+
+if (retry == 5) {
+  throw new RuntimeException("Failed to click cross button after retries");
+}
+
+System.out.println("Form Closed Successfully");
+
+}
+
+    // ======================================
+    // COMMON CLICK
+    // ======================================
+
+    public void click(By locator) {
+
+        WebElement element = waitClickable(locator);
+
+        jsClick(element);
+    }
+
+ // ======================================
+ // JS CLICK
+ // ======================================
+
+ public void jsClick(WebElement element) {
+
+      JavascriptExecutor js = (JavascriptExecutor) driver;
+
+      int attempts = 0;
+
+      while (attempts < 3) {
+          try {
+
+              scrollIntoView(element);
+
+              delay();
+
+              js.executeScript("arguments[0].click();", element);
+
+              return;
+
+          } catch (StaleElementReferenceException e) {
+
+              System.out.println("Stale element detected in jsClick, retrying...");
+              attempts++;
+              delay();
+          }
+      }
+
+      throw new RuntimeException("Failed to click element after retries");
+ }
+}

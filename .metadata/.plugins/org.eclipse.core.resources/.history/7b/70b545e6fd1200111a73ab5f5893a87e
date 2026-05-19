@@ -1,0 +1,103 @@
+package com.everycred.pages;
+
+import java.time.Duration;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+public class SubjectPage {
+
+    private final WebDriver driver;
+    private final WebDriverWait wait;
+
+    public SubjectPage(WebDriver driver) {
+        this.driver = driver;
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(40));
+    }
+
+    public void createGroup() throws InterruptedException {
+
+        // Go to Subjects → Groups
+        click(By.xpath("//a[contains(@href,'subjects/groups')]"));
+        wait.until(ExpectedConditions.urlContains("subjects/groups"));
+        Thread.sleep(2000);
+
+        // Create Group
+        click(By.xpath("//button[contains(.,'Create New')]"));
+        Thread.sleep(1000);
+
+        click(By.xpath("//span[normalize-space()='Create Group']"));
+        Thread.sleep(2000);
+
+        WebElement groupName = wait.until(
+                ExpectedConditions.visibilityOfElementLocated(By.id("groupName")));
+
+        groupName.sendKeys("Employee Department");
+
+        click(By.xpath("//button[normalize-space()='Create Group']"));
+
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(By.className("p-toast")));
+        Thread.sleep(2000);
+    }
+
+    public void createSubjectFlow() throws InterruptedException {
+
+        // Open Create Subject
+        click(By.xpath("//button[contains(.,'Create New')]"));
+        Thread.sleep(1000);
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(
+                By.xpath("//span[normalize-space()='Create Subject']")));
+
+        click(By.xpath("//span[normalize-space()='Create Subject']"));
+
+        // Wait for Add Subject page (Credential Title present)
+        wait.until(ExpectedConditions.visibilityOfElementLocated(
+                By.xpath("//input[@id='credentialTitle']")));
+        Thread.sleep(2000);
+
+        // Fill Credential info
+        driver.findElement(By.xpath("//input[@id='credentialTitle']"))
+                .sendKeys("Employee ID Card");
+
+        driver.findElement(By.xpath("//textarea[@id='description']"))
+                .sendKeys("Employee ID Card 2026");
+
+        // Select Group
+        click(By.xpath(
+                "//p-select[@id='group']//chevrondownicon[@class='p-component p-iconwrapper ng-star-inserted']//*[name()='svg']"));
+        Thread.sleep(1500);
+
+        click(By.xpath("//li[normalize-space()='Employee Department']"));
+        Thread.sleep(1000);
+
+        // Verify Layout Design in Credential section
+        By verifyLayoutDropdown = By.xpath(
+                "//p-select[@id='verifierDesign']//div[@aria-label='dropdown trigger']");
+
+        WebElement verifyLayoutElement = wait.until(
+                ExpectedConditions.visibilityOfElementLocated(verifyLayoutDropdown));
+
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});",
+                verifyLayoutElement);
+        Thread.sleep(800);
+
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", verifyLayoutElement);
+        Thread.sleep(1500);
+
+        click(By.xpath("//li[normalize-space()='Theme 1']"));
+    }
+
+    private void click(By locator) {
+        WebElement element = wait.until(ExpectedConditions.elementToBeClickable(locator));
+        try {
+            element.click();
+        } catch (Exception e) {
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", element);
+        }
+    }
+}

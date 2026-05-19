@@ -1,0 +1,10 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Everycred Suite" parallel="false">
+
+    <test name="Create Subject Test">
+        <classes>
+            <class name="tests.CreateSubjectTest"/>
+        </classes>
+    </test>
+
+</suite>

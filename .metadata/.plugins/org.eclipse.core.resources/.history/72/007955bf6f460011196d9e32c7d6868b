@@ -1,0 +1,212 @@
+package payu;
+
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import java.io.FileInputStream;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+public class PayUReportGenerator {
+
+    static class Stats {
+        int count = 0;
+        double amount = 0;
+
+        void add(double val) {
+            count++;
+            amount += val;
+        }
+
+        String format() {
+            return String.format("%d(%.0f)", count, amount);
+        }
+    }
+
+    // 🔥 Fixed column order (like your other report)
+    private static final String[] PAYMENT_ORDER = {
+            "UPI", "CC", "DC", "NB", "WALLET", "CARD"
+    };
+
+    private static final int MAX_WIDTH = 18;
+
+    public static void main(String[] args) {
+
+        String filePath = "transaction_report_4502858369757889547.xlsx";
+
+        Map<String, Map<String, Stats>> daily = new TreeMap<>();
+        Map<String, Stats> dayTotal = new HashMap<>();
+        Map<String, Stats> grand = new HashMap<>();
+        Stats overall = new Stats();
+
+        try (FileInputStream fis = new FileInputStream(filePath);
+             Workbook workbook = new XSSFWorkbook(fis)) {
+
+            Sheet sheet = workbook.getSheetAt(0);
+            Row header = sheet.getRow(0);
+
+            int dateCol = -1, modeCol = -1, amountCol = -1, statusCol = -1;
+
+            for (Cell cell : header) {
+                String h = cell.getStringCellValue().trim().toLowerCase();
+
+                if (h.equals("addedon")) dateCol = cell.getColumnIndex();
+                if (h.equals("mode")) modeCol = cell.getColumnIndex();
+                if (h.equals("amount")) amountCol = cell.getColumnIndex();
+                if (h.contains("status")) statusCol = cell.getColumnIndex(); // 🔥 success filter
+            }
+
+            if (dateCol == -1 || modeCol == -1 || amountCol == -1) {
+                System.out.println("Required columns not found!");
+                return;
+            }
+
+            SimpleDateFormat input = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            SimpleDateFormat output = new SimpleDateFormat("yyyy-MM-dd");
+
+            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+
+                Row row = sheet.getRow(i);
+                if (row == null) continue;
+
+                String status = getCell(row, statusCol).toUpperCase();
+
+                // ✅ ONLY SUCCESS
+                if (!status.contains("SUCCESS")) continue;
+
+                String rawDate = getCell(row, dateCol);
+                String mode = getCell(row, modeCol).toUpperCase().trim();
+                String amtStr = getCell(row, amountCol);
+
+                double amount;
+                try {
+                    amount = Double.parseDouble(amtStr);
+                } catch (Exception e) {
+                    continue;
+                }
+
+                String date;
+                try {
+                    date = output.format(input.parse(rawDate));
+                } catch (Exception e) {
+                    continue;
+                }
+
+                // store
+                daily
+                        .computeIfAbsent(date, k -> new HashMap<>())
+                        .computeIfAbsent(mode, k -> new Stats())
+                        .add(amount);
+
+                dayTotal.computeIfAbsent(date, k -> new Stats()).add(amount);
+                grand.computeIfAbsent(mode, k -> new Stats()).add(amount);
+                overall.add(amount);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return;
+        }
+
+        // ---------- TABLE ----------
+        List<String[]> table = new ArrayList<>();
+
+        String[] header = new String[PAYMENT_ORDER.length + 2];
+        header[0] = "Date";
+        System.arraycopy(PAYMENT_ORDER, 0, header, 1, PAYMENT_ORDER.length);
+        header[header.length - 1] = "Total";
+        table.add(header);
+
+        for (String date : daily.keySet()) {
+
+            Map<String, Stats> map = daily.get(date);
+            Stats t = dayTotal.get(date);
+
+            String[] row = new String[PAYMENT_ORDER.length + 2];
+            row[0] = date;
+
+            for (int i = 0; i < PAYMENT_ORDER.length; i++) {
+                Stats s = map.get(PAYMENT_ORDER[i]);
+                row[i + 1] = (s != null) ? s.format() : "0(0)";
+            }
+
+            row[row.length - 1] = t.format();
+            table.add(row);
+        }
+
+        // GRAND TOTAL
+        String[] g = new String[PAYMENT_ORDER.length + 2];
+        g[0] = "GRAND TOTAL";
+
+        for (int i = 0; i < PAYMENT_ORDER.length; i++) {
+            g[i + 1] = grand.getOrDefault(PAYMENT_ORDER[i], new Stats()).format();
+        }
+
+        g[g.length - 1] = overall.format();
+        table.add(g);
+
+        printTable(table);
+    }
+
+    // ---------- HELPERS ----------
+    private static String getCell(Row row, int index) {
+        if (index == -1) return "";
+        Cell cell = row.getCell(index);
+        if (cell == null) return "";
+
+        switch (cell.getCellType()) {
+            case STRING: return cell.getStringCellValue();
+            case NUMERIC: return String.valueOf(cell.getNumericCellValue());
+            default: return "";
+        }
+    }
+
+    // ---------- TABLE PRINT ----------
+    private static void printTable(List<String[]> rows) {
+
+        int cols = rows.get(0).length;
+        int[] widths = new int[cols];
+
+        for (String[] row : rows) {
+            for (int c = 0; c < cols; c++) {
+                widths[c] = Math.min(Math.max(widths[c], row[c].length()), MAX_WIDTH);
+            }
+        }
+
+        StringBuilder line = new StringBuilder("+");
+        for (int w : widths) line.append("-".repeat(w + 2)).append("+");
+
+        System.out.println(line);
+
+        for (int i = 0; i < rows.size(); i++) {
+            printRow(rows.get(i), widths);
+
+            if (i == 0 || rows.get(i)[0].equals("GRAND TOTAL")) {
+                System.out.println(line);
+            }
+        }
+
+        System.out.println(line);
+    }
+
+    private static void printRow(String[] row, int[] widths) {
+        System.out.print("|");
+
+        for (int c = 0; c < row.length; c++) {
+
+            String val = row[c];
+
+            if (val.length() > widths[c]) {
+                val = val.substring(0, widths[c] - 2) + "..";
+            }
+
+            if (c == 0) {
+                System.out.printf(" %-"+widths[c]+"s |", val);
+            } else {
+                System.out.printf(" %"+widths[c]+"s |", val);
+            }
+        }
+
+        System.out.println();
+    }
+}

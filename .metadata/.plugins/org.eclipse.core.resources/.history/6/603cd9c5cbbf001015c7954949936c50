@@ -1,0 +1,312 @@
+package orderpinelab;
+
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import java.io.*;
+import java.text.NumberFormat;
+import java.util.*;
+
+public class OrderPinelabReport {
+
+    static class Record {
+        String date;
+        String method;
+        double amount;
+
+        Record(String date, String method, double amount) {
+            this.date = date;
+            this.method = method;
+            this.amount = amount;
+        }
+    }
+
+    static class Stats {
+        int count = 0;
+        double total = 0.0;
+
+        void add(double amount) {
+            count++;
+            total += amount;
+        }
+    }
+
+    public static void main(String[] args) {
+        String excelPath = "2025-10-16 to 2025-10-31_Order_History.xlsx";
+        String csvPath = "transactionReport (72).csv";
+
+        List<Record> excelRecords = readExcel(excelPath);
+        List<Record> csvRecords = readCsv(csvPath);
+
+        Map<String, Map<String, Stats>> excelSummary = summarize(excelRecords);
+        Map<String, Map<String, Stats>> csvSummary = summarize(csvRecords);
+
+        System.out.println("=== ORDER HISTORY (Excel) SUMMARY ===");
+        printSummary(excelSummary, "Order");
+
+        System.out.println("\n=== PINELAB (CSV) SUMMARY ===");
+        printSummary(csvSummary, "Pinelab");
+
+        System.out.println("\n=== DIFFERENCE ANALYSIS (UPI & CARD only) ===");
+        printComparison(excelSummary, csvSummary);
+
+        System.out.println("\n=== FULL DIFFERENCE (ALL METHODS - DAY WISE) ===");
+        printFullDayWiseDiff(excelSummary, csvSummary);
+    }
+
+    /* --------------------------------------------------------------------- */
+    /* EXCEL READER */
+    /* --------------------------------------------------------------------- */
+    private static List<Record> readExcel(String filePath) {
+        List<Record> records = new ArrayList<>();
+        try (FileInputStream fis = new FileInputStream(filePath);
+             Workbook wb = new XSSFWorkbook(fis)) {
+
+            Sheet sheet = wb.getSheet("Order History");
+            Iterator<Row> it = sheet.iterator();
+            it.next(); // skip header
+
+            while (it.hasNext()) {
+                Row row = it.next();
+                if (row.getCell(8) == null) continue;
+
+                String date = row.getCell(8).getStringCellValue().trim().split("T")[0];
+
+                String method = Optional.ofNullable(row.getCell(9))
+                        .map(c -> c.getStringCellValue().trim())
+                        .orElse("");
+
+                // Normalize
+                if (method.equalsIgnoreCase("UPI SALE") ||
+                    method.equalsIgnoreCase("UPI") ||
+                    method.equalsIgnoreCase("UPIPPI")) {
+                    method = "UPI";
+                } else if (method.equalsIgnoreCase("CARD") ||
+                           method.equalsIgnoreCase("CC")) {
+                    method = "CARD";
+                }
+
+                double amount = 0.0;
+                Cell priceCell = row.getCell(5);
+                if (priceCell != null) {
+                    if (priceCell.getCellType() == CellType.NUMERIC) {
+                        amount = priceCell.getNumericCellValue();
+                    } else if (priceCell.getCellType() == CellType.STRING) {
+                        try {
+                            amount = Double.parseDouble(priceCell.getStringCellValue().trim());
+                        } catch (Exception ignored) {}
+                    }
+                }
+                records.add(new Record(date, method, amount));
+            }
+        } catch (IOException e) {
+            System.err.println("Excel read error: " + e.getMessage());
+        }
+        return records;
+    }
+
+    /* --------------------------------------------------------------------- */
+    /* CSV READER */
+    /* --------------------------------------------------------------------- */
+    private static List<Record> readCsv(String filePath) {
+        List<Record> records = new ArrayList<>();
+        boolean first = true;
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (first) { first = false; continue; }
+                String[] cols = parseCsvLine(line);
+                if (cols.length < 24) continue;
+
+                if (!"Success".equals(cols[23].trim())) continue;
+
+                String method = cols[0].trim();
+                if ("UPI".equals(method)) method = "UPI";
+                else if ("Card".equals(method)) method = "CARD";
+                else continue;
+
+                double amount = 0.0;
+                try {
+                    amount = Double.parseDouble(cols[20].trim().replace(",", ""));
+                } catch (Exception ignored) { continue; }
+
+                String date = cols[22].trim().split("T")[0];
+                records.add(new Record(date, method, amount));
+            }
+        } catch (IOException e) {
+            System.err.println("CSV read error: " + e.getMessage());
+        }
+        return records;
+    }
+
+    /* --------------------------------------------------------------------- */
+    /* SUMMARISER */
+    /* --------------------------------------------------------------------- */
+    private static Map<String, Map<String, Stats>> summarize(List<Record> records) {
+        Map<String, Map<String, Stats>> map = new LinkedHashMap<>();
+        for (Record r : records) {
+            map.computeIfAbsent(r.date, k -> new LinkedHashMap<>())
+               .computeIfAbsent(r.method, k -> new Stats())
+               .add(r.amount);
+        }
+        return map;
+    }
+
+    /* --------------------------------------------------------------------- */
+    /* PRINT SUMMARY */
+    /* --------------------------------------------------------------------- */
+    private static void printSummary(Map<String, Map<String, Stats>> data, String source) {
+        NumberFormat nf = NumberFormat.getCurrencyInstance(new Locale("en", "IN"));
+        double grandTotal = 0; int grandCount = 0;
+
+        for (var dateEntry : data.entrySet()) {
+            String date = dateEntry.getKey();
+            System.out.println("\nDate: " + date);
+            System.out.println("---------------------");
+            double dayTotal = 0; int dayCount = 0;
+
+            for (var methodEntry : dateEntry.getValue().entrySet()) {
+                Stats s = methodEntry.getValue();
+                System.out.printf("  %-8s | Count: %3d | Total: %s%n",
+                        methodEntry.getKey(), s.count, nf.format(s.total));
+                dayTotal += s.total;
+                dayCount += s.count;
+            }
+            System.out.printf("  Day Total → Count: %3d | Total: %s%n", dayCount, nf.format(dayTotal));
+            grandTotal += dayTotal;
+            grandCount += dayCount;
+        }
+        System.out.printf("\n%s GRAND TOTAL → Count: %d | Amount: %s%n",
+                source, grandCount, nf.format(grandTotal));
+    }
+
+    /* --------------------------------------------------------------------- */
+    /* UPI & CARD COMPARISON (Legacy) */
+    /* --------------------------------------------------------------------- */
+    private static void printComparison(Map<String, Map<String, Stats>> excel,
+                                        Map<String, Map<String, Stats>> csv) {
+        Set<String> dates = new TreeSet<>();
+        dates.addAll(excel.keySet());
+        dates.addAll(csv.keySet());
+
+        NumberFormat nf = NumberFormat.getCurrencyInstance(new Locale("en", "IN"));
+        System.out.println("\nDate       | Method | Excel Cnt | Excel Amt | CSV Cnt | CSV Amt | Diff Amt | Diff Cnt");
+        System.out.println("-------------------------------------------------------------------------------------");
+
+        double totalDiffAmt = 0;
+        int totalDiffCnt = 0;
+
+        for (String date : dates) {
+            for (String method : List.of("UPI", "CARD")) {
+                Stats e = getStats(excel, date, method);
+                Stats c = getStats(csv, date, method);
+
+                double diffAmt = e.total - c.total;
+                int diffCnt = e.count - c.count;
+
+                if (e.count == 0 && c.count == 0) continue;
+
+                System.out.printf("%-10s | %-6s | %9d | %9s | %7d | %7s | %8s | %8d%n",
+                        date, method,
+                        e.count, nf.format(e.total),
+                        c.count, nf.format(c.total),
+                        nf.format(diffAmt), diffCnt);
+
+                totalDiffAmt += diffAmt;
+                totalDiffCnt += diffCnt;
+            }
+        }
+        System.out.println("-------------------------------------------------------------------------------------");
+        System.out.printf("TOTAL DIFF → Amount: %s | Count: %d%n",
+                nf.format(totalDiffAmt), totalDiffCnt);
+    }
+
+    /* --------------------------------------------------------------------- */
+    /* FULL DAY-WISE DIFFERENCE (ALL METHODS) */
+    /* --------------------------------------------------------------------- */
+    private static void printFullDayWiseDiff(Map<String, Map<String, Stats>> excel,
+                                             Map<String, Map<String, Stats>> csv) {
+        Set<String> dates = new TreeSet<>();
+        dates.addAll(excel.keySet());
+        dates.addAll(csv.keySet());
+
+        NumberFormat nf = NumberFormat.getCurrencyInstance(new Locale("en", "IN"));
+
+        double grandDiffAmt = 0;
+        int grandDiffCnt = 0;
+
+        for (String date : dates) {
+            Map<String, Stats> eMap = excel.getOrDefault(date, Collections.emptyMap());
+            Map<String, Stats> cMap = csv.getOrDefault(date, Collections.emptyMap());
+
+            Set<String> methods = new TreeSet<>();
+            methods.addAll(eMap.keySet());
+            methods.addAll(cMap.keySet());
+
+            if (methods.isEmpty()) continue;
+
+            System.out.println("\n=== Date: " + date + " ===");
+            System.out.println("Method     | Excel Cnt | Excel Amt | CSV Cnt | CSV Amt | Diff Cnt | Diff Amt");
+            System.out.println("--------------------------------------------------------------------------------");
+
+            double dayDiffAmt = 0;
+            int dayDiffCnt = 0;
+
+            for (String method : methods) {
+                Stats e = eMap.getOrDefault(method, new Stats());
+                Stats c = cMap.getOrDefault(method, new Stats());
+
+                int diffCnt = e.count - c.count;
+                double diffAmt = e.total - c.total;
+
+                if (e.count == 0 && c.count == 0) continue;
+
+                System.out.printf("%-10s | %9d | %9s | %7d | %7s | %8d | %8s%n",
+                        method,
+                        e.count, nf.format(e.total),
+                        c.count, nf.format(c.total),
+                        diffCnt, nf.format(diffAmt));
+
+                dayDiffAmt += diffAmt;
+                dayDiffCnt += diffCnt;
+            }
+
+            System.out.println("--------------------------------------------------------------------------------");
+            System.out.printf("DAY DIFF   | Count: %3d | Amount: %s%n", dayDiffCnt, nf.format(dayDiffAmt));
+            System.out.println();
+
+            grandDiffAmt += dayDiffAmt;
+            grandDiffCnt += dayDiffCnt;
+        }
+
+        System.out.println("====================================================================================");
+        System.out.printf("GRAND DIFF | Count: %3d | Amount: %s%n", grandDiffCnt, nf.format(grandDiffAmt));
+        System.out.println("====================================================================================");
+    }
+
+    private static Stats getStats(Map<String, Map<String, Stats>> map, String date, String method) {
+        return map.getOrDefault(date, Collections.emptyMap())
+                  .getOrDefault(method, new Stats());
+    }
+
+    /* --------------------------------------------------------------------- */
+    /* CSV PARSER */
+    /* --------------------------------------------------------------------- */
+    private static String[] parseCsvLine(String line) {
+        List<String> result = new ArrayList<>();
+        StringBuilder sb = new StringBuilder();
+        boolean inQuotes = false;
+
+        for (char c : line.toCharArray()) {
+            if (c == '"') inQuotes = !inQuotes;
+            else if (c == ',' && !inQuotes) {
+                result.add(sb.toString());
+                sb = new StringBuilder();
+            } else {
+                sb.append(c);
+            }
+        }
+        result.add(sb.toString());
+        return result.toArray(new String[0]);
+    }
+}

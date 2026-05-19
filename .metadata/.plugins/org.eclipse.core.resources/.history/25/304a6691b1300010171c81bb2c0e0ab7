@@ -1,0 +1,18 @@
+package Demo_session;
+
+import java.awt.Desktop;
+import java.net.URI;
+
+public class Everygive_Launch 
+{
+
+	public static void main(String[] args) {
+        try {
+            URI uri = new URI("https://www.example.com");
+            Desktop.getDesktop().browse(uri);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+}

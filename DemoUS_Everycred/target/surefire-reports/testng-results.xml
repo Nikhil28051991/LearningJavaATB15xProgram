@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testng-results ignored="0" total="13" passed="13" failed="0" skipped="0">
+  <reporter-output>
+  </reporter-output>
+  <suite started-at="2026-05-18T15:24:10 IST" name="EveryCred Suite" finished-at="2026-05-18T15:31:09 IST" duration-ms="418584">
+    <groups>
+    </groups>
+    <test started-at="2026-05-18T15:24:10 IST" name="Full Flow Test" finished-at="2026-05-18T15:31:09 IST" duration-ms="418584">
+      <class name="com.everycred.tests.CreateSubjectTest">
+        <test-method is-config="true" signature="setUp()[pri:0, instance:com.everycred.tests.CreateSubjectTest@c267ef4]" started-at="2026-05-18T15:24:10 IST" name="setUp" finished-at="2026-05-18T15:24:17 IST" duration-ms="6854" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- setUp -->
+        <test-method is-config="true" signature="initPages()[pri:0, instance:com.everycred.tests.CreateSubjectTest@c267ef4]" started-at="2026-05-18T15:24:17 IST" name="initPages" finished-at="2026-05-18T15:24:17 IST" depends-on-methods="com.everycred.base.BaseTest.setUp" duration-ms="43" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- initPages -->
+        <test-method signature="step01_SignUp()[pri:1, instance:com.everycred.tests.CreateSubjectTest@c267ef4]" started-at="2026-05-18T15:24:17 IST" name="step01_SignUp" finished-at="2026-05-18T15:24:54 IST" duration-ms="37340" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- step01_SignUp -->
+        <test-method signature="step02_IssuerProfile()[pri:2, instance:com.everycred.tests.CreateSubjectTest@c267ef4]" started-at="2026-05-18T15:24:54 IST" name="step02_IssuerProfile" finished-at="2026-05-18T15:25:46 IST" depends-on-methods="com.everycred.tests.CreateSubjectTest.step01_SignUp" duration-ms="51275" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- step02_IssuerProfile -->
+        <test-method signature="step03_Login()[pri:3, instance:com.everycred.tests.CreateSubjectTest@c267ef4]" started-at="2026-05-18T15:25:46 IST" name="step03_Login" finished-at="2026-05-18T15:25:50 IST" depends-on-methods="com.everycred.tests.CreateSubjectTest.step02_IssuerProfile" duration-ms="4524" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- step03_Login -->
+        <test-method signature="step04_NavigateToSubjects()[pri:4, instance:com.everycred.tests.CreateSubjectTest@c267ef4]" started-at="2026-05-18T15:25:50 IST" name="step04_NavigateToSubjects" finished-at="2026-05-18T15:25:53 IST" depends-on-methods="com.everycred.tests.CreateSubjectTest.step03_Login" duration-ms="2507" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- step04_NavigateToSubjects -->
+        <test-method signature="step05_CreateGroup()[pri:5, instance:com.everycred.tests.CreateSubjectTest@c267ef4]" started-at="2026-05-18T15:25:53 IST" name="step05_CreateGroup" finished-at="2026-05-18T15:26:01 IST" depends-on-methods="com.everycred.tests.CreateSubjectTest.step04_NavigateToSubjects" duration-ms="8787" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- step05_CreateGroup -->
+        <test-method signature="step06_CreateSubject()[pri:6, instance:com.everycred.tests.CreateSubjectTest@c267ef4]" started-at="2026-05-18T15:26:01 IST" name="step06_CreateSubject" finished-at="2026-05-18T15:26:11 IST" depends-on-methods="com.everycred.tests.CreateSubjectTest.step05_CreateGroup" duration-ms="9450" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- step06_CreateSubject -->
+        <test-method signature="step07_AddAttributes()[pri:7, instance:com.everycred.tests.CreateSubjectTest@c267ef4]" started-at="2026-05-18T15:26:11 IST" name="step07_AddAttributes" finished-at="2026-05-18T15:26:34 IST" depends-on-methods="com.everycred.tests.CreateSubjectTest.step06_CreateSubject" duration-ms="23477" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- step07_AddAttributes -->
+        <test-method signature="step08_SelectAttributesAndSubmit()[pri:8, instance:com.everycred.tests.CreateSubjectTest@c267ef4]" started-at="2026-05-18T15:26:34 IST" name="step08_SelectAttributesAndSubmit" finished-at="2026-05-18T15:26:41 IST" depends-on-methods="com.everycred.tests.CreateSubjectTest.step07_AddAttributes" duration-ms="6864" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- step08_SelectAttributesAndSubmit -->
+        <test-method signature="step09_AddRecord()[pri:9, instance:com.everycred.tests.CreateSubjectTest@c267ef4]" started-at="2026-05-18T15:26:41 IST" name="step09_AddRecord" finished-at="2026-05-18T15:27:38 IST" depends-on-methods="com.everycred.tests.CreateSubjectTest.step08_SelectAttributesAndSubmit" duration-ms="57221" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- step09_AddRecord -->
+        <test-method signature="step10_IssueCredential()[pri:10, instance:com.everycred.tests.CreateSubjectTest@c267ef4]" started-at="2026-05-18T15:27:38 IST" name="step10_IssueCredential" finished-at="2026-05-18T15:27:51 IST" depends-on-methods="com.everycred.tests.CreateSubjectTest.step09_AddRecord" duration-ms="12624" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- step10_IssueCredential -->
+        <test-method signature="step11_VerifyCredential()[pri:11, instance:com.everycred.tests.CreateSubjectTest@c267ef4]" started-at="2026-05-18T15:27:51 IST" name="step11_VerifyCredential" finished-at="2026-05-18T15:28:16 IST" depends-on-methods="com.everycred.tests.CreateSubjectTest.step10_IssueCredential" duration-ms="25179" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- step11_VerifyCredential -->
+        <test-method signature="step12_RevokeCredential()[pri:12, instance:com.everycred.tests.CreateSubjectTest@c267ef4]" started-at="2026-05-18T15:28:16 IST" name="step12_RevokeCredential" finished-at="2026-05-18T15:28:39 IST" depends-on-methods="com.everycred.tests.CreateSubjectTest.step11_VerifyCredential" duration-ms="23109" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- step12_RevokeCredential -->
+        <test-method signature="step13_UploadSpreadsheet()[pri:13, instance:com.everycred.tests.CreateSubjectTest@c267ef4]" started-at="2026-05-18T15:28:39 IST" name="step13_UploadSpreadsheet" finished-at="2026-05-18T15:31:09 IST" depends-on-methods="com.everycred.tests.CreateSubjectTest.step12_RevokeCredential" duration-ms="149121" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- step13_UploadSpreadsheet -->
+        <test-method is-config="true" signature="tearDown(org.testng.ITestContext)[pri:0, instance:com.everycred.tests.CreateSubjectTest@c267ef4]" started-at="2026-05-18T15:31:09 IST" name="tearDown" finished-at="2026-05-18T15:31:09 IST" duration-ms="55" status="PASS">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[org.testng.TestRunner@616b2b2]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- tearDown -->
+      </class> <!-- com.everycred.tests.CreateSubjectTest -->
+    </test> <!-- Full Flow Test -->
+  </suite> <!-- EveryCred Suite -->
+</testng-results>

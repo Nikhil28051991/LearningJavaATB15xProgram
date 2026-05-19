@@ -1,0 +1,254 @@
+package com.everycred.pages;
+
+import java.time.Duration;
+import java.util.Set;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+public class SubjectPage {
+
+    private WebDriver driver;
+    private WebDriverWait wait;
+
+    public SubjectPage(WebDriver driver) {
+
+        this.driver = driver;
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(40));
+    }
+
+    // ======================================
+    // DELAY METHOD (500ms)
+    // ======================================
+
+    public void delay() {
+
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // ======================================
+    // CREATE GROUP
+    // ======================================
+
+    public void createGroup() {
+
+        System.out.println("Navigating to Subjects → Groups");
+
+        click(By.xpath("//a[contains(@href,'subjects/groups')]"));
+        delay();
+
+        click(By.xpath("//button[contains(.,'Create New')]"));
+        delay();
+
+        click(By.xpath("//span[normalize-space()='Create Group']"));
+        delay();
+
+        WebElement groupName = wait.until(
+                ExpectedConditions.visibilityOfElementLocated(By.id("groupName")));
+
+        groupName.sendKeys("Employee Department1");
+        delay();
+
+        click(By.xpath("//button[normalize-space()='Create Group']"));
+        delay();
+
+        System.out.println("Group Created Successfully");
+    }
+
+    // ======================================
+    // CREATE SUBJECT
+    // ======================================
+
+    public void createSubjectFlow() {
+
+        System.out.println("Opening Create Subject");
+
+        click(By.xpath("//button[contains(.,'Create New')]"));
+        delay();
+
+        click(By.xpath("//span[normalize-space()='Create Subject']"));
+        delay();
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credentialTitle")));
+
+        driver.findElement(By.id("credentialTitle"))
+                .sendKeys("Employee ID Card");
+        delay();
+
+        driver.findElement(By.id("description"))
+                .sendKeys("Employee ID Card 2026");
+        delay();
+
+        WebElement groupDropdown = wait.until(
+                ExpectedConditions.elementToBeClickable(By.id("group")));
+
+        jsClick(groupDropdown);
+        delay();
+
+        wait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("//li[normalize-space()='Employee Department1']")))
+                .click();
+        delay();
+
+        WebElement verifyDropdown = wait.until(
+                ExpectedConditions.elementToBeClickable(By.id("verifierDesign")));
+
+        jsClick(verifyDropdown);
+        delay();
+
+        wait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("//li[normalize-space()='Theme 1']")))
+                .click();
+
+        delay();
+
+        System.out.println("Subject Basic Details Completed");
+    }
+
+    // ======================================
+    // ADD ATTRIBUTES
+    // ======================================
+
+    public void addAttributes() {
+
+        System.out.println("Adding Attributes");
+
+        addAttribute("Employees ID", "fieldType_0", "EPID-401-0483");
+        addAttribute("Designation", "fieldType_1","Designation of Employee");
+        addAttribute("Personal Email ID", "fieldType_2","Personal Email ID of the Employee");
+        addAttribute("Personal Contact Number", "fieldType_3","Personal Contact Number of the Employee");
+        addAttribute("Joining Date", "fieldType_4","Joining Date of the Employee");
+        addAttribute("Expiry Date", "fieldType_5","Expiration Date of the Contract");
+        addAttribute("Company URL", "fieldType_6","Official URL of the Company");
+        addAttribute("Address", "fieldType_1","Campus Address");
+
+        System.out.println("All Attributes Added Successfully");
+    }
+
+    // ======================================
+    // ATTRIBUTE METHOD
+    // ======================================
+
+    public void addAttribute(String title,String fieldTypeId,String descriptionText) {
+
+        System.out.println("Adding Attribute : " + title);
+
+        click(By.xpath("//span[normalize-space()='Add New']"));
+        delay();
+
+        WebElement titleField = wait.until(
+                ExpectedConditions.visibilityOfElementLocated(By.id("fieldTitle")));
+
+        titleField.clear();
+        titleField.sendKeys(title);
+        delay();
+
+        WebElement fieldType = wait.until(
+                ExpectedConditions.presenceOfElementLocated(By.id("fieldType")));
+
+        jsClick(fieldType);
+        delay();
+
+        wait.until(ExpectedConditions.presenceOfElementLocated(
+                By.xpath("//li[@id='" + fieldTypeId + "']")))
+                .click();
+
+        delay();
+
+        WebElement description = wait.until(
+                ExpectedConditions.visibilityOfElementLocated(By.id("fieldDescription")));
+
+        description.clear();
+        description.sendKeys(descriptionText);
+        delay();
+
+        WebElement checkbox = wait.until(
+                ExpectedConditions.presenceOfElementLocated(
+                        By.xpath("//input[@id='isRequired']")));
+
+        jsClick(checkbox);
+        delay();
+
+        WebElement saveButton = wait.until(
+                ExpectedConditions.presenceOfElementLocated(
+                        By.xpath("//span[normalize-space()='Save']")));
+
+        jsClick(saveButton);
+        delay();
+
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(By.id("fieldTitle")));
+
+        System.out.println(title + " Attribute Added Successfully");
+    }
+
+ // ======================================
+    // CLICK REQUIRED CHECKBOX (FIXED)
+    // ======================================
+
+    WebElement checkbox = wait.until(
+            ExpectedConditions.presenceOfElementLocated(
+                    By.xpath("//input[@id='isRequired']")));
+
+    ((JavascriptExecutor) driver)
+            .executeScript("arguments[0].scrollIntoView(true);", checkbox);
+
+    delay();
+
+    jsClick(checkbox);
+
+    System.out.println("Required Checkbox Clicked");
+
+    delay();
+
+    // ======================================
+    // CLICK SAVE BUTTON
+    // ======================================
+
+    WebElement saveButton2 = wait.until(
+            ExpectedConditions.presenceOfElementLocated(
+                    By.xpath("//span[normalize-space()='Save']")));
+
+    ((JavascriptExecutor) driver)
+            .executeScript("arguments[0].scrollIntoView(true);", saveButton2);
+
+    delay();
+
+    jsClick(saveButton2);
+
+    delay();
+
+    wait.until(ExpectedConditions.invisibilityOfElementLocated(By.id("fieldTitle")));
+
+    System.out.println("Designation Attribute Added Successfully");
+}
+
+// ======================================
+// COMMON CLICK METHOD
+// ======================================
+
+public void click(By locator) {
+
+    WebElement element = wait.until(
+            ExpectedConditions.elementToBeClickable(locator));
+
+    jsClick(element);
+}
+
+// ======================================
+// JAVASCRIPT CLICK
+// ======================================
+
+public void jsClick(WebElement element) {
+
+    JavascriptExecutor js = (JavascriptExecutor) driver;
+    js.executeScript("arguments[0].click();", element);
+}
+}

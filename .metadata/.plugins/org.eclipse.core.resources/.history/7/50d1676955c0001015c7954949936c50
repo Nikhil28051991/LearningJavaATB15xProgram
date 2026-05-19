@@ -1,0 +1,297 @@
+package orderpinelab;
+
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
+public class OrderPinelabReport {
+
+    static class Record {
+        String date;
+        String method;
+        double amount;
+
+        Record(String date, String method, double amount) {
+            this.date = date;
+            this.method = method;
+            this.amount = amount;
+        }
+    }
+
+    static class Stats {
+        int count = 0;
+        double total = 0.0;
+
+        void add(double amount) {
+            count++;
+            total += amount;
+        }
+    }
+
+    public static void main(String[] args) {
+        String excelPath = "2025-10-16 to 2025-10-31_Order_History.xlsx";
+        String csvPath = "transactionReport (72).csv";
+
+        List<Record> excelRecords = readExcel(excelPath);
+        List<Record> csvRecords = readCsv(csvPath);
+
+        Map<String, Map<String, Stats>> excelSummary = summarize(excelRecords);
+        Map<String, Map<String, Stats>> csvSummary = summarize(csvRecords);
+
+        System.out.println("=== ORDER HISTORY (Excel) SUMMARY ===");
+        printSummary(excelSummary, "Order");
+
+        System.out.println("\n=== PINELAB (CSV) SUMMARY ===");
+        printSummary(csvSummary, "Pinelab");
+
+        System.out.println("\n=== DIFFERENCE ANALYSIS ===");
+        printDifference(excelSummary, csvSummary);
+    }
+
+    private static List<Record> readExcel(String filePath) {
+        List<Record> records = new ArrayList<>();
+        try (FileInputStream fis = new FileInputStream(filePath);
+             Workbook wb = XSSFWorkbook(fis)) {
+
+            Sheet sheet = wb.getSheet("Order History");
+            Iterator<Row> it = sheet.iterator();
+            it.next(); // skip header
+
+            while (it.hasNext()) {
+                Row row = it.next();
+
+                // Filter for Success status (index 11)
+                Cell statusCell = row.getCell(11);
+                if (statusCell == null || !statusCell.getStringCellValue().trim().equalsIgnoreCase("Success")) continue;
+
+                // Amount > 0 (index 5)
+                Cell amountCell = row.getCell(5);
+                double amount = 0.0;
+                if (amountCell != null) {
+                    if (amountCell.getCellType() == CellType.NUMERIC) {
+                        amount = amountCell.getNumericCellValue();
+                    } else if (amountCell.getCellType() == CellType.STRING) {
+                        try {
+                            amount = Double.parseDouble(amountCell.getStringCellValue().trim());
+                        } catch (Exception ignored) {}
+                    }
+                }
+                if (amount <= 0) continue;
+
+                // Date (index 8)
+                Cell dateCell = row.getCell(8);
+                if (dateCell == null) continue;
+                String rawDate = dateCell.getStringCellValue().trim();
+                String date = rawDate.split("T")[0];
+
+                // Method (index 9)
+                Cell methodCell = row.getCell(9);
+                String rawMethod = methodCell != null ? methodCell.getStringCellValue().trim() : "";
+
+                String method = rawMethod; // default remaining
+                if (rawMethod.equalsIgnoreCase("UPI SALE")) {
+                    method = "UPI Sale"; // map to CSV UPI
+                } else if (rawMethod.equalsIgnoreCase("CARD")) {
+                    method = "Card"; // map to CSV Card
+                } else if (rawMethod.equalsIgnoreCase("CASH")) {
+                    method = "CASH";
+                } else if (rawMethod.equalsIgnoreCase("UPI") || rawMethod.equalsIgnoreCase("UPIPPI") || rawMethod.equalsIgnoreCase("CC") || rawMethod.equalsIgnoreCase("Free")) {
+                    method = rawMethod; // keep as is for remaining
+                } else {
+                    method = "Other";
+                }
+
+                records.add(new Record(date, method, amount));
+            }
+        } catch (IOException e) {
+            System.err.println("Excel read error: " + e.getMessage());
+        }
+        return records;
+    }
+
+    private static List<Record> readCsv(String filePath) {
+        List<Record> records = new ArrayList<>();
+        boolean first = true;
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (first) { first = false; continue; }
+                String[] cols = parseCsvLine(line);
+                if (cols.length < 24) continue;
+
+                if (!"Success".equals(cols[23].trim())) continue;
+
+                String rawMethod = cols[0].trim();
+                String method = rawMethod; // UPI or Card as is
+
+                double amount = 0.0;
+                try {
+                    amount = Double.parseDouble(cols[20].trim().replace(",", ""));
+                } catch (Exception ignored) { continue; }
+
+                String date = cols[22].trim().split("T")[0];
+                records.add(new Record(date, method, amount));
+            }
+        } catch (IOException e) {
+            System.err.println("CSV read error: " + e.getMessage());
+        }
+        return records;
+    }
+
+    private static Map<String, Map<String, Stats>> summarize(List<Record> records) {
+        Map<String, Map<String, Stats>> map = new TreeMap<>();
+        for (Record r : records) {
+            map.computeIfAbsent(r.date, k -> new LinkedHashMap<>())
+               .computeIfAbsent(r.method, k -> new Stats())
+               .add(r.amount);
+        }
+        return map;
+    }
+
+    private static void printSummary(Map<String, Map<String, Stats>> data, String source) {
+        NumberFormat nf = NumberFormat.getCurrencyInstance(new Locale("en", "IN"));
+        double grandTotal = 0; int grandCount = 0;
+
+        for (var dateEntry : data.entrySet()) {
+            String date = dateEntry.getKey();
+            System.out.println("\nDate: " + date);
+            System.out.println("---------------------");
+            double dayTotal = 0; int dayCount = 0;
+
+            for (var methodEntry : dateEntry.getValue().entrySet()) {
+                Stats s = methodEntry.getValue();
+                System.out.printf("  %-15s | Count: %3d | Amount: %s%n",
+                        methodEntry.getKey(), s.count, nf.format(s.total));
+                dayTotal += s.total;
+                dayCount += s.count;
+            }
+            System.out.printf("  Day Total → Count: %3d | Amount: %s%n", dayCount, nf.format(dayTotal));
+            grandTotal += dayTotal;
+            grandCount += dayCount;
+        }
+        System.out.printf("\n%s GRAND TOTAL → Count: %d | Amount: %s%n", source, grandCount, nf.format(grandTotal));
+    }
+
+    private static void printDifference(Map<String, Map<String, Stats>> excel, Map<String, Stats>> csv) {
+        Set<String> dates = new TreeSet<>();
+        dates.addAll(excel.keySet());
+        dates.addAll(csv.keySet());
+
+        NumberFormat nf = NumberFormat.getCurrencyInstance(new Locale("en", "IN"));
+
+        int grandCashDiffCnt = 0, grandRemainingDiffCnt = 0;
+        double grandCashDiffAmt = 0, grandRemainingDiffAmt = 0;
+
+        for (String date : dates) {
+            Stats eUpiSale = getStats(excel, date, "UPI Sale");
+            Stats cUpi = getStats(csv, date, "UPI");
+
+            Stats eCard = getStats(excel, date, "Card");
+            Stats cCard = getStats(csv, date, "Card");
+
+            Stats eCash = getStats(excel, date, "CASH");
+            Stats eRemaining = getStats(excel, date, "REMAINING"); // Free, Other
+
+            // Differences
+            int upiDiffCnt = eUpiSale.count - cUpi.count;
+            double upiDiffAmt = eUpiSale.total - cUpi.total;
+
+            int cardDiffCnt = eCard.count - cCard.count;
+            double cardDiffAmt = eCard.total - cCard.total;
+
+            int cashDiffCnt = eCash.count;
+            double cashDiffAmt = eCash.total;
+
+            int remainingDiffCnt = eRemaining.count;
+            double remainingDiffAmt = eRemaining.total;
+
+            System.out.println("\n=== Date: " + date + " === ");
+
+            System.out.println("Category | Excel Cnt | Excel Amt | CSV Cnt | CSV Amt | Diff Cnt | Diff Amt");
+            System.out.println("--------------------------------------------------------------------------------");
+
+            if (eUpiSale.count > 0 || cUpi.count > 0) {
+                System.out.printf("%-8s | %9d | %9s | %7d | %7s | %8d | %8s%n",
+                        "UPI Sale",
+                        eUpiSale.count, nf.format(eUpiSale.total),
+                        cUpi.count, nf.format(cUpi.total),
+                        upiDiffCnt, nf.format(upiDiffAmt));
+            }
+
+            if (eCard.count > 0 || cCard.count > 0) {
+                System.out.printf("%-8s | %9d | %9s | %7d | %7s | %8d | %8s%n",
+                        "Card",
+                        eCard.count, nf.format(eCard.total),
+                        cCard.count, nf.format(cCard.total),
+                        cardDiffCnt, nf.format(cardDiffAmt));
+            }
+
+            if (eCash.count > 0) {
+                System.out.printf("%-8s | %9d | %9s | %7d | %7s | %8d | %8s%n",
+                        "CASH",
+                        eCash.count, nf.format(eCash.total),
+                        0, "₹0.00",
+                        cashDiffCnt, nf.format(cashDiffAmt));
+            }
+
+            if (eRemaining.count > 0) {
+                System.out.printf("%-8s | %9d | %9s | %7d | %7s | %8d | %8s%n",
+                        "REMAINING",
+                        eRemaining.count, nf.format(eRemaining.total),
+                        0, "₹0.00",
+                        remainingDiffCnt, nf.format(remainingDiffAmt));
+            }
+
+            System.out.println("--------------------------------------------------------------------------------");
+
+            grandCashDiffCnt += cashDiffCnt;
+            grandRemainingDiffCnt += remainingDiffCnt;
+            grandCashDiffAmt += cashDiffAmt;
+            grandRemainingDiffAmt += remainingDiffAmt;
+        }
+
+        System.out.println("\n====================================================================================");
+        System.out.printf("GRAND DIFF CASH: %4d (₹%s) | REMAINING: %4d (₹%s)\n",
+                grandCashDiffCnt, nf.format(grandCashDiffAmt),
+                grandRemainingDiffCnt, nf.format(grandRemainingDiffAmt));
+        System.out.println("====================================================================================");
+    }
+
+    private static Stats getStats(Map<String, Map<String, Stats>> map, String date, String method) {
+        return map.getOrDefault(date, Collections.emptyMap())
+                  .getOrDefault(method, new Stats());
+    }
+
+    private static String[] parseCsvLine(String line) {
+        List<String> result = new ArrayList<>();
+        StringBuilder sb = new StringBuilder();
+        boolean inQuotes = false;
+
+        for (char c : line.toCharArray()) {
+            if (c == '"') inQuotes = !inQuotes;
+            else if (c == ',' && !inQuotes) {
+                result.add(sb.toString());
+                sb = new StringBuilder();
+            } else {
+                sb.append(c);
+            }
+        }
+        result.add(sb.toString());
+        return result.toArray(new String[0]);
+    }
+}

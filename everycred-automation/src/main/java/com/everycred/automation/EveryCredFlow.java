@@ -1,0 +1,170 @@
+package com.everycred.automation;
+
+import java.time.Duration;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import io.github.bonigarcia.wdm.WebDriverManager;
+
+public class EveryCredFlow {
+
+    public static void main(String[] args) throws InterruptedException {
+
+        WebDriverManager.chromedriver().setup();
+        WebDriver driver = new ChromeDriver();
+        driver.manage().window().maximize();
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
+
+        try {
+
+            // ================= LOGIN =================
+            System.out.println("Login");
+
+            driver.get("https://demo-dcs-issuer-us.everycred.com/auth/login");
+
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("email")))
+                    .sendKeys("admin.albuquerque@yopmail.com");
+
+            driver.findElement(By.cssSelector("input[type='password']"))
+                    .sendKeys("Everycred@123");
+
+            driver.findElement(By.xpath("//button[@type='submit']")).click();
+
+            wait.until(ExpectedConditions.urlContains("issuer"));
+            Thread.sleep(2500);
+
+            // ================= CREATE GROUP =================
+            clickWithWait(wait, driver,
+                    By.xpath("//a[normalize-space()='Subjects']"));
+            Thread.sleep(2000);
+
+            clickWithWait(wait, driver,
+                    By.xpath("//button[normalize-space()='Create New']"));
+            Thread.sleep(1500);
+
+            clickWithWait(wait, driver,
+                    By.xpath("//span[normalize-space()='Create Group']"));
+            Thread.sleep(2000);
+
+            WebElement groupName = wait.until(
+                    ExpectedConditions.visibilityOfElementLocated(By.id("groupName")));
+
+            groupName.clear();
+            groupName.sendKeys("Employee Department");
+            Thread.sleep(1500);
+
+            clickWithWait(wait, driver,
+                    By.xpath("//button[normalize-space()='Create Group']"));
+
+            wait.until(ExpectedConditions.invisibilityOfElementLocated(
+                    By.className("p-toast")));
+
+            System.out.println("✔ Create Group");
+            Thread.sleep(2500);
+
+            // ================= CREATE SUBJECT =================
+            clickWithWait(wait, driver,
+                    By.xpath("//button[normalize-space()='Create New']"));
+            Thread.sleep(1500);
+
+            clickWithWait(wait, driver,
+                    By.xpath("//span[normalize-space()='Create Subject']"));
+            Thread.sleep(2500);
+
+            System.out.println("✔ Create Subject");
+
+            // ================= FILL SUBJECT FORM =================
+            WebElement subjectName = wait.until(
+                    ExpectedConditions.visibilityOfElementLocated(By.id("subjectName")));
+
+            subjectName.clear();
+            subjectName.sendKeys("Employee ID Card");
+            Thread.sleep(1500);
+
+            clickWithWait(wait, driver,
+                    By.xpath("//span[@aria-label='Search groups...']"));
+            Thread.sleep(1500);
+
+            clickWithWait(wait, driver,
+                    By.xpath("//li[contains(@id,'group_')]"));
+            Thread.sleep(1500);
+
+            WebElement credentialTitle = wait.until(
+                    ExpectedConditions.visibilityOfElementLocated(By.id("credentialTitle")));
+
+            credentialTitle.clear();
+            credentialTitle.sendKeys("Employee ID Card Certificate");
+            Thread.sleep(1500);
+
+            WebElement description = wait.until(
+                    ExpectedConditions.visibilityOfElementLocated(By.id("description")));
+
+            description.clear();
+            description.sendKeys("Employee ID Card Certificate 2026");
+            Thread.sleep(1500);
+
+            System.out.println("✔ Fill Subject Form");
+
+            // ================= CLICK NEXT =================
+            clickWithWait(wait, driver,
+                    By.xpath("//button[normalize-space()='Next']"));
+            Thread.sleep(3000);
+
+            System.out.println("✔ Click Next");
+
+            // ================= OPEN APPEARANCE TAB =================
+            System.out.println("✔ Open Appearance Tab");
+
+            // Click Verify Layout dropdown
+            clickWithWait(wait, driver,
+                    By.xpath("//p-select[@id='verifierDesign']"));
+            Thread.sleep(2000);
+
+            // ================= SELECT THEME =================
+            clickWithWait(wait, driver,
+                    By.xpath("//li[@aria-label='theme_1']"));
+            Thread.sleep(2000);
+
+            System.out.println("✔ Select Verify Layout → theme_1");
+
+            // ================= FINAL NEXT =================
+            clickWithWait(wait, driver,
+                    By.xpath("//button[normalize-space()='Next']"));
+            Thread.sleep(3000);
+
+            System.out.println("\n✅ FLOW COMPLETED SUCCESSFULLY");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // driver.quit();
+    }
+
+    // ================= SAFE CLICK METHOD =================
+    public static void clickWithWait(WebDriverWait wait,
+                                     WebDriver driver,
+                                     By locator) {
+
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(
+                By.className("p-toast")));
+
+        WebElement element = wait.until(
+                ExpectedConditions.elementToBeClickable(locator));
+
+        try {
+            element.click();
+        } catch (Exception e) {
+            JavascriptExecutor js = (JavascriptExecutor) driver;
+            js.executeScript("arguments[0].scrollIntoView(true);", element);
+            js.executeScript("arguments[0].click();", element);
+        }
+    }
+}

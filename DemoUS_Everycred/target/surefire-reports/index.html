@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+  <meta charset='utf-8'>
+  <title>TestNG reports</title>
+
+    <link type="text/css" href="testng-reports1.css" rel="stylesheet" id="ultra" />
+    <link type="text/css" href="testng-reports.css" rel="stylesheet" id="retro" disabled="false"/>
+    <script type="text/javascript" src="jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" src="testng-reports.js"></script>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type='text/javascript'>
+      google.load('visualization', '1', {packages:['table']});
+      google.setOnLoadCallback(drawTable);
+      var suiteTableInitFunctions = new Array();
+      var suiteTableData = new Array();
+    </script>
+    <!--
+      <script type="text/javascript" src="jquery-ui/js/jquery-ui-1.8.16.custom.min.js"></script>
+     -->
+  </head>
+
+  <body>    <div class="top-banner-root">
+      <span class="top-banner-title-font">Test results</span>
+      <button id="button" class="button">Switch Retro Theme</button> <!-- button -->
+      <br/>
+      <span class="top-banner-font-1">1 suite</span>
+    </div> <!-- top-banner-root -->
+    <div class="navigator-root">
+      <div class="navigator-suite-header">
+        <span>All suites</span>
+        <a href="#" title="Collapse/expand all the suites" class="collapse-all-link">
+          <img src="collapseall.gif" class="collapse-all-icon">
+          </img> <!-- collapse-all-icon -->
+        </a> <!-- collapse-all-link -->
+      </div> <!-- navigator-suite-header -->
+      <div class="suite">
+        <div class="rounded-window">
+          <div class="suite-header light-rounded-window-top">
+            <a href="#" panel-name="suite-EveryCred_Suite" class="navigator-link">
+              <span class="suite-name border-passed">EveryCred Suite</span>
+            </a> <!-- navigator-link -->
+          </div> <!-- suite-header light-rounded-window-top -->
+          <div class="navigator-suite-content">
+            <div class="suite-section-title">
+              <span>Info</span>
+            </div> <!-- suite-section-title -->
+            <div class="suite-section-content">
+              <ul>
+                <li>
+                  <a href="#" panel-name="test-xml-EveryCred_Suite" class="navigator-link ">
+                    <span>C:\Users\Nikhil Sonawane\eclipse-workspace\DemoUS_Everycred\testng.xml</span>
+                  </a> <!-- navigator-link  -->
+                </li>
+                <li>
+                  <a href="#" panel-name="testlist-EveryCred_Suite" class="navigator-link ">
+                    <span class="test-stats">1 test</span>
+                  </a> <!-- navigator-link  -->
+                </li>
+                <li>
+                  <a href="#" panel-name="group-EveryCred_Suite" class="navigator-link ">
+                    <span>0 groups</span>
+                  </a> <!-- navigator-link  -->
+                </li>
+                <li>
+                  <a href="#" panel-name="times-EveryCred_Suite" class="navigator-link ">
+                    <span>Times</span>
+                  </a> <!-- navigator-link  -->
+                </li>
+                <li>
+                  <a href="#" panel-name="reporter-EveryCred_Suite" class="navigator-link ">
+                    <span>Reporter output</span>
+                  </a> <!-- navigator-link  -->
+                </li>
+                <li>
+                  <a href="#" panel-name="ignored-methods-EveryCred_Suite" class="navigator-link ">
+                    <span>Ignored methods</span>
+                  </a> <!-- navigator-link  -->
+                </li>
+                <li>
+                  <a href="#" panel-name="chronological-EveryCred_Suite" class="navigator-link ">
+                    <span>Chronological view</span>
+                  </a> <!-- navigator-link  -->
+                </li>
+              </ul>
+            </div> <!-- suite-section-content -->
+            <div class="result-section">
+              <div class="suite-section-title">
+                <span>Results</span>
+              </div> <!-- suite-section-title -->
+              <div class="suite-section-content">
+                <ul>
+                  <li>
+                    <span class="method-stats">13 methods,   13 passed</span>
+                  </li>
+                  <li>
+                    <span class="method-list-title passed">Passed methods</span>
+                    <span class="show-or-hide-methods passed">
+                      <a href="#" panel-name="suite-EveryCred_Suite" class="hide-methods passed suite-EveryCred_Suite"> (hide)</a> <!-- hide-methods passed suite-EveryCred_Suite -->
+                      <a href="#" panel-name="suite-EveryCred_Suite" class="show-methods passed suite-EveryCred_Suite"> (show)</a> <!-- show-methods passed suite-EveryCred_Suite -->
+                    </span>
+                    <div class="method-list-content passed suite-EveryCred_Suite">
+                      <span>
+                        <img src="passed.png" width="3%"/>
+                        <a href="#" panel-name="suite-EveryCred_Suite" title="com.everycred.tests.CreateSubjectTest" class="method navigator-link" hash-for-method="step01_SignUp">step01_SignUp</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img src="passed.png" width="3%"/>
+                        <a href="#" panel-name="suite-EveryCred_Suite" title="com.everycred.tests.CreateSubjectTest" class="method navigator-link" hash-for-method="step02_IssuerProfile">step02_IssuerProfile</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img src="passed.png" width="3%"/>
+                        <a href="#" panel-name="suite-EveryCred_Suite" title="com.everycred.tests.CreateSubjectTest" class="method navigator-link" hash-for-method="step03_Login">step03_Login</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img src="passed.png" width="3%"/>
+                        <a href="#" panel-name="suite-EveryCred_Suite" title="com.everycred.tests.CreateSubjectTest" class="method navigator-link" hash-for-method="step04_NavigateToSubjects">step04_NavigateToSubjects</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img src="passed.png" width="3%"/>
+                        <a href="#" panel-name="suite-EveryCred_Suite" title="com.everycred.tests.CreateSubjectTest" class="method navigator-link" hash-for-method="step05_CreateGroup">step05_CreateGroup</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img src="passed.png" width="3%"/>
+                        <a href="#" panel-name="suite-EveryCred_Suite" title="com.everycred.tests.CreateSubjectTest" class="method navigator-link" hash-for-method="step06_CreateSubject">step06_CreateSubject</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img src="passed.png" width="3%"/>
+                        <a href="#" panel-name="suite-EveryCred_Suite" title="com.everycred.tests.CreateSubjectTest" class="method navigator-link" hash-for-method="step07_AddAttributes">step07_AddAttributes</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img src="passed.png" width="3%"/>
+                        <a href="#" panel-name="suite-EveryCred_Suite" title="com.everycred.tests.CreateSubjectTest" class="method navigator-link" hash-for-method="step08_SelectAttributesAndSubmit">step08_SelectAttributesAndSubmit</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img src="passed.png" width="3%"/>
+                        <a href="#" panel-name="suite-EveryCred_Suite" title="com.everycred.tests.CreateSubjectTest" class="method navigator-link" hash-for-method="step09_AddRecord">step09_AddRecord</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img src="passed.png" width="3%"/>
+                        <a href="#" panel-name="suite-EveryCred_Suite" title="com.everycred.tests.CreateSubjectTest" class="method navigator-link" hash-for-method="step10_IssueCredential">step10_IssueCredential</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img src="passed.png" width="3%"/>
+                        <a href="#" panel-name="suite-EveryCred_Suite" title="com.everycred.tests.CreateSubjectTest" class="method navigator-link" hash-for-method="step11_VerifyCredential">step11_VerifyCredential</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img src="passed.png" width="3%"/>
+                        <a href="#" panel-name="suite-EveryCred_Suite" title="com.everycred.tests.CreateSubjectTest" class="method navigator-link" hash-for-method="step12_RevokeCredential">step12_RevokeCredential</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img src="passed.png" width="3%"/>
+                        <a href="#" panel-name="suite-EveryCred_Suite" title="com.everycred.tests.CreateSubjectTest" class="method navigator-link" hash-for-method="step13_UploadSpreadsheet">step13_UploadSpreadsheet</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                    </div> <!-- method-list-content passed suite-EveryCred_Suite -->
+                  </li>
+                </ul>
+              </div> <!-- suite-section-content -->
+            </div> <!-- result-section -->
+          </div> <!-- navigator-suite-content -->
+        </div> <!-- rounded-window -->
+      </div> <!-- suite -->
+    </div> <!-- navigator-root -->
+    <div class="wrapper">
+      <div class="main-panel-root">
+        <div panel-name="suite-EveryCred_Suite" class="panel EveryCred_Suite">
+          <div class="suite-EveryCred_Suite-class-passed">
+            <div class="main-panel-header rounded-window-top">
+              <img src="passed.png"/>
+              <span class="class-name">com.everycred.tests.CreateSubjectTest</span>
+            </div> <!-- main-panel-header rounded-window-top -->
+            <div class="main-panel-content rounded-window-bottom">
+              <div class="method">
+                <div class="method-content">
+                  <a name="step01_SignUp">
+                  </a> <!-- step01_SignUp -->
+                  <span class="method-name">step01_SignUp</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="step02_IssuerProfile">
+                  </a> <!-- step02_IssuerProfile -->
+                  <span class="method-name">step02_IssuerProfile</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="step03_Login">
+                  </a> <!-- step03_Login -->
+                  <span class="method-name">step03_Login</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="step04_NavigateToSubjects">
+                  </a> <!-- step04_NavigateToSubjects -->
+                  <span class="method-name">step04_NavigateToSubjects</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="step05_CreateGroup">
+                  </a> <!-- step05_CreateGroup -->
+                  <span class="method-name">step05_CreateGroup</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="step06_CreateSubject">
+                  </a> <!-- step06_CreateSubject -->
+                  <span class="method-name">step06_CreateSubject</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="step07_AddAttributes">
+                  </a> <!-- step07_AddAttributes -->
+                  <span class="method-name">step07_AddAttributes</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="step08_SelectAttributesAndSubmit">
+                  </a> <!-- step08_SelectAttributesAndSubmit -->
+                  <span class="method-name">step08_SelectAttributesAndSubmit</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="step09_AddRecord">
+                  </a> <!-- step09_AddRecord -->
+                  <span class="method-name">step09_AddRecord</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="step10_IssueCredential">
+                  </a> <!-- step10_IssueCredential -->
+                  <span class="method-name">step10_IssueCredential</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="step11_VerifyCredential">
+                  </a> <!-- step11_VerifyCredential -->
+                  <span class="method-name">step11_VerifyCredential</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="step12_RevokeCredential">
+                  </a> <!-- step12_RevokeCredential -->
+                  <span class="method-name">step12_RevokeCredential</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="step13_UploadSpreadsheet">
+                  </a> <!-- step13_UploadSpreadsheet -->
+                  <span class="method-name">step13_UploadSpreadsheet</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+            </div> <!-- main-panel-content rounded-window-bottom -->
+          </div> <!-- suite-EveryCred_Suite-class-passed -->
+        </div> <!-- panel EveryCred_Suite -->
+        <div panel-name="test-xml-EveryCred_Suite" class="panel">
+          <div class="main-panel-header rounded-window-top">
+            <span class="header-content">C:\Users\Nikhil Sonawane\eclipse-workspace\DemoUS_Everycred\testng.xml</span>
+          </div> <!-- main-panel-header rounded-window-top -->
+          <div class="main-panel-content rounded-window-bottom">
+            <pre>
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;!DOCTYPE suite SYSTEM &quot;https://testng.org/testng-1.0.dtd&quot;&gt;
+&lt;suite name=&quot;EveryCred Suite&quot; guice-stage=&quot;DEVELOPMENT&quot; verbose=&quot;0&quot;&gt;
+  &lt;test thread-count=&quot;5&quot; name=&quot;Full Flow Test&quot; verbose=&quot;0&quot;&gt;
+    &lt;classes&gt;
+      &lt;class name=&quot;com.everycred.tests.CreateSubjectTest&quot;/&gt;
+    &lt;/classes&gt;
+  &lt;/test&gt; &lt;!-- Full Flow Test --&gt;
+&lt;/suite&gt; &lt;!-- EveryCred Suite --&gt;
+            </pre>
+          </div> <!-- main-panel-content rounded-window-bottom -->
+        </div> <!-- panel -->
+        <div panel-name="testlist-EveryCred_Suite" class="panel">
+          <div class="main-panel-header rounded-window-top">
+            <span class="header-content">Tests for EveryCred Suite</span>
+          </div> <!-- main-panel-header rounded-window-top -->
+          <div class="main-panel-content rounded-window-bottom">
+            <ul>
+              <li>
+                <span class="test-name">Full Flow Test (1 class)</span>
+              </li>
+            </ul>
+          </div> <!-- main-panel-content rounded-window-bottom -->
+        </div> <!-- panel -->
+        <div panel-name="group-EveryCred_Suite" class="panel">
+          <div class="main-panel-header rounded-window-top">
+            <span class="header-content">Groups for EveryCred Suite</span>
+          </div> <!-- main-panel-header rounded-window-top -->
+          <div class="main-panel-content rounded-window-bottom">
+          </div> <!-- main-panel-content rounded-window-bottom -->
+        </div> <!-- panel -->
+        <div panel-name="times-EveryCred_Suite" class="panel">
+          <div class="main-panel-header rounded-window-top">
+            <span class="header-content">Times for EveryCred Suite</span>
+          </div> <!-- main-panel-header rounded-window-top -->
+          <div class="main-panel-content rounded-window-bottom">
+            <div class="times-div">
+              <script type="text/javascript">
+suiteTableInitFunctions.push('tableData_EveryCred_Suite');
+function tableData_EveryCred_Suite() {
+var data = new google.visualization.DataTable();
+data.addColumn('number', 'Number');
+data.addColumn('string', 'Method');
+data.addColumn('string', 'Class');
+data.addColumn('number', 'Time (ms)');
+data.addRows(13);
+data.setCell(0, 0, 0)
+data.setCell(0, 1, 'step13_UploadSpreadsheet')
+data.setCell(0, 2, 'com.everycred.tests.CreateSubjectTest')
+data.setCell(0, 3, 149121);
+data.setCell(1, 0, 1)
+data.setCell(1, 1, 'step09_AddRecord')
+data.setCell(1, 2, 'com.everycred.tests.CreateSubjectTest')
+data.setCell(1, 3, 57221);
+data.setCell(2, 0, 2)
+data.setCell(2, 1, 'step02_IssuerProfile')
+data.setCell(2, 2, 'com.everycred.tests.CreateSubjectTest')
+data.setCell(2, 3, 51275);
+data.setCell(3, 0, 3)
+data.setCell(3, 1, 'step01_SignUp')
+data.setCell(3, 2, 'com.everycred.tests.CreateSubjectTest')
+data.setCell(3, 3, 37340);
+data.setCell(4, 0, 4)
+data.setCell(4, 1, 'step11_VerifyCredential')
+data.setCell(4, 2, 'com.everycred.tests.CreateSubjectTest')
+data.setCell(4, 3, 25179);
+data.setCell(5, 0, 5)
+data.setCell(5, 1, 'step07_AddAttributes')
+data.setCell(5, 2, 'com.everycred.tests.CreateSubjectTest')
+data.setCell(5, 3, 23477);
+data.setCell(6, 0, 6)
+data.setCell(6, 1, 'step12_RevokeCredential')
+data.setCell(6, 2, 'com.everycred.tests.CreateSubjectTest')
+data.setCell(6, 3, 23109);
+data.setCell(7, 0, 7)
+data.setCell(7, 1, 'step10_IssueCredential')
+data.setCell(7, 2, 'com.everycred.tests.CreateSubjectTest')
+data.setCell(7, 3, 12624);
+data.setCell(8, 0, 8)
+data.setCell(8, 1, 'step06_CreateSubject')
+data.setCell(8, 2, 'com.everycred.tests.CreateSubjectTest')
+data.setCell(8, 3, 9450);
+data.setCell(9, 0, 9)
+data.setCell(9, 1, 'step05_CreateGroup')
+data.setCell(9, 2, 'com.everycred.tests.CreateSubjectTest')
+data.setCell(9, 3, 8787);
+data.setCell(10, 0, 10)
+data.setCell(10, 1, 'step08_SelectAttributesAndSubmit')
+data.setCell(10, 2, 'com.everycred.tests.CreateSubjectTest')
+data.setCell(10, 3, 6864);
+data.setCell(11, 0, 11)
+data.setCell(11, 1, 'step03_Login')
+data.setCell(11, 2, 'com.everycred.tests.CreateSubjectTest')
+data.setCell(11, 3, 4524);
+data.setCell(12, 0, 12)
+data.setCell(12, 1, 'step04_NavigateToSubjects')
+data.setCell(12, 2, 'com.everycred.tests.CreateSubjectTest')
+data.setCell(12, 3, 2507);
+window.suiteTableData['EveryCred_Suite']= { tableData: data, tableDiv: 'times-div-EveryCred_Suite'}
+return data;
+}
+              </script>
+              <span class="suite-total-time">Total running time: 6 minutes</span>
+              <div id="times-div-EveryCred_Suite">
+              </div> <!-- times-div-EveryCred_Suite -->
+            </div> <!-- times-div -->
+          </div> <!-- main-panel-content rounded-window-bottom -->
+        </div> <!-- panel -->
+        <div panel-name="reporter-EveryCred_Suite" class="panel">
+          <div class="main-panel-header rounded-window-top">
+            <span class="header-content">Reporter output for EveryCred Suite</span>
+          </div> <!-- main-panel-header rounded-window-top -->
+          <div class="main-panel-content rounded-window-bottom">
+          </div> <!-- main-panel-content rounded-window-bottom -->
+        </div> <!-- panel -->
+        <div panel-name="ignored-methods-EveryCred_Suite" class="panel">
+          <div class="main-panel-header rounded-window-top">
+            <span class="header-content">0 ignored methods</span>
+          </div> <!-- main-panel-header rounded-window-top -->
+          <div class="main-panel-content rounded-window-bottom">
+          </div> <!-- main-panel-content rounded-window-bottom -->
+        </div> <!-- panel -->
+        <div panel-name="chronological-EveryCred_Suite" class="panel">
+          <div class="main-panel-header rounded-window-top">
+            <span class="header-content">Methods in chronological order</span>
+          </div> <!-- main-panel-header rounded-window-top -->
+          <div class="main-panel-content rounded-window-bottom">
+            <div class="chronological-class">
+              <div class="chronological-class-name">com.everycred.tests.CreateSubjectTest</div> <!-- chronological-class-name -->
+              <div class="configuration-class before">
+                <span class="method-name">setUp</span>
+                <span class="method-start">0 ms</span>
+              </div> <!-- configuration-class before -->
+              <div class="configuration-class before">
+                <span class="method-name">initPages</span>
+                <span class="method-start">6855 ms</span>
+              </div> <!-- configuration-class before -->
+              <div class="test-method">
+                <span class="method-name">step01_SignUp</span>
+                <span class="method-start">6953 ms</span>
+              </div> <!-- test-method -->
+              <div class="test-method">
+                <span class="method-name">step02_IssuerProfile</span>
+                <span class="method-start">44302 ms</span>
+              </div> <!-- test-method -->
+              <div class="test-method">
+                <span class="method-name">step03_Login</span>
+                <span class="method-start">95583 ms</span>
+              </div> <!-- test-method -->
+              <div class="test-method">
+                <span class="method-name">step04_NavigateToSubjects</span>
+                <span class="method-start">100112 ms</span>
+              </div> <!-- test-method -->
+              <div class="test-method">
+                <span class="method-name">step05_CreateGroup</span>
+                <span class="method-start">102621 ms</span>
+              </div> <!-- test-method -->
+              <div class="test-method">
+                <span class="method-name">step06_CreateSubject</span>
+                <span class="method-start">111413 ms</span>
+              </div> <!-- test-method -->
+              <div class="test-method">
+                <span class="method-name">step07_AddAttributes</span>
+                <span class="method-start">120864 ms</span>
+              </div> <!-- test-method -->
+              <div class="test-method">
+                <span class="method-name">step08_SelectAttributesAndSubmit</span>
+                <span class="method-start">144344 ms</span>
+              </div> <!-- test-method -->
+              <div class="test-method">
+                <span class="method-name">step09_AddRecord</span>
+                <span class="method-start">151211 ms</span>
+              </div> <!-- test-method -->
+              <div class="test-method">
+                <span class="method-name">step10_IssueCredential</span>
+                <span class="method-start">208434 ms</span>
+              </div> <!-- test-method -->
+              <div class="test-method">
+                <span class="method-name">step11_VerifyCredential</span>
+                <span class="method-start">221067 ms</span>
+              </div> <!-- test-method -->
+              <div class="test-method">
+                <span class="method-name">step12_RevokeCredential</span>
+                <span class="method-start">246246 ms</span>
+              </div> <!-- test-method -->
+              <div class="test-method">
+                <span class="method-name">step13_UploadSpreadsheet</span>
+                <span class="method-start">269357 ms</span>
+              </div> <!-- test-method -->
+              <div class="configuration-class after">
+                <span class="method-name">tearDown(org.testng.TestRunner@616b2b2)</span>
+                <span class="method-start">418512 ms</span>
+              </div> <!-- configuration-class after -->
+          </div> <!-- main-panel-content rounded-window-bottom -->
+        </div> <!-- panel -->
+      </div> <!-- main-panel-root -->
+    </div> <!-- wrapper -->
+  </body>
+<script type="text/javascript" src="testng-reports2.js"></script>
+</html>

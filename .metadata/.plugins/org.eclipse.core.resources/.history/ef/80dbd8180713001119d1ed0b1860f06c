@@ -1,0 +1,25 @@
+package com.everycred.tests;
+
+import org.testng.annotations.Test;
+
+import com.everycred.base.BaseTest;
+import com.everycred.pages.LoginPage;
+import com.everycred.pages.SubjectPage;
+
+public class CreateSubjectTest extends BaseTest {
+
+    @Test
+    public void testCreateSubject() throws Exception {
+
+        LoginPage login = new LoginPage(driver);
+        SubjectPage subject = new SubjectPage(driver);
+
+        login.login(prop.getProperty("username"),
+                    prop.getProperty("password"));
+
+        Thread.sleep(3000);
+
+        subject.createGroup();
+        subject.createSubjectFlow();
+    }
+}

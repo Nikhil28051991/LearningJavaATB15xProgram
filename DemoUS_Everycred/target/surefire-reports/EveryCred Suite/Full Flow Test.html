@@ -1,0 +1,145 @@
+<html>
+<head>
+<title>TestNG:  Full Flow Test</title>
+<link href="../testng.css" rel="stylesheet" type="text/css" />
+<link href="../my-testng.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">
+.log { display: none;} 
+.stack-trace { display: none;} 
+</style>
+<script type="text/javascript">
+<!--
+function flip(e) {
+  current = e.style.display;
+  if (current == 'block') {
+    e.style.display = 'none';
+    return 0;
+  }
+  else {
+    e.style.display = 'block';
+    return 1;
+  }
+}
+
+function toggleBox(szDivId, elem, msg1, msg2)
+{
+  var res = -1;  if (document.getElementById) {
+    res = flip(document.getElementById(szDivId));
+  }
+  else if (document.all) {
+    // this is the way old msie versions work
+    res = flip(document.all[szDivId]);
+  }
+  if(elem) {
+    if(res == 0) elem.innerHTML = msg1; else elem.innerHTML = msg2;
+  }
+
+}
+
+function toggleAllBoxes() {
+  if (document.getElementsByTagName) {
+    d = document.getElementsByTagName('div');
+    for (i = 0; i < d.length; i++) {
+      if (d[i].className == 'log') {
+        flip(d[i]);
+      }
+    }
+  }
+}
+
+// -->
+</script>
+
+</head>
+<body>
+<h2 align='center'>Full Flow Test</h2><table border='1' align="center">
+<tr>
+<td>Tests passed/Failed/Skipped:</td><td>13/0/0</td>
+</tr><tr>
+<td>Started on:</td><td>Mon May 18 15:24:10 IST 2026</td>
+</tr>
+<tr><td>Total time:</td><td>418 seconds (418584 ms)</td>
+</tr><tr>
+<td>Included groups:</td><td></td>
+</tr><tr>
+<td>Excluded groups:</td><td></td>
+</tr>
+</table><p/>
+<small><i>(Hover the method name to see the test class name)</i></small><p/>
+<table width='100%' border='1' class='invocation-passed'>
+<tr><td colspan='4' align='center'><b>PASSED TESTS</b></td></tr>
+<tr><td><b>Test method</b></td>
+<td><b>Attribute(s)</b></td>
+<td width="30%"><b>Exception</b></td>
+<td width="10%"><b>Time (seconds)</b></td>
+<td><b>Instance</b></td>
+</tr>
+<tr>
+<td title='com.everycred.tests.CreateSubjectTest.step11_VerifyCredential()'><b>step11_VerifyCredential</b><br>Test class: com.everycred.tests.CreateSubjectTest</td>
+<td></td>
+<td>25</td>
+<td>com.everycred.tests.CreateSubjectTest@c267ef4</td></tr>
+<tr>
+<td title='com.everycred.tests.CreateSubjectTest.step02_IssuerProfile()'><b>step02_IssuerProfile</b><br>Test class: com.everycred.tests.CreateSubjectTest</td>
+<td></td>
+<td>51</td>
+<td>com.everycred.tests.CreateSubjectTest@c267ef4</td></tr>
+<tr>
+<td title='com.everycred.tests.CreateSubjectTest.step05_CreateGroup()'><b>step05_CreateGroup</b><br>Test class: com.everycred.tests.CreateSubjectTest</td>
+<td></td>
+<td>8</td>
+<td>com.everycred.tests.CreateSubjectTest@c267ef4</td></tr>
+<tr>
+<td title='com.everycred.tests.CreateSubjectTest.step10_IssueCredential()'><b>step10_IssueCredential</b><br>Test class: com.everycred.tests.CreateSubjectTest</td>
+<td></td>
+<td>12</td>
+<td>com.everycred.tests.CreateSubjectTest@c267ef4</td></tr>
+<tr>
+<td title='com.everycred.tests.CreateSubjectTest.step08_SelectAttributesAndSubmit()'><b>step08_SelectAttributesAndSubmit</b><br>Test class: com.everycred.tests.CreateSubjectTest</td>
+<td></td>
+<td>6</td>
+<td>com.everycred.tests.CreateSubjectTest@c267ef4</td></tr>
+<tr>
+<td title='com.everycred.tests.CreateSubjectTest.step09_AddRecord()'><b>step09_AddRecord</b><br>Test class: com.everycred.tests.CreateSubjectTest</td>
+<td></td>
+<td>57</td>
+<td>com.everycred.tests.CreateSubjectTest@c267ef4</td></tr>
+<tr>
+<td title='com.everycred.tests.CreateSubjectTest.step13_UploadSpreadsheet()'><b>step13_UploadSpreadsheet</b><br>Test class: com.everycred.tests.CreateSubjectTest</td>
+<td></td>
+<td>149</td>
+<td>com.everycred.tests.CreateSubjectTest@c267ef4</td></tr>
+<tr>
+<td title='com.everycred.tests.CreateSubjectTest.step06_CreateSubject()'><b>step06_CreateSubject</b><br>Test class: com.everycred.tests.CreateSubjectTest</td>
+<td></td>
+<td>9</td>
+<td>com.everycred.tests.CreateSubjectTest@c267ef4</td></tr>
+<tr>
+<td title='com.everycred.tests.CreateSubjectTest.step07_AddAttributes()'><b>step07_AddAttributes</b><br>Test class: com.everycred.tests.CreateSubjectTest</td>
+<td></td>
+<td>23</td>
+<td>com.everycred.tests.CreateSubjectTest@c267ef4</td></tr>
+<tr>
+<td title='com.everycred.tests.CreateSubjectTest.step03_Login()'><b>step03_Login</b><br>Test class: com.everycred.tests.CreateSubjectTest</td>
+<td></td>
+<td>4</td>
+<td>com.everycred.tests.CreateSubjectTest@c267ef4</td></tr>
+<tr>
+<td title='com.everycred.tests.CreateSubjectTest.step12_RevokeCredential()'><b>step12_RevokeCredential</b><br>Test class: com.everycred.tests.CreateSubjectTest</td>
+<td></td>
+<td>23</td>
+<td>com.everycred.tests.CreateSubjectTest@c267ef4</td></tr>
+<tr>
+<td title='com.everycred.tests.CreateSubjectTest.step01_SignUp()'><b>step01_SignUp</b><br>Test class: com.everycred.tests.CreateSubjectTest</td>
+<td></td>
+<td>37</td>
+<td>com.everycred.tests.CreateSubjectTest@c267ef4</td></tr>
+<tr>
+<td title='com.everycred.tests.CreateSubjectTest.step04_NavigateToSubjects()'><b>step04_NavigateToSubjects</b><br>Test class: com.everycred.tests.CreateSubjectTest</td>
+<td></td>
+<td>2</td>
+<td>com.everycred.tests.CreateSubjectTest@c267ef4</td></tr>
+</table><p>
+</body>
+</html>

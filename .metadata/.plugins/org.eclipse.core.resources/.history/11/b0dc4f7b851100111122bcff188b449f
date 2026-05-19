@@ -1,0 +1,147 @@
+package com.everycred.automation;
+
+import java.time.Duration;
+
+import org.openqa.selenium.*;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.*;
+
+import io.github.bonigarcia.wdm.WebDriverManager;
+
+public class EveryCredLogin {
+
+    public static void main(String[] args) throws InterruptedException {
+
+        WebDriverManager.chromedriver().setup();
+        WebDriver driver = new ChromeDriver();
+        driver.manage().window().maximize();
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(40));
+
+        try {
+
+            // ================= LOGIN =================
+            System.out.println("Login");
+
+            driver.get("https://demo-dcs-issuer-us.everycred.com/auth/login");
+
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("email")))
+                    .sendKeys("admin.albuquerque@yopmail.com");
+
+            driver.findElement(By.cssSelector("input[type='password']"))
+                    .sendKeys("Everycred@123");
+
+            driver.findElement(By.xpath("//button[@type='submit']")).click();
+
+            wait.until(ExpectedConditions.urlContains("dashboard"));
+            Thread.sleep(2000);
+
+            // ================= GO TO SUBJECTS =================
+            click(wait, driver, By.xpath("//a[contains(@href,'subjects/groups')]"));
+            wait.until(ExpectedConditions.urlContains("subjects/groups"));
+            Thread.sleep(2000);
+
+            // ================= CREATE GROUP =================
+            click(wait, driver, By.xpath("//button[contains(.,'Create New')]"));
+            Thread.sleep(1000);
+
+            click(wait, driver, By.xpath("//span[normalize-space()='Create Group']"));
+            Thread.sleep(2000);
+
+            WebElement groupName = wait.until(
+                    ExpectedConditions.visibilityOfElementLocated(By.id("groupName")));
+
+            groupName.sendKeys("Employee Department");
+
+            click(wait, driver, By.xpath("//button[normalize-space()='Create Group']"));
+
+            wait.until(ExpectedConditions.invisibilityOfElementLocated(By.className("p-toast")));
+
+            System.out.println("✔ Create Group");
+            Thread.sleep(2000);
+
+            // ================= CREATE SUBJECT (FIXED PART) =================
+            click(wait, driver, By.xpath("//button[contains(.,'Create New')]"));
+            Thread.sleep(1000);
+
+            // Wait for dropdown panel
+            wait.until(ExpectedConditions.visibilityOfElementLocated(
+                    By.xpath("//span[normalize-space()='Create Subject']")));
+
+            click(wait, driver, By.xpath("//span[normalize-space()='Create Subject']"));
+
+            // 🔥 WAIT FOR ADD SUBJECT PAGE (Credential Title present)
+            wait.until(ExpectedConditions.visibilityOfElementLocated(
+                    By.xpath("//input[@id='credentialTitle']")));
+            Thread.sleep(2000);
+
+            System.out.println("✔ Add Subject page loaded");
+
+            // ================= FILL CREDENTIAL INFO =================
+            driver.findElement(By.xpath("//input[@id='credentialTitle']"))
+                    .sendKeys("Employee ID Card");
+
+            driver.findElement(By.xpath("//textarea[@id='description']"))
+                    .sendKeys("Employee ID Card 2026");
+
+            // ================= SELECT GROUP =================
+            click(wait, driver, By.xpath(
+                    "//p-select[@id='group']//chevrondownicon[@class='p-component p-iconwrapper ng-star-inserted']//*[name()='svg']"));
+            Thread.sleep(1500);
+
+            // Select 'Employee Department' option from dropdown
+            click(wait, driver, By.xpath("//li[normalize-space()='Employee Department']"));
+            Thread.sleep(1000);
+
+            System.out.println("✔ Fill Subject Form");
+
+            // ================= NEXT =================
+            click(wait, driver, By.xpath("//button[normalize-space()='Next']"));
+            Thread.sleep(2500);
+
+            System.out.println("✔ Click Next");
+
+            // ================= APPEARANCE / VERIFY LAYOUT DESIGN =================
+            By verifyLayoutDropdown = By.xpath(
+                    "//p-select[@id='verifierDesign']//chevrondownicon[@class='p-component p-iconwrapper ng-star-inserted']//*[name()='svg']");
+
+            // Scroll the Verify Layout Design dropdown into view
+            WebElement verifyLayoutElement = wait.until(
+                    ExpectedConditions.visibilityOfElementLocated(verifyLayoutDropdown));
+            ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});",
+                    verifyLayoutElement);
+            Thread.sleep(1000);
+
+            // Open dropdown
+            click(wait, driver, verifyLayoutDropdown);
+            Thread.sleep(1500);
+
+            // Select Theme_1 option
+            click(wait, driver, By.xpath("//li[normalize-space()='Theme_1' or @aria-label='theme_1']"));
+
+            System.out.println("✔ Select Verify Layout → theme_1");
+
+            click(wait, driver, By.xpath("//button[normalize-space()='Next']"));
+
+            System.out.println("✔ Click Next");
+            System.out.println("\n✅ FLOW COMPLETED SUCCESSFULLY");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // driver.quit();
+    }
+
+    public static void click(WebDriverWait wait, WebDriver driver, By locator) {
+
+        WebElement element = wait.until(ExpectedConditions.elementToBeClickable(locator));
+
+        try {
+            element.click();
+        } catch (Exception e) {
+            JavascriptExecutor js = (JavascriptExecutor) driver;
+            js.executeScript("arguments[0].click();", element);
+        }
+    }
+}

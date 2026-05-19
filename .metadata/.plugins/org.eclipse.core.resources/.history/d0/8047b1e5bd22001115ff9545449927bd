@@ -1,0 +1,478 @@
+package com.everycred.pages;
+
+import java.time.Duration;
+import java.time.ZonedDateTime;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+public class IssueCredentialPage {
+
+    private WebDriver driver;
+    private WebDriverWait wait;
+
+    public IssueCredentialPage(WebDriver driver) {
+
+        this.driver = driver;
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(40));
+    }
+
+
+    // ======================================
+    // DELAY
+    // ======================================
+
+    public void delay() {
+
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+ // ======================================
+    // ISSUE CREDENTIAL FLOW
+    // ======================================
+
+    public void issueCredentialFlow() throws InterruptedException {
+
+        System.out.println("Starting Issue Credential Flow");
+
+        String currentUrl = driver.getCurrentUrl();
+
+        System.out.println("Current URL = " + currentUrl);
+
+
+     // ======================================
+     // IF NOT ON CREDENTIAL PAGE → GO THERE
+     // ======================================
+
+     if (!currentUrl.contains("/credentials")) {
+
+         System.out.println("Opening Credentials tab");
+
+         WebElement credentialTab = wait.until(
+                 ExpectedConditions.elementToBeClickable(
+                         By.xpath("//a[normalize-space()='Credentials']")));
+
+         jsClick(credentialTab);
+
+         delay();
+
+         wait.until(ExpectedConditions.urlContains("/credentials"));
+
+         Thread.sleep(2000);
+     }
+
+
+     // ======================================
+     // IF ALREADY ON CREDENTIAL PAGE → CHECK ISSUED
+     // ======================================
+
+     if (driver.getCurrentUrl().contains("/credentials")) {
+
+         System.out.println("On Credentials page");
+
+         try {
+
+             WebElement issuedTab = wait.until(
+                     ExpectedConditions.elementToBeClickable(
+                             By.xpath("//button[normalize-space()='Issued']")));
+
+             jsClick(issuedTab);
+
+             delay();
+
+             WebElement verifyTick = wait.until(
+                     ExpectedConditions.elementToBeClickable(
+                             By.xpath("//tbody/tr[1]/td[8]/div[1]/div[2]/div[1]/button[1]/div[1]")));
+
+             jsClick(verifyTick);
+
+             delay();
+
+             return;
+
+         } catch (Exception e) {
+
+             System.out.println("Issued not found → continue old flow");
+
+         }
+     }
+
+
+        // =============================
+        // WAIT FOR ADD CREDENTIAL TABLE
+        // =============================
+
+        System.out.println("Waiting for Add Credential table");
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(
+                By.xpath("//tbody")));
+
+        delay();
+
+        // =============================
+        // SELECT CHECKBOX (FIXED with retry)
+        // =============================
+
+        System.out.println("Selecting record checkbox");
+
+        WebElement checkbox = null;
+
+        int attempts = 0;
+
+        while (attempts < 10) {
+
+            try {
+
+                checkbox = wait.until(
+                        ExpectedConditions.presenceOfElementLocated(
+                                By.xpath("//tbody/tr[1]//input[@type='checkbox']")));
+
+                if (checkbox.isDisplayed()) {
+                    break;
+                }
+
+            } catch (Exception e) {
+
+                delay();
+            }
+
+            attempts++;
+        }
+
+        if (checkbox == null) {
+
+            throw new RuntimeException("Checkbox not found in Issue Credential table!");
+        }
+
+        ((JavascriptExecutor) driver)
+                .executeScript("arguments[0].scrollIntoView({block:'center'});", checkbox);
+
+        delay();
+
+        ((JavascriptExecutor) driver)
+                .executeScript("arguments[0].click();", checkbox);
+
+        delay();
+  
+        // =============================
+        // CLICK ISSUE BUTTON
+        // =============================
+
+        WebElement issueBtn = wait.until(
+                ExpectedConditions.elementToBeClickable(
+                        By.xpath("//span[normalize-space()='Issue Credentials']")));
+
+        jsClick(issueBtn);
+
+        delay();
+
+        // =============================
+        // POPUP OPEN WAIT
+        // =============================
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(
+                By.xpath("//input[@placeholder='Valid From']")));
+
+        delay();
+
+/*
+        // =============================
+        // SEND VIA EMAIL (NO RADIO BUTTON)
+        // =============================
+
+
+        WebElement emailNo = wait.until(
+                ExpectedConditions.presenceOfElementLocated(
+                        By.xpath("//input[@id='emailNo']")));
+
+        ((JavascriptExecutor) driver)
+                .executeScript("arguments[0].scrollIntoView({block:'center'});", emailNo);
+
+        delay();
+
+        ((JavascriptExecutor) driver)
+                .executeScript("arguments[0].click();", emailNo);
+
+        delay();
+       */
+
+
+        // =============================
+        // CLICK VALID FROM
+        // =============================
+
+        WebElement validFrom = wait.until(
+                ExpectedConditions.elementToBeClickable(
+                        By.xpath("//input[@placeholder='Valid From']")));
+
+        jsClick(validFrom);
+
+        delay();
+
+
+        // =============================
+        // SELECT CURRENT DATE (DYNAMIC)
+        // =============================
+
+        System.out.println("Selecting current date");
+
+        // get current IST date
+        ZonedDateTime istDate =
+                ZonedDateTime.now(
+                        java.time.ZoneId.of("Asia/Kolkata"));
+
+        int today = istDate.getDayOfMonth();
+
+        WebElement todayDate = wait.until(
+                ExpectedConditions.elementToBeClickable(
+                        By.xpath("//td[not(contains(@class,'other-month'))]//span[text()='" + today + "']")));
+
+        ((JavascriptExecutor) driver)
+                .executeScript("arguments[0].scrollIntoView({block:'center'});", todayDate);
+
+        delay();
+
+        ((JavascriptExecutor) driver)
+                .executeScript("arguments[0].click();", todayDate);
+
+        delay();
+
+        System.out.println("Validity date selected");
+        
+        
+     // =============================
+     // CLICK ISSUE BUTTON IN POPUP
+     // =============================
+
+     System.out.println("Click Issue button in popup");
+
+     WebElement issuePopup = wait.until(
+             ExpectedConditions.elementToBeClickable(
+                     By.xpath("//button[.//span[normalize-space()='Issue']]")));
+
+     jsClick(issuePopup);
+
+     delay();
+
+     System.out.println("Waiting popup to close");
+
+     wait.until(ExpectedConditions.invisibilityOfElementLocated(
+             By.xpath("//app-issue-credentials-dialog")));
+
+     Thread.sleep(2000);
+
+     System.out.println("Opening Credentials page");
+
+     wait.until(ExpectedConditions.urlContains("/credentials"));
+
+     Thread.sleep(2000);
+
+     WebElement credentialTab = wait.until(
+             ExpectedConditions.elementToBeClickable(
+                     By.xpath("//a[contains(@href,'credentials')]")));
+
+     jsClick(credentialTab);
+
+     delay();
+
+     System.out.println("Waiting for Issued tab");
+
+     wait.until(ExpectedConditions.presenceOfElementLocated(
+             By.xpath("//a[contains(text(),'Issued')]")));
+
+     WebElement issuedTab = wait.until(
+             ExpectedConditions.elementToBeClickable(
+                     By.xpath("(//a[contains(text(),'Issued')])[1]")));
+
+     jsClick(issuedTab);
+
+     delay();
+     
+    	System.out.println("Click latest verify");
+
+    	WebElement verifyTick = wait.until(
+    	        ExpectedConditions.elementToBeClickable(
+    	                By.xpath("//tbody/tr[1]/td[8]/div[1]/div[2]/div[1]/button[1]/div[1]")));
+
+    	jsClick(verifyTick);
+
+    	delay();
+    	
+    	System.out.println("Switching window");
+
+    	String mainWindow = driver.getWindowHandle();
+
+    	for (String win : driver.getWindowHandles()) {
+
+    	    if (!win.equals(mainWindow)) {
+
+    	        driver.switchTo().window(win);
+    	        break;
+    	    }
+    	}
+
+    	Thread.sleep(4000);
+    	
+    	System.out.println("Switching window");
+
+    	String mainWindow2 = driver.getWindowHandle();
+
+    	for (String win : driver.getWindowHandles()) {
+
+    	    if (!win.equals(mainWindow)) {
+
+    	        driver.switchTo().window(win);
+    	        break;
+    	    }
+    	}
+
+    	Thread.sleep(4000);
+    	
+    	JavascriptExecutor js = (JavascriptExecutor) driver;
+
+    	js.executeScript("window.scrollTo(0,document.body.scrollHeight)");
+
+    	delay();
+
+    	WebElement verifierBtn = wait.until(
+    	        ExpectedConditions.elementToBeClickable(
+    	                By.xpath("//button[@id='verifier-button']")));
+
+    	jsClick(verifierBtn);
+
+    	Thread.sleep(5000);
+    	
+    	driver.close();
+
+    	driver.switchTo().window(mainWindow2);
+
+    	delay();
+    	
+    	WebElement subjectsTab = wait.until(
+    	        ExpectedConditions.elementToBeClickable(
+    	                By.xpath("//a[normalize-space()='Subjects']")));
+
+    	jsClick(subjectsTab);
+
+    	delay();
+    	
+    	WebElement addRecordBtn = wait.until(
+    	        ExpectedConditions.elementToBeClickable(
+    	                By.xpath("//tbody/tr[1]/td[2]/div[1]/div[2]/button[1]")));
+
+    	jsClick(addRecordBtn);
+
+    	delay();
+
+/*
+        // =============================
+        // CLICK CANCEL BUTTON
+        // =============================
+
+        System.out.println("Closing popup");
+
+        WebElement cancelBtn = wait.until(
+                ExpectedConditions.elementToBeClickable(
+                        By.xpath("//button[normalize-space()='Cancel']")));
+
+        ((JavascriptExecutor) driver)
+                .executeScript("arguments[0].scrollIntoView({block:'center'});", cancelBtn);
+
+        delay();
+
+        ((JavascriptExecutor) driver)
+                .executeScript("arguments[0].click();", cancelBtn);
+
+        // NEW FIX: wait until popup is fully gone before proceeding
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(
+                By.xpath("//input[@placeholder='Valid From']")));
+
+        delay();
+
+        System.out.println("Popup closed");
+    */
+
+    }
+
+
+    // ======================================
+    // JS CLICK
+    // ======================================
+
+    public void jsClick(WebElement element) {
+
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+
+        js.executeScript(
+                "arguments[0].scrollIntoView({block:'center'});",
+                element);
+
+        delay();
+
+        js.executeScript("arguments[0].click();", element);
+    }
+
+
+
+    // ======================================
+    // UPLOAD SPREADSHEET
+    // ======================================
+
+    public void uploadSpreadsheet() throws InterruptedException {
+
+        String filePath =
+                "C:\\Users\\Nikhil Sonawane\\Downloads\\Employees ID Cards-template.xlsx";
+
+        System.out.println("Upload started");
+
+        // wait popup close after issue credential
+        try {
+            wait.until(ExpectedConditions.invisibilityOfElementLocated(
+                    By.xpath("//span[contains(text(),'Issue Credential')]")));
+        } catch (Exception e) {
+        }
+
+        WebElement uploadMain = wait.until(
+                ExpectedConditions.elementToBeClickable(
+                        By.xpath("//span[normalize-space()='Upload Spreadsheet']")));
+
+        jsClick(uploadMain);
+
+        delay();
+
+        // FIX: wait for file input explicitly before sending keys
+        wait.until(ExpectedConditions.presenceOfElementLocated(
+                By.xpath("//input[@type='file']")));
+
+        WebElement fileInput = driver.findElement(
+                By.xpath("//input[@type='file']"));
+
+        ((JavascriptExecutor) driver)
+                .executeScript("arguments[0].style.display='block';", fileInput);
+
+        fileInput.sendKeys(filePath);
+
+        delay();
+
+        WebElement uploadBtn = wait.until(
+                ExpectedConditions.elementToBeClickable(
+                        By.xpath("//button[contains(.,'Upload Spreadsheet')]")));
+
+        jsClick(uploadBtn);
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(
+                By.xpath("//tbody//tr")));
+
+        System.out.println("Record loaded");
+    }
+
+}

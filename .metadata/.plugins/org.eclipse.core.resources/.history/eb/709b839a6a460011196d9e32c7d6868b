@@ -1,0 +1,238 @@
+package orderhistory;
+
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import java.io.FileInputStream;
+import java.time.LocalDate;
+import java.util.*;
+
+public class OrderReportTable2 {
+
+    static class Stats {
+        int count = 0;
+        double amount = 0;
+        double discount = 0;
+
+        void add(double price, double disc) {
+            count++;
+            amount += price;
+            discount += disc;
+        }
+
+        String format() {
+            return String.format("%d (%.0f | %.0f)", count, amount, discount);
+        }
+    }
+
+    private static final String[] PAYMENT_ORDER = {
+            "UPI", "CC", "UPIPPI", "UPICC", "NB", "UPI SALE", "CARD", "CASH"
+    };
+
+    public static void main(String[] args) {
+
+        String filePath = "C:\\Users\\Nikhil Sonawane\\eclipse-workspace\\OrderReport\\2026-04-16 to 2026-04-30_Order_History.xlsx";
+
+        Map<LocalDate, Map<String, Stats>> daily = new TreeMap<>();
+        Map<String, Stats> grand = new HashMap<>();
+        Map<LocalDate, Stats> dayTotal = new HashMap<>();
+        Stats overall = new Stats();
+
+        try (FileInputStream fis = new FileInputStream(filePath);
+             Workbook wb = new XSSFWorkbook(fis)) {
+
+            Sheet sheet = wb.getSheetAt(0);
+
+            Row header = sheet.getRow(0);
+            Map<String, Integer> cols = new HashMap<>();
+
+            for (Cell c : header) {
+                cols.put(c.getStringCellValue().toLowerCase().trim(), c.getColumnIndex());
+            }
+
+            System.out.println("Available Columns:");
+            for (String k : cols.keySet()) {
+                System.out.println(k);
+            }
+
+            int dateCol = findColumnFlexible(cols, "purchased", "date");
+            int payCol = findColumnFlexible(cols, "payment");
+            int priceCol = findColumnFlexible(cols, "ticket", "price", "amount");
+            int discountCol = findColumnFlexible(cols, "discount", "disc");
+
+            System.out.println("\nUsing columns -> Date:" + dateCol +
+                    " Payment:" + payCol +
+                    " Price:" + priceCol +
+                    " Discount:" + discountCol);
+
+            for (int r = 1; r <= sheet.getLastRowNum(); r++) {
+
+                Row row = sheet.getRow(r);
+                if (row == null) continue;
+
+                Cell dc = row.getCell(dateCol);
+                if (dc == null) continue;
+
+                LocalDate date;
+                try {
+                    if (dc.getCellType() == CellType.NUMERIC) {
+                        date = dc.getLocalDateTimeCellValue().toLocalDate();
+                    } else {
+                        String d = dc.toString().trim();
+                        date = LocalDate.parse(d.substring(0, 10));
+                    }
+                } catch (Exception e) {
+                    continue;
+                }
+
+                String payment = "UNKNOWN";
+                Cell pc = row.getCell(payCol);
+                if (pc != null) {
+                    payment = pc.toString().toUpperCase().trim().replace("_", " ");
+                }
+
+                double price = 0;
+                Cell pr = row.getCell(priceCol);
+                if (pr != null) {
+                    try {
+                        price = (pr.getCellType() == CellType.NUMERIC)
+                                ? pr.getNumericCellValue()
+                                : Double.parseDouble(pr.toString().replace(",", "").trim());
+                    } catch (Exception ignored) {}
+                }
+
+                double discount = 0;
+                if (discountCol != -1) {
+                    Cell dcCell = row.getCell(discountCol);
+                    if (dcCell != null) {
+                        try {
+                            discount = (dcCell.getCellType() == CellType.NUMERIC)
+                                    ? dcCell.getNumericCellValue()
+                                    : Double.parseDouble(dcCell.toString().replace(",", "").trim());
+                        } catch (Exception ignored) {}
+                    }
+                }
+
+                daily
+                        .computeIfAbsent(date, k -> new HashMap<>())
+                        .computeIfAbsent(payment, k -> new Stats())
+                        .add(price, discount);
+
+                dayTotal.computeIfAbsent(date, k -> new Stats()).add(price, discount);
+                grand.computeIfAbsent(payment, k -> new Stats()).add(price, discount);
+                overall.add(price, discount);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return;
+        }
+
+        // ---------- TABLE ----------
+        List<String[]> table = new ArrayList<>();
+
+        // ✅ HEADER UPDATED (+ Discount column)
+        String[] headerRow = new String[PAYMENT_ORDER.length + 3];
+        headerRow[0] = "Date";
+        System.arraycopy(PAYMENT_ORDER, 0, headerRow, 1, PAYMENT_ORDER.length);
+        headerRow[headerRow.length - 2] = "Discount";
+        headerRow[headerRow.length - 1] = "Total";
+        table.add(headerRow);
+
+        for (LocalDate d : daily.keySet()) {
+
+            Map<String, Stats> map = daily.get(d);
+            Stats t = dayTotal.get(d);
+
+            String[] row = new String[PAYMENT_ORDER.length + 3];
+            row[0] = d.toString();
+
+            for (int i = 0; i < PAYMENT_ORDER.length; i++) {
+                Stats s = map.get(PAYMENT_ORDER[i]);
+                row[i + 1] = (s != null) ? s.format() : "0 (0 | 0)";
+            }
+
+            // ✅ NEW DISCOUNT COLUMN
+            row[row.length - 2] = String.format("%.0f", t.discount);
+
+            // TOTAL
+            row[row.length - 1] = t.format();
+
+            table.add(row);
+        }
+
+        // GRAND TOTAL
+        String[] g = new String[PAYMENT_ORDER.length + 3];
+        g[0] = "GRAND TOTAL";
+
+        for (int i = 0; i < PAYMENT_ORDER.length; i++) {
+            g[i + 1] = grand.getOrDefault(PAYMENT_ORDER[i], new Stats()).format();
+        }
+
+        // ✅ TOTAL DISCOUNT
+        g[g.length - 2] = String.format("%.0f", overall.discount);
+        g[g.length - 1] = overall.format();
+
+        table.add(g);
+
+        // FINAL TOTAL
+        String totalStr = overall.format();
+        String[] totalRow = new String[PAYMENT_ORDER.length + 3];
+        totalRow[0] = "TOTAL";
+        Arrays.fill(totalRow, 1, totalRow.length, totalStr);
+        table.add(totalRow);
+
+        printTable(table);
+    }
+
+    private static int findColumnFlexible(Map<String, Integer> map, String... keywords) {
+        for (String key : map.keySet()) {
+            for (String k : keywords) {
+                if (key.contains(k)) {
+                    return map.get(key);
+                }
+            }
+        }
+        return -1;
+    }
+
+    private static void printTable(List<String[]> rows) {
+
+        int cols = rows.get(0).length;
+        int[] widths = new int[cols];
+
+        for (String[] row : rows) {
+            for (int c = 0; c < cols; c++) {
+                widths[c] = Math.max(widths[c], row[c].length());
+            }
+        }
+
+        StringBuilder line = new StringBuilder("+");
+        for (int w : widths) line.append("-".repeat(w + 2)).append("+");
+
+        System.out.println(line);
+        printRow(rows.get(0), widths);
+        System.out.println(line);
+
+        for (int i = 1; i < rows.size(); i++) {
+            printRow(rows.get(i), widths);
+            if (rows.get(i)[0].equals("GRAND TOTAL")) {
+                System.out.println(line);
+            }
+        }
+
+        System.out.println(line);
+    }
+
+    private static void printRow(String[] row, int[] widths) {
+        System.out.print("|");
+        for (int c = 0; c < row.length; c++) {
+            if (c == 0) {
+                System.out.printf(" %-"+widths[c]+"s |", row[c]);
+            } else {
+                System.out.printf(" %"+widths[c]+"s |", row[c]);
+            }
+        }
+        System.out.println();
+    }
+}

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+ 
+    <modelVersion>4.0.0</modelVersion>
+ 
+    <groupId>com.ticketanalysis</groupId>
+    <artifactId>every-ticket-calculations</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+ 
+    <name>Every Ticket Calculations</name>
+    <description>A Java application to analyze ticket sales data from Excel files</description>
+ 
+    <properties>
+        <!-- Java 24 -->
+        <maven.compiler.source>24</maven.compiler.source>
+        <maven.compiler.target>24</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+ 
+        <!-- Dependency Versions -->
+        <poi.version>5.2.4</poi.version>
+        <xmlbeans.version>5.1.0</xmlbeans.version>
+        <commons-io.version>2.15.1</commons-io.version>
+        <slf4j.version>2.0.9</slf4j.version>
+        <log4j2.version>2.23.1</log4j2.version>
+    </properties>
+ 
+    <dependencies>
+ 
+        <!-- ==================== Apache POI (Excel Reading) ==================== -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>${poi.version}</version>
+        </dependency>
+ 
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>${poi.version}</version>
+        </dependency>
+ 
+        <!-- XMLBeans (required for .xlsx) -->
+        <dependency>
+            <groupId>org.apache.xmlbeans</groupId>
+            <artifactId>xmlbeans</artifactId>
+            <version>${xmlbeans.version}</version>
+        </dependency>
+ 
+        <!-- Commons IO (fixes UnsynchronizedByteArrayOutputStream in POI) -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${commons-io.version}</version>
+        </dependency>
+ 
+        <!-- ==================== Logging: SLF4J + Log4j2 ==================== -->
+        <!-- SLF4J API (use this in your code: org.slf4j.Logger) -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+ 
+        <!-- Log4j2 API & Core -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>${log4j2.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>${log4j2.version}</version>
+        </dependency>
+ 
+        <!-- Bridge: Routes SLF4J calls → Log4j2 -->
+       <dependency>
+    <groupId>org.apache.logging.log4j</groupId>
+    <artifactId>log4j-slf4j2-impl</artifactId>
+    <version>2.23.1</version>
+</dependency>
+ 
+    </dependencies>
+ 
+    <build>
+        <plugins>
+ 
+            <!-- Compiler Plugin (Supports Java 24) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <release>24</release>
+                </configuration>
+            </plugin>
+ 
+            <!-- Exec Plugin to Run Main Class -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <executable>java</executable>
+                    <arguments>
+                        <argument>-classpath</argument>
+                        <classpath/>
+                        <argument>TicketAnalyzer</argument>
+                    </arguments>
+                </configuration>
+            </plugin>
+ 
+        </plugins>
+    </build>
+ 
+</project>

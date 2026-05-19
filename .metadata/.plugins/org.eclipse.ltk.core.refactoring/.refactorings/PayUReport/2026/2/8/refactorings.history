@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Move &apos;transaction_8765164_1771218613488.xlsx&apos; to &apos;PayUReport&apos;" description="Move &apos;transaction_8765164_1771218613488.xlsx&apos; to &apos;PayUReport&apos;" destination="/PayUReport" element1="target/transaction_8765164_1771218613488.xlsx" flags="7" id="org.eclipse.ltk.core.refactoring.move.resources" resources="1" stamp="1771310968292" updateReferences="true"/>
+</session>

@@ -1,0 +1,10 @@
+com\everycred\pages\UploadSpreadsheetPage.class
+com\everycred\pages\SignupPage.class
+com\everycred\pages\SubjectPage.class
+com\everycred\pages\RevokeCredentialPage.class
+com\everycred\pages\VerifyCredentialPage.class
+com\everycred\pages\AddRecordPage.class
+com\everycred\pages\IssuerProfilePage.class
+com\everycred\pages\IssueCredentialPage.class
+com\everycred\pages\LoginPage.class
+com\everycred\base\BaseTest.class

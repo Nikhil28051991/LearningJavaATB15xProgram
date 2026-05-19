@@ -1,0 +1,255 @@
+package orderhistory;
+
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import java.io.FileInputStream;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+
+public class OrderReportTable {
+
+    private static class Stats {
+        int count = 0;
+        double totalPrice = 0.0;
+
+        void add(double price) {
+            count++;
+            totalPrice += price;
+        }
+
+        String format() {
+            return String.format("%d (%.0f)", count, totalPrice);
+        }
+    }
+
+    private static final String[] PAYMENT_ORDER = {
+        "UPI", "CC", "UPIPPI", "UPICC", "NB", "UPI SALE", "CARD", "CASH"
+    };
+
+    public static void main(String[] args) {
+
+        String filePath = "C:\\Users\\Nikhil Sonawane\\eclipse-workspace\\OrderReport\\2026-04-01 to 2026-04-15_Order_History.xlsx";
+
+        Map<LocalDate, Map<String, Stats>> dailyData = new TreeMap<>();
+        Map<String, Stats> grandTotals = new HashMap<>();
+        Map<LocalDate, Stats> dayTotals = new HashMap<>();
+        Stats overallTotal = new Stats();
+
+        DataFormatter formatter = new DataFormatter();
+
+        try (FileInputStream fis = new FileInputStream(filePath);
+             Workbook wb = new XSSFWorkbook(fis)) {
+
+            Sheet sheet = wb.getSheet("Order History");
+            if (sheet == null) {
+                System.err.println("Sheet 'Order History' not found!");
+                return;
+            }
+
+            for (int r = 1; r <= sheet.getLastRowNum(); r++) {
+
+                Row row = sheet.getRow(r);
+                if (row == null) continue;
+
+                // ================= DATE =================
+                Cell dateCell = row.getCell(8);
+                LocalDate date = parseDate(dateCell, formatter);
+                if (date == null) continue;
+
+                // ================= PAYMENT =================
+                Cell payCell = row.getCell(9);
+                String payment = parseString(payCell, formatter);
+                if (payment.isEmpty()) payment = "Unknown";
+
+                // ================= PRICE =================
+                Cell priceCell = row.getCell(5);
+                double price = parseDouble(priceCell, formatter);
+
+                // ================= AGGREGATION =================
+                dailyData.computeIfAbsent(date, k -> new HashMap<>())
+                        .computeIfAbsent(payment, k -> new Stats())
+                        .add(price);
+
+                dayTotals.computeIfAbsent(date, k -> new Stats()).add(price);
+                grandTotals.computeIfAbsent(payment, k -> new Stats()).add(price);
+                overallTotal.add(price);
+            }
+
+        } catch (Exception e) {
+            System.err.println("Error reading Excel: " + e.getMessage());
+            e.printStackTrace();
+            return;
+        }
+
+        // ================= TABLE =================
+        List<String[]> table = new ArrayList<>();
+
+        String[] header = new String[PAYMENT_ORDER.length + 2];
+        header[0] = "Date";
+        System.arraycopy(PAYMENT_ORDER, 0, header, 1, PAYMENT_ORDER.length);
+        header[header.length - 1] = "Total";
+        table.add(header);
+
+        for (LocalDate date : dailyData.keySet()) {
+
+            Map<String, Stats> dayMap = dailyData.get(date);
+            Stats dayTotal = dayTotals.get(date);
+
+            String[] row = new String[PAYMENT_ORDER.length + 2];
+            row[0] = date.toString();
+
+            for (int i = 0; i < PAYMENT_ORDER.length; i++) {
+                Stats s = dayMap.get(PAYMENT_ORDER[i]);
+                row[i + 1] = s != null ? s.format() : "0 (0)";
+            }
+
+            row[row.length - 1] = dayTotal.format();
+            table.add(row);
+        }
+
+        // GRAND TOTAL
+        String[] grandRow = new String[PAYMENT_ORDER.length + 2];
+        grandRow[0] = "GRAND TOTAL";
+
+        for (int i = 0; i < PAYMENT_ORDER.length; i++) {
+            Stats s = grandTotals.getOrDefault(PAYMENT_ORDER[i], new Stats());
+            grandRow[i + 1] = s.format();
+        }
+
+        grandRow[grandRow.length - 1] = overallTotal.format();
+        table.add(grandRow);
+
+        // FINAL TOTAL
+        String totalStr = overallTotal.format();
+        String[] finalRow = new String[PAYMENT_ORDER.length + 2];
+
+        finalRow[0] = "TOTAL";
+        Arrays.fill(finalRow, 1, finalRow.length, totalStr);
+
+        table.add(finalRow);
+
+        printTable(table);
+    }
+
+    // ================= HELPER METHODS =================
+
+    private static LocalDate parseDate(Cell cell, DataFormatter formatter) {
+        if (cell == null) return null;
+
+        try {
+            if (cell.getCellType() == CellType.NUMERIC &&
+                DateUtil.isCellDateFormatted(cell)) {
+                return cell.getLocalDateTimeCellValue().toLocalDate();
+            }
+
+            String text = formatter.formatCellValue(cell).trim();
+            if (text.isEmpty()) return null;
+
+            // Try multiple formats
+            List<DateTimeFormatter> formats = Arrays.asList(
+                    DateTimeFormatter.ISO_DATE_TIME,
+                    DateTimeFormatter.ISO_DATE,
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"),
+                    DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"),
+                    DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"),
+                    DateTimeFormatter.ofPattern("dd-MM-yyyy"),
+                    DateTimeFormatter.ofPattern("dd/MM/yyyy")
+            );
+
+            for (DateTimeFormatter fmt : formats) {
+                try {
+                    if (fmt.toString().contains("H")) {
+                        return LocalDateTime.parse(text, fmt).toLocalDate();
+                    } else {
+                        return LocalDate.parse(text, fmt);
+                    }
+                } catch (Exception ignored) {}
+            }
+
+        } catch (Exception ignored) {}
+
+        return null;
+    }
+
+    private static String parseString(Cell cell, DataFormatter formatter) {
+        if (cell == null) return "";
+        return formatter.formatCellValue(cell).trim();
+    }
+
+    private static double parseDouble(Cell cell, DataFormatter formatter) {
+        if (cell == null) return 0.0;
+
+        try {
+            if (cell.getCellType() == CellType.NUMERIC) {
+                return cell.getNumericCellValue();
+            }
+
+            String text = formatter.formatCellValue(cell)
+                    .replace(",", "")
+                    .trim();
+
+            if (!text.isEmpty()) {
+                return Double.parseDouble(text);
+            }
+
+        } catch (Exception ignored) {}
+
+        return 0.0;
+    }
+
+    // ================= PRINT =================
+
+    private static void printTable(List<String[]> rows) {
+
+        int cols = rows.get(0).length;
+        int[] widths = new int[cols];
+
+        for (String[] row : rows) {
+            for (int c = 0; c < cols; c++) {
+                int len = row[c].length();
+                if (row[0].equals("GRAND TOTAL") || row[0].equals("TOTAL")) {
+                    len += 4;
+                }
+                widths[c] = Math.max(widths[c], len);
+            }
+        }
+
+        String line = "+" + java.util.stream.IntStream.range(0, cols)
+                .mapToObj(i -> "-".repeat(widths[i] + 2))
+                .reduce((a, b) -> a + "+" + b).orElse("") + "+";
+
+        System.out.println(line);
+        printRow(rows.get(0), widths, false);
+        System.out.println(line);
+
+        for (int i = 1; i < rows.size() - 2; i++) {
+            printRow(rows.get(i), widths, false);
+        }
+
+        System.out.println(line);
+        printRow(rows.get(rows.size() - 2), widths, true);
+
+        System.out.println(line);
+        printRow(rows.get(rows.size() - 1), widths, true);
+
+        System.out.println(line);
+    }
+
+    private static void printRow(String[] row, int[] widths, boolean bold) {
+
+        for (int c = 0; c < row.length; c++) {
+            String cell = row[c];
+
+            if (bold) {
+                cell = "**" + cell + "**";
+            }
+
+            String fmt = c == 0 ? "%-" + widths[c] + "s" : "%" + widths[c] + "s";
+            System.out.print("| " + String.format(fmt, cell) + " ");
+        }
+
+        System.out.println("|");
+    }
+}

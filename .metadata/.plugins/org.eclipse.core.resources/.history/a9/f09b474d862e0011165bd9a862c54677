@@ -1,0 +1,304 @@
+package com.everycred.pages;
+
+import java.time.Duration;
+
+import org.openqa.selenium.*;
+import org.openqa.selenium.support.ui.*;
+
+public class UploadSpreadsheetPage {
+
+    private WebDriver driver;
+    private WebDriverWait wait;
+
+    public UploadSpreadsheetPage(WebDriver driver) {
+        this.driver = driver;
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(40));
+    }
+
+    // ======================================
+    // DELAY
+    // ======================================
+
+    public void delay() {
+        try { Thread.sleep(500); } catch (InterruptedException e) {}
+    }
+
+    // ======================================
+    // MAIN FLOW (RECOVERABLE)
+    // ======================================
+
+    public void uploadSpreadsheetFlow() throws InterruptedException {
+
+        System.out.println("Starting Upload Spreadsheet Flow");
+
+        String currentUrl = driver.getCurrentUrl();
+
+        // ======================================
+        // ENSURE USER IS ON CREDENTIAL PAGE
+        // ======================================
+
+        if (!currentUrl.contains("/credentials")) {
+
+            System.out.println("Navigating to Credentials page");
+
+            WebElement credentialTab = wait.until(
+                    ExpectedConditions.elementToBeClickable(
+                            By.xpath("//a[contains(@href,'credentials')]")));
+
+            jsClick(credentialTab);
+
+            wait.until(ExpectedConditions.urlContains("/credentials"));
+        }
+
+        Thread.sleep(2000);
+
+        // ======================================
+        // OPEN SUBJECTS TAB
+        // ======================================
+
+        System.out.println("Opening Subjects Tab");
+
+        WebElement subjectsTab = wait.until(
+                ExpectedConditions.elementToBeClickable(
+                        By.xpath("//a[normalize-space()='Subjects']")));
+
+        jsClick(subjectsTab);
+
+        wait.until(ExpectedConditions.or(
+                ExpectedConditions.visibilityOfElementLocated(By.xpath("//tbody//tr")),
+                ExpectedConditions.visibilityOfElementLocated(By.xpath("//span[contains(text(),'in-process records')]"))
+        ));
+
+        delay();
+
+        // ======================================
+        // CLICK ADD RECORD FROM TABLE
+        // ======================================
+
+        System.out.println("Clicking Add Record button");
+
+        WebElement addRecordButton = wait.until(
+                ExpectedConditions.elementToBeClickable(
+                        By.xpath("//tbody/tr[1]//button[contains(.,'Add Record')]")));
+
+        jsClick(addRecordButton);
+
+        delay();
+
+        // ======================================
+        // WAIT FOR ADD RECORD POPUP (RECOVERY SAFE)
+        // ======================================
+
+        boolean popupOpened = false;
+
+        try {
+            wait.until(ExpectedConditions.visibilityOfElementLocated(
+                    By.xpath("//span[normalize-space()='Add Records']")));
+            popupOpened = true;
+        } catch (TimeoutException e) {
+            System.out.println("⚠️ Add Record popup did NOT open, checking fallback...");
+        }
+
+        Thread.sleep(1000);
+
+        // ======================================
+        // IF POPUP NOT OPEN → CHECK PAGE
+        // ======================================
+
+        if (!popupOpened) {
+
+            if (driver.getCurrentUrl().contains("/credentials/add")) {
+                System.out.println("✅ Already on Add Credential Page, skipping popup steps");
+            } else {
+                throw new RuntimeException("❌ Neither popup opened nor navigated to Add page");
+            }
+        }
+
+        // ======================================
+        // SELECT SUBJECT (ONLY IF POPUP OPENED)
+        // ======================================
+
+        if (popupOpened) {
+
+            System.out.println("Selecting Subject");
+
+            By dropdownLocator = By.xpath("//div[contains(@class,'p-dialog')]//span[@aria-label='Select a subject']");
+
+            WebElement subjectDropdown = wait.until(
+                    ExpectedConditions.presenceOfElementLocated(dropdownLocator));
+
+            try {
+                driver.findElement(dropdownLocator).click();
+            } catch (Exception e) {
+                WebElement fresh = driver.findElement(dropdownLocator);
+                ((JavascriptExecutor) driver).executeScript("arguments[0].click();", fresh);
+            }
+
+            Thread.sleep(1000);
+
+            By subjectLocator = By.xpath("//li[@id='selectedSubject_0']");
+
+            WebElement latestSubject = wait.until(
+                    ExpectedConditions.presenceOfElementLocated(subjectLocator));
+
+            try {
+                driver.findElement(subjectLocator).click();
+            } catch (Exception e) {
+                WebElement fresh = driver.findElement(subjectLocator);
+                ((JavascriptExecutor) driver).executeScript("arguments[0].click();", fresh);
+            }
+
+            Thread.sleep(1000);
+
+            // ======================================
+            // CLICK ADD RECORD(S)
+            // ======================================
+
+            System.out.println("Confirm Add Records");
+
+            By confirmLocator = By.xpath("//div[contains(@class,'p-dialog')]//button[normalize-space()='Add Record(s)']");
+
+            WebElement confirmAddRecords = wait.until(
+                    ExpectedConditions.visibilityOfElementLocated(confirmLocator));
+
+            ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", confirmAddRecords);
+
+            Thread.sleep(500);
+
+            try {
+                driver.findElement(confirmLocator).click();
+            } catch (Exception e) {
+                WebElement fresh = driver.findElement(confirmLocator);
+                ((JavascriptExecutor) driver).executeScript("arguments[0].click();", fresh);
+            }
+
+            Thread.sleep(3000);
+        }
+
+        // ======================================
+        // WAIT FOR ADD CREDENTIAL PAGE
+        // ======================================
+
+        wait.until(ExpectedConditions.or(
+                ExpectedConditions.visibilityOfElementLocated(By.xpath("//span[normalize-space()='Add New Record']")),
+                ExpectedConditions.urlContains("/credentials/add")
+        ));
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(
+                By.xpath("//button[.//span[normalize-space()='Upload Spreadsheet']]")));
+
+        Thread.sleep(2000);
+
+        System.out.println("Add Credential Page Loaded");
+
+        // ======================================
+        // CLICK UPLOAD SPREADSHEET (STEP 1)
+        // ======================================
+
+        System.out.println("Click Upload Spreadsheet");
+
+        By uploadBtnLocator = By.xpath("//button[.//span[normalize-space()='Upload Spreadsheet']]");
+
+        WebElement uploadBtn = wait.until(
+                ExpectedConditions.presenceOfElementLocated(uploadBtnLocator));
+
+        ((JavascriptExecutor) driver)
+                .executeScript("arguments[0].scrollIntoView({block:'center'});", uploadBtn);
+
+        Thread.sleep(1000);
+
+        try {
+            driver.findElement(uploadBtnLocator).click();
+        } catch (Exception e) {
+            WebElement fresh = driver.findElement(uploadBtnLocator);
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", fresh);
+        }
+
+        delay();
+
+        // ======================================
+        // 🔥 HANDLE POPUP SECOND BUTTON (STEP 2)
+        // ======================================
+
+        System.out.println("Handling Upload Spreadsheet Popup");
+
+        boolean popupAppeared = false;
+
+        try {
+            wait.until(ExpectedConditions.visibilityOfElementLocated(
+                    By.xpath("//button[contains(text(),'Upload Spreadsheet')]")));
+            popupAppeared = true;
+        } catch (TimeoutException e) {
+            System.out.println("⚠️ Upload popup did NOT appear, continuing...");
+        }
+
+        if (popupAppeared) {
+
+            System.out.println("Clicking Upload inside popup");
+
+            By popupUploadBtn = By.xpath("//button[contains(text(),'Upload Spreadsheet')]");
+
+            Thread.sleep(2000);
+
+            try {
+                driver.findElement(popupUploadBtn).click();
+            } catch (Exception e) {
+                WebElement fresh = driver.findElement(popupUploadBtn);
+                ((JavascriptExecutor) driver).executeScript("arguments[0].click();", fresh);
+            }
+
+            Thread.sleep(2000);
+        }
+
+        // ======================================
+        // HANDLE IN-PROCESS OR FILE INPUT
+        // ======================================
+
+        System.out.println("Checking In-process records");
+
+        wait.until(ExpectedConditions.or(
+                ExpectedConditions.visibilityOfElementLocated(By.xpath("//span[contains(text(),'in-process records')]")),
+                ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@type='file']"))
+        ));
+
+        if (driver.findElements(By.xpath("//span[contains(text(),'in-process records')]")).size() > 0) {
+
+            System.out.println("Clicking In-process message");
+
+            By inProcessLocator = By.xpath("//span[contains(text(),'in-process records')]");
+
+            try {
+                driver.findElement(inProcessLocator).click();
+            } catch (Exception e) {
+                WebElement fresh = driver.findElement(inProcessLocator);
+                ((JavascriptExecutor) driver).executeScript("arguments[0].click();", fresh);
+            }
+
+            Thread.sleep(3000);
+        }
+
+        // ======================================
+        // VERIFY TABLE DATA
+        // ======================================
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(
+                By.xpath("//tbody//tr")));
+
+        System.out.println("✅ Uploaded records are visible");
+    }
+
+    // ======================================
+    // JS CLICK
+    // ======================================
+
+    public void jsClick(WebElement element) {
+
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+
+        js.executeScript("arguments[0].scrollIntoView(true);", element);
+
+        delay();
+
+        js.executeScript("arguments[0].click();", element);
+    }
+}

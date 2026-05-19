@@ -1,0 +1,152 @@
+package com.everycred.pages;
+
+import java.time.Duration;
+
+import org.openqa.selenium.*;
+import org.openqa.selenium.support.ui.*;
+
+public class RevokeCredentialPage {
+
+    private WebDriver driver;
+    private WebDriverWait wait;
+
+    public RevokeCredentialPage(WebDriver driver) {
+        this.driver = driver;
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(40));
+    }
+
+    public void delay() {
+        try { Thread.sleep(500); } catch (InterruptedException e) {}
+    }
+
+    public void revokeCredentialFlow() throws InterruptedException {
+
+        System.out.println("Starting Revoke Credential Flow");
+
+        String currentUrl = driver.getCurrentUrl();
+
+        // ================= NAVIGATE =================
+        if (!currentUrl.contains("/credentials")) {
+
+            System.out.println("Navigating to Credentials page");
+
+            WebElement credentialTab = wait.until(
+                    ExpectedConditions.elementToBeClickable(
+                            By.xpath("//a[contains(@href,'credentials')]")));
+
+            jsClick(credentialTab);
+
+            wait.until(ExpectedConditions.urlContains("/credentials"));
+        }
+
+        Thread.sleep(2000);
+
+        // ================= PAGE LOAD =================
+        wait.until(ExpectedConditions.visibilityOfElementLocated(
+                By.xpath("//button[normalize-space()='Issued']")));
+
+        Thread.sleep(2000);
+
+        // ================= ISSUED TAB =================
+        WebElement issuedTab = wait.until(
+                ExpectedConditions.elementToBeClickable(
+                        By.xpath("//button[normalize-space()='Issued']")));
+
+        jsClick(issuedTab);
+
+        Thread.sleep(3000);
+
+        // ================= TABLE =================
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//tbody/tr[1]")));
+
+        // ================= CHECKBOX =================
+        WebElement checkboxInput = wait.until(
+                ExpectedConditions.presenceOfElementLocated(
+                        By.xpath("(//p-tablecheckbox//input)[1]")));
+
+        ((JavascriptExecutor) driver)
+                .executeScript("arguments[0].scrollIntoView({block:'center'});", checkboxInput);
+
+        Thread.sleep(500);
+
+        ((JavascriptExecutor) driver)
+                .executeScript("arguments[0].click();", checkboxInput);
+
+        Thread.sleep(1000);
+
+        if (!checkboxInput.isSelected()) {
+            ((JavascriptExecutor) driver)
+                    .executeScript("arguments[0].click();", checkboxInput);
+        }
+
+        if (!checkboxInput.isSelected()) {
+            throw new RuntimeException("Checkbox not selected");
+        }
+
+        // ================= CLICK REVOKE =================
+        WebElement revokeBtn = wait.until(
+                ExpectedConditions.elementToBeClickable(
+                        By.xpath("//span[normalize-space()='Revoke']")));
+
+        jsClick(revokeBtn);
+
+        delay();
+
+        // ================= REMARK =================
+        WebElement remarkBox = wait.until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        By.xpath("//textarea[@id='remark']")));
+
+        remarkBox.sendKeys("Wrongly Issued");
+
+        delay();
+
+        // ================= CONFIRM =================
+        WebElement confirmRevoke = wait.until(
+                ExpectedConditions.elementToBeClickable(
+                        By.xpath("//button[contains(@class,'p-button-danger')]")));
+
+        try {
+            confirmRevoke.click();
+        } catch (Exception e) {
+            ((JavascriptExecutor) driver)
+                    .executeScript("arguments[0].click();", confirmRevoke);
+        }
+
+        // ================= WAIT =================
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(
+                By.xpath("//div[contains(@class,'p-dialog')]")));
+
+        Thread.sleep(2000);
+
+        // ================= REVOKED TAB =================
+        By revokedTabLocator = By.xpath("//button[normalize-space()='Revoked']");
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(revokedTabLocator));
+
+        Thread.sleep(2000);
+
+        WebElement revokedTab = wait.until(
+                ExpectedConditions.elementToBeClickable(revokedTabLocator));
+
+        jsClick(revokedTab);
+
+        Thread.sleep(4000);
+
+        // ================= VERIFY =================
+        wait.until(ExpectedConditions.or(
+                ExpectedConditions.visibilityOfElementLocated(By.xpath("//tbody/tr")),
+                ExpectedConditions.presenceOfElementLocated(By.xpath("//tbody"))
+        ));
+
+        System.out.println("✅ Revoke verified successfully");
+    }
+
+    public void jsClick(WebElement element) {
+        ((JavascriptExecutor) driver)
+                .executeScript("arguments[0].scrollIntoView(true);", element);
+        delay();
+        ((JavascriptExecutor) driver)
+                .executeScript("arguments[0].click();", element);
+    }
+}

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Failed suite [EveryCred Suite]" verbose="0">
+  <test thread-count="5" name="Full Flow Test(failed)" verbose="0">
+    <classes>
+      <class name="com.everycred.tests.CreateSubjectTest">
+        <methods>
+          <include name="testCreateSubject"/>
+          <include name="tearDown"/>
+          <include name="setUp"/>
+        </methods>
+      </class> <!-- com.everycred.tests.CreateSubjectTest -->
+    </classes>
+  </test> <!-- Full Flow Test(failed) -->
+</suite> <!-- Failed suite [EveryCred Suite] -->

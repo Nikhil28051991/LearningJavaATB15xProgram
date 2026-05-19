@@ -1,0 +1,376 @@
+package com.everycred.pages;
+
+import java.time.Duration;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+public class SubjectPage {
+
+    private WebDriver driver;
+    private WebDriverWait wait;
+
+    public SubjectPage(WebDriver driver) {
+        this.driver = driver;
+
+        // changed 60 -> 30 (faster but safe)
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(30));
+    }
+
+    // ======================================
+    // DELAY METHOD
+    // ======================================
+
+    public void delay() {
+        try {
+            Thread.sleep(200);   // 400 -> 200 faster
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // ======================================
+    // CREATE GROUP                                              // changes during run 
+    // ======================================
+
+    public void createGroup() {
+
+        System.out.println("Navigating to Subjects → Groups");
+
+        click(By.xpath("//a[contains(@href,'subjects/groups')]"));
+        delay();
+
+        click(By.xpath("//button[contains(.,'Create New')]"));
+        delay();
+
+        click(By.xpath("//span[normalize-space()='Create Group']"));
+        delay();
+
+        WebElement groupName = wait.until(
+                ExpectedConditions.visibilityOfElementLocated(By.id("groupName")));
+
+        groupName.sendKeys("Employee Department8");               //
+        delay();
+
+        click(By.xpath("//button[normalize-space()='Create Group']"));
+
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(By.id("groupName")));
+
+        delay();
+
+        System.out.println("Group Created Successfully");
+    }
+
+
+    // ======================================
+    // CREATE SUBJECT                                           // changes during run 
+    // ======================================
+
+    public void createSubjectFlow() {
+
+        System.out.println("Opening Create Subject");
+
+        click(By.xpath("//button[contains(.,'Create New')]"));
+        delay();
+
+        click(By.xpath("//span[normalize-space()='Create Subject']"));
+        delay();
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credentialTitle")));
+
+        driver.findElement(By.id("credentialTitle"))
+                .sendKeys("Employee ID Card7");          //
+        delay();
+
+        driver.findElement(By.id("description"))
+                .sendKeys("Employee ID Card7 2026");    //
+        delay();
+
+
+        WebElement groupDropdown = wait.until(
+                ExpectedConditions.elementToBeClickable(By.id("group")));
+
+        jsClick(groupDropdown);
+        delay();
+
+        wait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("//li[normalize-space()='Employee Department8']")))     //
+                .click();
+
+        delay();
+
+
+        System.out.println("Selecting Credential Design");
+
+        WebElement credentialDesign = wait.until(
+                ExpectedConditions.elementToBeClickable(
+                        By.xpath("//span[@aria-label='Select a credential design']")));
+
+        jsClick(credentialDesign);
+        delay();
+
+        WebElement darkTemplate = wait.until(
+                ExpectedConditions.elementToBeClickable(
+                        By.xpath("//li[@aria-label='Dark Template']")));
+
+        jsClick(darkTemplate);
+
+        delay();
+
+
+        WebElement verifyDropdown = wait.until(
+                ExpectedConditions.elementToBeClickable(By.id("verifierDesign")));
+
+        jsClick(verifyDropdown);
+        delay();
+
+        wait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("//li[normalize-space()='Theme 1']")))
+                .click();
+
+        delay();
+
+        System.out.println("Subject Basic Details Completed");
+    }
+
+
+    // ======================================
+    // ADD ATTRIBUTES
+    // ======================================
+
+    public void addAttributes() {
+
+        System.out.println("Adding Attributes");
+
+        addAttribute("Employees ID", "fieldType_0", "EPID-401-04837");
+        addAttribute("Designation", "fieldType_1", "Designation of Employee");
+        addAttribute("Personal Email ID", "fieldType_2", "Personal Email ID of the Employee");
+        addAttribute("Personal Contact Number", "fieldType_3", "Personal Contact Number");
+        addAttribute("Joining Date", "fieldType_4", "Joining Date");
+        addAttribute("Expiry Date", "fieldType_5", "Expiry Date");
+        addAttribute("Company URL", "fieldType_6", "Company URL");
+        addAttribute("Address", "fieldType_1", "Address");
+
+        System.out.println("All Attributes Added Successfully");
+    }
+
+
+    // ======================================
+    // ADD SINGLE ATTRIBUTE METHOD
+    // ======================================
+
+    public void addAttribute(String title, String fieldTypeId, String descriptionText) {
+
+        try {
+
+            System.out.println("Adding Attribute : " + title);
+
+            WebElement addNewBtn = wait.until(
+                    ExpectedConditions.elementToBeClickable(
+                            By.xpath("//span[normalize-space()='Add New']")));
+
+            jsClick(addNewBtn);
+
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("fieldTitle")));
+
+            delay();
+
+            WebElement titleField = wait.until(
+                    ExpectedConditions.visibilityOfElementLocated(By.id("fieldTitle")));
+
+            titleField.clear();
+            titleField.sendKeys(title);
+            delay();
+
+
+            WebElement fieldType = wait.until(
+                    ExpectedConditions.elementToBeClickable(By.id("fieldType")));
+
+            jsClick(fieldType);
+            delay();
+
+            wait.until(ExpectedConditions.elementToBeClickable(
+                    By.xpath("//li[@id='" + fieldTypeId + "']")))
+                    .click();
+
+            delay();
+
+
+            WebElement description = wait.until(
+                    ExpectedConditions.visibilityOfElementLocated(By.id("fieldDescription")));
+
+            description.clear();
+            description.sendKeys(descriptionText);
+
+            delay();
+
+
+            WebElement checkbox = wait.until(
+                    ExpectedConditions.presenceOfElementLocated(
+                            By.id("isRequired")));
+
+            jsClick(checkbox);
+
+            delay();
+
+
+            WebElement saveButton = wait.until(
+                    ExpectedConditions.elementToBeClickable(
+                            By.xpath("//span[normalize-space()='Save']")));
+
+            jsClick(saveButton);
+
+
+            wait.until(ExpectedConditions.invisibilityOfElementLocated(
+                    By.id("fieldTitle")));
+
+            wait.until(ExpectedConditions.or(
+                    ExpectedConditions.visibilityOfElementLocated(By.xpath("//span[normalize-space()='Add New']")),
+                    ExpectedConditions.invisibilityOfElementLocated(By.xpath("//span[normalize-space()='Save']"))
+            ));
+
+            delay();
+
+            System.out.println(title + " Attribute Added Successfully");
+
+        } catch (Exception e) {
+
+            System.out.println("Error while adding attribute: " + title);
+
+            e.printStackTrace();
+
+            delay();
+            
+
+            try {
+                click(By.xpath("//span[normalize-space()='Add New']"));
+            } catch (Exception ex) {
+            }
+        }
+    }
+
+
+    // ======================================
+    // SELECT MULTIPLE ATTRIBUTES AND SUBMIT
+    // ======================================
+
+    public void selectMultipleCheckboxAndSubmit() {
+
+        System.out.println("Selecting attributes by exact name");
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//tbody")));
+
+        String[] attributes = {
+                "Employees ID",
+                "Designation",
+                "Personal Email ID",
+                "Personal Contact Number",
+                "Joining Date",
+                "Expiry Date",
+                "Company URL",
+                "Address"
+        };
+
+        for (String attr : attributes) {
+
+            System.out.println("Selecting attribute: " + attr);
+
+            By checkboxLocator = By.xpath(
+                    "//tbody/tr/td[normalize-space()='" + attr + "']/preceding-sibling::td//input"
+            );
+
+            WebElement checkbox = wait.until(
+                    ExpectedConditions.presenceOfElementLocated(checkboxLocator));
+
+            ((JavascriptExecutor) driver)
+                    .executeScript("arguments[0].scrollIntoView({block:'center'});", checkbox);
+
+            delay();
+
+            ((JavascriptExecutor) driver)
+                    .executeScript("arguments[0].click();", checkbox);
+
+            delay();
+        }
+
+        System.out.println("Checkbox selection done");
+
+        WebElement submitButton = wait.until(
+                ExpectedConditions.elementToBeClickable(
+                        By.xpath("//span[@class='p-button-label']")));
+
+        jsClick(submitButton);
+
+        System.out.println("Submit clicked");
+    }
+
+
+    // ======================================
+    // OPEN ADD RECORD PAGE
+    // ======================================
+
+    public void openAddRecordPage() {
+
+        System.out.println("Opening Subjects Tab");
+
+        click(By.xpath("//a[normalize-space()='Subjects']"));
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//body")));
+
+        delay();
+
+        WebElement addRecordButton = wait.until(
+                ExpectedConditions.elementToBeClickable(
+                        By.xpath("//tbody/tr[1]//button[contains(.,'Add Record')]")));
+
+        jsClick(addRecordButton);
+
+        System.out.println("Add Record button clicked");
+
+        delay();
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(
+                By.xpath("//span[normalize-space()='Add New Record']")));
+
+        System.out.println("Add Credential Page Loaded Successfully");
+
+        delay();
+    }
+
+
+    // ======================================
+    // COMMON CLICK
+    // ======================================
+
+    public void click(By locator) {
+
+        WebElement element = wait.until(
+                ExpectedConditions.elementToBeClickable(locator));
+
+        jsClick(element);
+    }
+
+
+    // ======================================
+    // JS CLICK
+    // ======================================
+
+    public void jsClick(WebElement element) {
+
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+
+        js.executeScript(
+                "arguments[0].scrollIntoView({block:'center'});",
+                element);
+
+        try {
+            element.click();
+        } catch (Exception e) {
+            js.executeScript("arguments[0].click();", element);
+        }
+    }
+}

@@ -1,0 +1,88 @@
+package com.everycred.automation;
+
+import java.time.Duration;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import io.github.bonigarcia.wdm.WebDriverManager;
+
+public class EveryCredLogin {
+
+    public static void main(String[] args) {
+
+        WebDriverManager.chromedriver().setup();
+        WebDriver driver = new ChromeDriver();
+        driver.manage().window().maximize();
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
+
+        try {
+
+            // LOGIN
+            driver.get("https://demo-dcs-issuer-us.everycred.com/auth/login");
+
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("email")))
+                    .sendKeys("admin.albuquerque@yopmail.com");
+
+            driver.findElement(By.cssSelector("input[type='password']"))
+                    .sendKeys("Everycred@123");
+
+            driver.findElement(By.xpath("//button[@type='submit']")).click();
+
+            wait.until(ExpectedConditions.visibilityOfElementLocated(
+                    By.xpath("//*[normalize-space()='Subjects']")));
+
+            System.out.println("✅ Login successful");
+
+            driver.findElement(By.xpath("//*[normalize-space()='Subjects']")).click();
+
+            // CLICK CREATE NEW
+            wait.until(ExpectedConditions.elementToBeClickable(
+                    By.xpath("//button[contains(.,'Create New')]"))).click();
+
+            // CLICK CREATE GROUP
+            wait.until(ExpectedConditions.elementToBeClickable(
+                    By.xpath("//*[normalize-space()='Create Group']"))).click();
+
+            // WAIT FOR PRIMENG DIALOG (CORRECT WAY)
+            WebElement dialog = wait.until(
+                    ExpectedConditions.visibilityOfElementLocated(
+                            By.xpath("//div[contains(@class,'p-dialog') and contains(@class,'p-dialog-visible')]")));
+
+            System.out.println("✅ Create Group dialog opened");
+
+            // LOCATE INPUT BELOW GROUP NAME LABEL
+            WebElement groupInput = dialog.findElement(
+                    By.xpath(".//label[normalize-space()='Group Name']/following::input[1]"));
+
+            wait.until(ExpectedConditions.elementToBeClickable(groupInput));
+
+            groupInput.clear();
+            groupInput.sendKeys("Employee ID Card");
+
+            System.out.println("✅ Entered Employee ID Card automatically");
+
+            // CLICK CREATE GROUP BUTTON
+            WebElement createBtn = dialog.findElement(
+                    By.xpath(".//button[normalize-space()='Create Group']"));
+
+            wait.until(ExpectedConditions.elementToBeClickable(createBtn));
+            createBtn.click();
+
+            System.out.println("✅ Clicked Create Group");
+
+            Thread.sleep(5000);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // driver.quit();
+    }
+}
+

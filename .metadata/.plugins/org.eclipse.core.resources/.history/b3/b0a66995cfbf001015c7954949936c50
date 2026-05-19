@@ -1,0 +1,291 @@
+package orderpinelab;
+
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import java.io.*;
+import java.text.NumberFormat;
+import java.util.*;
+
+public class OrderPinelabReport {
+
+    static class Record {
+        String date;
+        String method;
+        double amount;
+
+        Record(String date, String method, double amount) {
+            this.date = date;
+            this.method = method;
+            this.amount = amount;
+        }
+    }
+
+    static class Stats {
+        int count = 0;
+        double total = 0.0;
+
+        void add(double amount) {
+            count++;
+            total += amount;
+        }
+    }
+
+    public static void main(String[] args) {
+        String excelPath = "2025-10-16 to 2025-10-31_Order_History.xlsx";
+        String csvPath = "transactionReport (72).csv";
+
+        List<Record> excelRecords = readExcel(excelPath);
+        List<Record> csvRecords = readCsv(csvPath);
+
+        Map<String, Map<String, Stats>> excelSummary = summarize(excelRecords);
+        Map<String, Map<String, Stats>> csvSummary = summarize(csvRecords);
+
+        System.out.println("=== ORDER HISTORY (Excel) SUMMARY ===");
+        printSummary(excelSummary, "Order");
+
+        System.out.println("\n=== PINELAB (CSV) SUMMARY ===");
+        printSummary(csvSummary, "Pinelab");
+
+        System.out.println("\n=== FINAL VERIFIED DIFFERENCE (UPI + CASH) ===");
+        printVerifiedDiff(excelSummary, csvSummary);
+    }
+
+    /* --------------------------------------------------------------------- */
+    /* EXCEL READER - CORRECTLY NORMALIZES UPI SALE → UPI */
+    /* --------------------------------------------------------------------- */
+    private static List<Record> readExcel(String filePath) {
+        List<Record> records = new ArrayList<>();
+        try (FileInputStream fis = new FileInputStream(filePath);
+             Workbook wb = new XSSFWorkbook(fis)) {
+
+            Sheet sheet = wb.getSheet("Order History");
+            if (sheet == null) {
+                System.err.println("Sheet 'Order History' not found!");
+                return records;
+            }
+
+            Iterator<Row> it = sheet.iterator();
+            if (!it.hasNext()) return records;
+            it.next(); // skip header
+
+            while (it.hasNext()) {
+                Row row = it.next();
+                Cell dateCell = row.getCell(8);
+                if (dateCell == null) continue;
+
+                String rawDate = dateCell.getStringCellValue().trim();
+                String date = rawDate.split("T")[0];
+
+                Cell methodCell = row.getCell(9);
+                String rawMethod = methodCell != null ? methodCell.getStringCellValue().trim() : "";
+
+                // === CRITICAL: Normalize UPI Sale → UPI ===
+                String method;
+                if (rawMethod.equalsIgnoreCase("UPI SALE") ||
+                    rawMethod.equalsIgnoreCase("UPI") ||
+                    rawMethod.equalsIgnoreCase("UPIPPI") ||
+                    rawMethod.equalsIgnoreCase("UPI PPI")) {
+                    method = "UPI";
+                } else if (rawMethod.equalsIgnoreCase("CARD") ||
+                           rawMethod.equalsIgnoreCase("CC")) {
+                    method = "CARD";
+                } else if (rawMethod.equalsIgnoreCase("CASH")) {
+                    method = "CASH";
+                } else {
+                    continue; // skip unknown
+                }
+
+                double amount = 0.0;
+                Cell priceCell = row.getCell(5);
+                if (priceCell != null) {
+                    if (priceCell.getCellType() == CellType.NUMERIC) {
+                        amount = priceCell.getNumericCellValue();
+                    } else if (priceCell.getCellType() == CellType.STRING) {
+                        try {
+                            String val = priceCell.getStringCellValue().trim().replace(",", "");
+                            amount = Double.parseDouble(val);
+                        } catch (Exception ignored) {}
+                    }
+                }
+
+                records.add(new Record(date, method, amount));
+            }
+        } catch (IOException e) {
+            System.err.println("Excel read error: " + e.getMessage());
+        }
+        return records;
+    }
+
+    /* --------------------------------------------------------------------- */
+    /* CSV READER - ONLY UPI & CARD */
+    /* --------------------------------------------------------------------- */
+    private static List<Record> readCsv(String filePath) {
+        List<Record> records = new ArrayList<>();
+        boolean first = true;
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (first) { first = false; continue; }
+                String[] cols = parseCsvLine(line);
+                if (cols.length < 24) continue;
+
+                if (!"Success".equals(cols[23].trim())) continue;
+
+                String method = cols[0].trim();
+                if ("UPI".equals(method)) method = "UPI";
+                else if ("Card".equals(method)) method = "CARD";
+                else continue;
+
+                double amount = 0.0;
+                try {
+                    amount = Double.parseDouble(cols[20].trim().replace(",", ""));
+                } catch (Exception ignored) { continue; }
+
+                String date = cols[22].trim().split("T")[0];
+                records.add(new Record(date, method, amount));
+            }
+        } catch (IOException e) {
+            System.err.println("CSV read error: " + e.getMessage());
+        }
+        return records;
+    }
+
+    /* --------------------------------------------------------------------- */
+    /* SUMMARISER */
+    /* --------------------------------------------------------------------- */
+    private static Map<String, Map<String, Stats>> summarize(List<Record> records) {
+        Map<String, Map<String, Stats>> map = new LinkedHashMap<>();
+        for (Record r : records) {
+            map.computeIfAbsent(r.date, k -> new LinkedHashMap<>())
+               .computeIfAbsent(r.method, k -> new Stats())
+               .add(r.amount);
+        }
+        return map;
+    }
+
+    /* --------------------------------------------------------------------- */
+    /* PRINT SUMMARY */
+    /* --------------------------------------------------------------------- */
+    private static void printSummary(Map<String, Map<String, Stats>> data, String source) {
+        NumberFormat nf = NumberFormat.getCurrencyInstance(new Locale("en", "IN"));
+        double grandTotal = 0; int grandCount = 0;
+
+        for (var dateEntry : data.entrySet()) {
+            String date = dateEntry.getKey();
+            System.out.println("\nDate: " + date);
+            System.out.println("---------------------");
+            double dayTotal = 0; int dayCount = 0;
+
+            for (var methodEntry : dateEntry.getValue().entrySet()) {
+                Stats s = methodEntry.getValue();
+                System.out.printf("  %-8s | Count: %3d | Total: %s%n",
+                        methodEntry.getKey(), s.count, nf.format(s.total));
+                dayTotal += s.total;
+                dayCount += s.count;
+            }
+            System.out.printf("  Day Total → Count: %3d | Total: %s%n", dayCount, nf.format(dayTotal));
+            grandTotal += dayTotal;
+            grandCount += dayCount;
+        }
+        System.out.printf("\n%s GRAND TOTAL → Count: %d | Amount: %s%n",
+                source, grandCount, nf.format(grandTotal));
+    }
+
+    /* --------------------------------------------------------------------- */
+    /* FINAL VERIFIED DIFF: UPI (Excel - CSV) | CASH (Excel only) */
+    /* --------------------------------------------------------------------- */
+    private static void printVerifiedDiff(Map<String, Map<String, Stats>> excel,
+                                          Map<String, Map<String, Stats>> csv) {
+        Set<String> dates = new TreeSet<>();
+        dates.addAll(excel.keySet());
+        dates.addAll(csv.keySet());
+
+        NumberFormat nf = NumberFormat.getCurrencyInstance(new Locale("en", "IN"));
+
+        int grandUpiDiffCnt = 0, grandCashDiffCnt = 0, grandTotalDiffCnt = 0;
+        double grandUpiDiffAmt = 0, grandCashDiffAmt = 0, grandTotalDiffAmt = 0;
+
+        for (String date : dates) {
+            Stats eUpi = getStats(excel, date, "UPI");
+            Stats cUpi = getStats(csv, date, "UPI");
+            Stats eCash = getStats(excel, date, "CASH");
+
+            int upiDiffCnt = eUpi.count - cUpi.count;
+            double upiDiffAmt = eUpi.total - cUpi.total;
+            int cashDiffCnt = eCash.count;
+            double cashDiffAmt = eCash.total;
+
+            int dayDiffCnt = upiDiffCnt + cashDiffCnt;
+            double dayDiffAmt = upiDiffAmt + cashDiffAmt;
+
+            if (upiDiffCnt == 0 && cashDiffCnt == 0) continue;
+
+            System.out.println("\n=== Date: " + date + " ===");
+            System.out.println("Method | Excel Cnt | Excel Amt | CSV Cnt | CSV Amt | Diff Cnt | Diff Amt");
+            System.out.println("--------------------------------------------------------------------------------");
+
+            if (eUpi.count > 0 || cUpi.count > 0) {
+                System.out.printf("%-6s | %9d | %9s | %7d | %7s | %8d | %8s%n",
+                        "UPI",
+                        eUpi.count, nf.format(eUpi.total),
+                        cUpi.count, nf.format(cUpi.total),
+                        upiDiffCnt, nf.format(upiDiffAmt));
+            }
+
+            if (eCash.count > 0) {
+                System.out.printf("%-6s | %9d | %9s | %7d | %7s | %8d | %8s%n",
+                        "CASH",
+                        eCash.count, nf.format(eCash.total),
+                        0, "₹0.00",
+                        cashDiffCnt, nf.format(cashDiffAmt));
+            }
+
+            System.out.println("--------------------------------------------------------------------------------");
+            System.out.printf("DAY DIFF → UPI: %3d (₹%s) | CASH: %3d (₹%s) | TOTAL: %3d (₹%s)%n",
+                    upiDiffCnt, nf.format(upiDiffAmt),
+                    cashDiffCnt, nf.format(cashDiffAmt),
+                    dayDiffCnt, nf.format(dayDiffAmt));
+
+            grandUpiDiffCnt += upiDiffCnt;
+            grandCashDiffCnt += cashDiffCnt;
+            grandTotalDiffCnt += dayDiffCnt;
+            grandUpiDiffAmt += upiDiffAmt;
+            grandCashDiffAmt += cashDiffAmt;
+            grandTotalDiffAmt += dayDiffAmt;
+        }
+
+        System.out.println("\n====================================================================================");
+        System.out.printf("FINAL VERIFIED DIFF → UPI: %4d (₹%s) | CASH: %4d (₹%s) | TOTAL: %4d (₹%s)%n",
+                grandUpiDiffCnt, nf.format(grandUpiDiffAmt),
+                grandCashDiffCnt, nf.format(grandCashDiffAmt),
+                grandTotalDiffCnt, nf.format(grandTotalDiffAmt));
+        System.out.println("====================================================================================");
+    }
+
+    private static Stats getStats(Map<String, Map<String, Stats>> map, String date, String method) {
+        return map.getOrDefault(date, Collections.emptyMap())
+                  .getOrDefault(method, new Stats());
+    }
+
+    /* --------------------------------------------------------------------- */
+    /* CSV PARSER */
+    /* --------------------------------------------------------------------- */
+    private static String[] parseCsvLine(String line) {
+        List<String> result = new ArrayList<>();
+        StringBuilder sb = new StringBuilder();
+        boolean inQuotes = false;
+
+        for (char c : line.toCharArray()) {
+            if (c == '"') inQuotes = !inQuotes;
+            else if (c == ',' && !inQuotes) {
+                result.add(sb.toString());
+                sb = new StringBuilder();
+            } else {
+                sb.append(c);
+            }
+        }
+        result.add(sb.toString());
+        return result.toArray(new String[0]);
+    }
+}

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Move &apos;transactionReport (86).csv&apos; to &apos;Practice_2025Feb&apos;" description="Move &apos;transactionReport (86).csv&apos; to &apos;Practice_2025Feb&apos;" destination="/Practice_2025Feb" element1="/PinelabReport/transactionReport (86).csv" flags="7" id="org.eclipse.ltk.core.refactoring.move.resources" resources="1" stamp="1775212598783" updateReferences="true"/>
+</session>

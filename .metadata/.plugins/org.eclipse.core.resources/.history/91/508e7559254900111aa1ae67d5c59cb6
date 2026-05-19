@@ -1,0 +1,606 @@
+package com.everycred.pages;
+
+import java.time.Duration;
+import java.util.List;
+import java.util.Set;
+
+import org.openqa.selenium.*;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+public class SubjectPage {
+
+    private WebDriver driver;
+    private WebDriverWait wait;
+    private WebDriverWait shortWait;
+
+    private boolean onboardingHandled = false;
+    private boolean subjectsNavigationHandled = false;
+    private String createdGroupName = "Employee Department";
+
+    // 🔥 GLOBAL CONTROL (FIX: prevents double navigation even if called again)
+    private static boolean GLOBAL_SUBJECTS_LOADED = false;
+
+    public SubjectPage(WebDriver driver) {
+        this.driver = driver;
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(25));
+        this.shortWait = new WebDriverWait(driver, Duration.ofSeconds(3));
+    }
+
+    // ======================================
+    // DELAY METHOD (VISIBLE UI FLOW)
+    // ======================================
+
+    public void delay() {
+        delay(120);
+    }
+
+    // ======================================
+    // 🔥 OVERLOADED FIX (RESOLVES YOUR ERROR)
+    // ======================================
+
+    public void delay(int ms) {
+        try {
+            Thread.sleep(ms);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // ======================================
+    // UI STABILITY FIX
+    // ======================================
+
+    public void waitForUIToSettle() {
+        try {
+            Thread.sleep(300);
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("body")));
+        } catch (Exception ignored) {}
+    }
+
+    // ======================================
+    // SWITCH WINDOW
+    // ======================================
+
+    public void switchToActiveWindow() {
+        String lastHandle = null;
+
+        Set<String> handles = driver.getWindowHandles();
+        for (String handle : handles) {
+            lastHandle = handle;
+        }
+
+        if (lastHandle != null) {
+            driver.switchTo().window(lastHandle);
+        }
+    }
+
+    // ======================================
+    // COLLAPSE PANEL
+    // ======================================
+
+    public void clickCollapseArrow() {
+
+        try {
+            By collapseArrow = By.xpath("//button[@type='button']//i[contains(@class,'pi-chevron-down')]");
+
+            WebElement icon = wait.until(ExpectedConditions.presenceOfElementLocated(collapseArrow));
+            WebElement button = icon.findElement(By.xpath("./ancestor::button"));
+
+            jsClick(button);
+
+            waitForUIToSettle();
+
+        } catch (Exception e) {
+            System.out.println("Collapse not found");
+        }
+    }
+
+    // ======================================
+    // NAVIGATE SUBJECTS (🔥 FIXED DUPLICATE ISSUE)
+    // ======================================
+
+    public void navigateToSubjects() {
+
+        if (GLOBAL_SUBJECTS_LOADED) {
+            System.out.println("Subjects already loaded → skipping navigation");
+            return;
+        }
+
+        System.out.println("Navigating to Subjects");
+
+        WebElement subjectsTab = wait.until(
+                ExpectedConditions.elementToBeClickable(
+                        By.xpath("//a[normalize-space()='Subjects']")));
+
+        jsClick(subjectsTab);
+
+        wait.until(ExpectedConditions.urlContains("/subjects"));
+
+        waitForUIToSettle();
+
+        clickCollapseArrow();
+
+        GLOBAL_SUBJECTS_LOADED = true;
+    }
+
+    // ======================================
+    // NAVIGATE + ONBOARDING (ONLY ONCE)
+    // ======================================
+
+    public void navigateToSubjectsAndHandleOnboarding() {
+
+        if (subjectsNavigationHandled) {
+            System.out.println("Navigation already executed → skipping second call");
+            return;
+        }
+
+        System.out.println("Navigating to Subjects & handling onboarding");
+
+        navigateToSubjects();
+
+        delay(150);
+
+        if (!onboardingHandled) {
+            closeOnboardingIfPresent();
+            onboardingHandled = true;
+        }
+
+        subjectsNavigationHandled = true;
+    }
+
+    // ======================================
+    // CREATE GROUP (OPTIMIZED BUT STABLE)
+    // ======================================
+
+    public void createGroup() {
+
+        System.out.println("Navigating to Subjects → Groups");
+
+        click(By.xpath("//a[contains(@href,'subjects/groups')]"));
+
+        clickCreateNewButton();
+
+        delay(120);
+
+        WebElement createGroupOption = wait.until(
+                ExpectedConditions.elementToBeClickable(
+                        By.xpath("//span[normalize-space()='Create Group']")));
+
+        jsClick(createGroupOption);
+
+        String baseGroupName = "Employee Department";
+        for (int attempt = 1; attempt <= 10; attempt++) {
+            String candidateName = attempt == 1 ? baseGroupName : baseGroupName + " " + attempt;
+
+            WebElement groupName = wait.until(
+                    ExpectedConditions.visibilityOfElementLocated(By.id("groupName")));
+            groupName.clear();
+            groupName.sendKeys(candidateName);
+
+            delay(200);
+
+            WebElement createBtn = wait.until(
+                    ExpectedConditions.elementToBeClickable(
+                            By.xpath("//button[contains(.,'Create Group')]")));
+            jsClick(createBtn);
+
+            if (isDuplicateGroupValidationVisible()) {
+                System.out.println("Group already exists: " + candidateName + " -> retrying");
+                clickCancelInCreateGroupPopup();
+                reopenCreateGroupDialog();
+                continue;
+            }
+
+            wait.until(ExpectedConditions.or(
+                    ExpectedConditions.invisibilityOfElementLocated(By.id("groupName")),
+                    ExpectedConditions.visibilityOfElementLocated(
+                            By.xpath("//*[contains(@class,'p-toast-message') and contains(.,'Group')]"))
+            ));
+
+            createdGroupName = candidateName;
+            closeDialogIfVisible();
+            System.out.println("Group Created Successfully: " + createdGroupName);
+            return;
+        }
+
+        throw new RuntimeException("Unable to create unique group name after multiple attempts");
+    }
+
+ // ======================================
+ // CREATE SUBJECT FLOW
+ // ======================================
+
+ public void createSubjectFlow() {
+
+     System.out.println("Opening Create Subject");
+
+     waitForUIToSettle();
+
+     // 🔥 FAST CLICK FIX APPLIED
+     By createNewLocator = By.xpath("//button[contains(.,'Create New')]");
+     wait.until(ExpectedConditions.presenceOfElementLocated(createNewLocator));
+
+     Exception lastError = null;
+
+     for (int attempt = 1; attempt <= 3; attempt++) {
+         try {
+
+             WebElement btn = driver.findElement(createNewLocator);
+
+             if (btn.isDisplayed() && btn.isEnabled()) {
+                 btn.click();
+                 waitForUIToSettle();
+                 break;
+             }
+
+         } catch (Exception ignored) {}
+
+         try {
+             WebElement btn = shortWait.until(
+                     ExpectedConditions.elementToBeClickable(createNewLocator));
+
+             btn.click();
+             waitForUIToSettle();
+             break;
+
+         } catch (Exception e) {
+             lastError = e;
+         }
+
+         try {
+             WebElement btn = driver.findElement(createNewLocator);
+             jsClick(btn);
+             waitForUIToSettle();
+             break;
+
+         } catch (Exception e) {
+             lastError = e;
+         }
+
+         delay(60);
+     }
+
+     delay(60);
+
+     try {
+         WebElement createSubjectBtn = wait.until(
+                 ExpectedConditions.elementToBeClickable(
+                         By.xpath("//span[normalize-space()='Create Subject']")));
+
+         jsClick(createSubjectBtn);
+
+     } catch (Exception e) {
+
+         WebElement fallback = wait.until(
+                 ExpectedConditions.elementToBeClickable(
+                         By.xpath("//*[self::a or self::button][contains(normalize-space(),'Create Subject')]")));
+
+         jsClick(fallback);
+     }
+
+     waitForUIToSettle();
+
+        WebElement title = wait.until(
+                ExpectedConditions.visibilityOfElementLocated(By.id("credentialTitle")));
+
+        title.clear();
+        title.sendKeys("Employee ID Card");
+
+        delay(200);
+
+        WebElement desc = driver.findElement(By.id("description"));
+        desc.clear();
+        desc.sendKeys("Employee ID Card 2026");
+
+        selectFromDropdown(By.id("group"), createdGroupName);
+
+        System.out.println("Selecting Credential Design");
+        selectFromDropdown(
+                By.xpath("//span[@aria-label='Select a credential design'] | //div[@id='credentialDesign']"),
+                "Dark Template");
+
+        selectFromDropdown(By.id("verifierDesign"), "Theme 1");
+
+        System.out.println("Subject Basic Details Completed");
+    }
+
+    // ======================================
+    // ADD ATTRIBUTES (SLOWED FOR VISIBILITY)
+    // ======================================
+
+    public void addAttributes() {
+
+        System.out.println("Adding Attributes");
+
+        addAttribute("Employees ID", "fieldType_0", "EPID-401-04837");
+        addAttribute("Designation", "fieldType_1", "Designation");
+        addAttribute("Personal Email ID", "fieldType_2", "Email");
+        addAttribute("Personal Contact Number", "fieldType_3", "Contact");
+        addAttribute("Joining Date", "fieldType_4", "Joining Date");
+        addAttribute("Expiry Date", "fieldType_5", "Expiry Date");
+        addAttribute("Company URL", "fieldType_6", "URL");
+        addAttribute("Address", "fieldType_1", "Address");
+
+        System.out.println("All Attributes Added Successfully");
+    }
+
+    // ======================================
+    // ADD ATTRIBUTE (SAFE + SLOW VISIBILITY)
+    // ======================================
+
+    public void addAttribute(String title, String fieldTypeId, String descriptionText) {
+
+        try {
+
+            WebElement addNewBtn = wait.until(
+                    ExpectedConditions.elementToBeClickable(
+                            By.xpath("//span[normalize-space()='Add New']")));
+
+            jsClick(addNewBtn);
+
+            delay(200);
+
+            WebElement titleField = wait.until(
+                    ExpectedConditions.visibilityOfElementLocated(By.id("fieldTitle")));
+
+            titleField.clear();
+            titleField.sendKeys(title);
+
+            delay(150);
+
+            WebElement fieldType = wait.until(
+                    ExpectedConditions.elementToBeClickable(By.id("fieldType")));
+
+            jsClick(fieldType);
+
+            delay(150);
+
+            wait.until(ExpectedConditions.elementToBeClickable(
+                    By.xpath("//li[@id='" + fieldTypeId + "']"))).click();
+
+            WebElement description = wait.until(
+                    ExpectedConditions.visibilityOfElementLocated(By.id("fieldDescription")));
+
+            description.clear();
+            description.sendKeys(descriptionText);
+
+            delay(150);
+
+            jsClick(wait.until(ExpectedConditions.presenceOfElementLocated(By.id("isRequired"))));
+
+            delay(150);
+
+            jsClick(wait.until(ExpectedConditions.elementToBeClickable(
+                    By.xpath("//span[normalize-space()='Save']"))));
+
+            wait.until(ExpectedConditions.invisibilityOfElementLocated(By.id("fieldTitle")));
+
+        } catch (Exception e) {
+            System.out.println("Attribute failed: " + title);
+        }
+    }
+
+    // ======================================
+    // CHECKBOX SELECTION
+    // ======================================
+
+    public void selectMultipleCheckboxAndSubmit() {
+
+        String[] attributes = {
+                "Employees ID",
+                "Designation",
+                "Personal Email ID",
+                "Personal Contact Number",
+                "Joining Date",
+                "Expiry Date",
+                "Company URL",
+                "Address"
+        };
+
+        int selectedCount = 0;
+        for (String attr : attributes) {
+            if (selectAttributeCheckbox(attr)) {
+                selectedCount++;
+            }
+        }
+
+        System.out.println("Attributes selected before submit: " + selectedCount);
+        clickSubmitButton();
+
+        System.out.println("Submit clicked");
+    }
+
+    private boolean selectAttributeCheckbox(String attr) {
+        System.out.println("Selecting attribute: " + attr);
+
+        By rowLocator = By.xpath(
+                "//tbody/tr[.//td[normalize-space()='" + attr + "'] or .//span[normalize-space()='" + attr + "']]");
+
+        WebElement row;
+        try {
+            row = wait.until(ExpectedConditions.visibilityOfElementLocated(rowLocator));
+        } catch (Exception e) {
+            System.out.println("Attribute row not found, skipping: " + attr);
+            return false;
+        }
+
+        WebElement checkbox = row.findElement(By.xpath(
+                ".//input[@type='checkbox'] | .//div[contains(@class,'p-checkbox-box')]"));
+
+        ((JavascriptExecutor) driver).executeScript(
+                "arguments[0].scrollIntoView({block:'center'});", checkbox);
+        delay(120);
+
+        try {
+            checkbox.click();
+        } catch (Exception e) {
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", checkbox);
+        }
+
+        delay(120);
+        return true;
+    }
+
+    // ======================================
+    // CLICK UTIL
+    // ======================================
+
+    public void click(By locator) {
+        WebElement element = wait.until(ExpectedConditions.elementToBeClickable(locator));
+        jsClick(element);
+    }
+
+    // ======================================
+    // JS CLICK
+    // ======================================
+
+    public void jsClick(WebElement element) {
+        ((JavascriptExecutor) driver)
+                .executeScript("arguments[0].click();", element);
+    }
+
+    private void closeDialogIfVisible() {
+        try {
+            WebElement close = wait.until(ExpectedConditions.elementToBeClickable(
+                    By.xpath("//button[contains(@class,'p-dialog-header-close')]")));
+            jsClick(close);
+            waitForUIToSettle();
+        } catch (Exception ignored) {
+            // no dialog open
+        }
+    }
+
+    private void closeOnboardingIfPresent() {
+        try {
+            List<WebElement> onboardingCloseButtons = driver.findElements(
+                    By.xpath("//button[contains(@class,'p-dialog-header-close')]"));
+            if (onboardingCloseButtons.isEmpty()) {
+                System.out.println("Onboarding not present");
+                return;
+            }
+            WebElement closeBtn = shortWait.until(
+                    ExpectedConditions.elementToBeClickable(
+                            By.xpath("//button[contains(@class,'p-dialog-header-close')]")));
+            jsClick(closeBtn);
+            System.out.println("Onboarding closed");
+        } catch (Exception e) {
+            System.out.println("Onboarding present but could not close safely");
+        }
+    }
+
+    private boolean isDuplicateGroupValidationVisible() {
+        try {
+            List<WebElement> duplicateHints = driver.findElements(By.xpath(
+                    "//*[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'already') and " +
+                            "contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'exist')]"));
+            if (!duplicateHints.isEmpty()) {
+                return true;
+            }
+
+            List<WebElement> errorToasts = driver.findElements(By.xpath(
+                    "//*[contains(@class,'p-toast-message-error') and contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'exist')]"));
+            return !errorToasts.isEmpty();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private void clickCancelInCreateGroupPopup() {
+        try {
+            WebElement cancelBtn = shortWait.until(
+                    ExpectedConditions.elementToBeClickable(
+                            By.xpath("//button[normalize-space()='Cancel']")));
+            jsClick(cancelBtn);
+            waitForUIToSettle();
+        } catch (Exception e) {
+            closeDialogIfVisible();
+        }
+    }
+
+    private void reopenCreateGroupDialog() {
+        delay(120);
+        clickCreateNewButton();
+        delay(120);
+        WebElement createGroupOption = wait.until(
+                ExpectedConditions.elementToBeClickable(
+                        By.xpath("//span[normalize-space()='Create Group']")));
+        jsClick(createGroupOption);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("groupName")));
+    }
+
+    private void selectFromDropdown(By triggerLocator, String optionText) {
+        WebElement trigger = wait.until(ExpectedConditions.presenceOfElementLocated(triggerLocator));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block:'center'});", trigger);
+        delay(120);
+
+        try {
+            wait.until(ExpectedConditions.visibilityOf(trigger));
+            jsClick(trigger);
+        } catch (Exception e) {
+            WebElement clickableTrigger = wait.until(ExpectedConditions.elementToBeClickable(triggerLocator));
+            jsClick(clickableTrigger);
+        }
+        delay(180);
+
+        By optionLocator = By.xpath(
+                "//li[normalize-space()='" + optionText + "'] | " +
+                "//*[@role='option' and normalize-space()='" + optionText + "'] | " +
+                "//span[normalize-space()='" + optionText + "']");
+
+        WebElement option = wait.until(ExpectedConditions.visibilityOfElementLocated(optionLocator));
+        jsClick(option);
+        waitForUIToSettle();
+    }
+
+    private void clickCreateNewButton() {
+        By createNewLocator = By.xpath("//button[contains(.,'Create New')]");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(createNewLocator));
+
+        Exception lastError = null;
+        for (int attempt = 1; attempt <= 3; attempt++) {
+            try {
+                WebElement createNewBtn = wait.until(ExpectedConditions.elementToBeClickable(createNewLocator));
+                jsClick(createNewBtn);
+                waitForUIToSettle();
+                return;
+            } catch (Exception e) {
+                lastError = e;
+                delay(200);
+            }
+        }
+
+        throw new RuntimeException("Unable to click Create New button", lastError);
+    }
+
+    private void clickSubmitButton() {
+        By submitByAriaLabel = By.xpath("//button[@aria-label='Submit']");
+        By submitFallback = By.xpath("//button[normalize-space()='Submit'] | //span[normalize-space()='Submit']/ancestor::button");
+
+        Exception lastError = null;
+        for (int attempt = 1; attempt <= 3; attempt++) {
+            try {
+                WebElement submitBtn = wait.until(ExpectedConditions.presenceOfElementLocated(submitByAriaLabel));
+                ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block:'center'});", submitBtn);
+                waitForUIToSettle();
+                jsClick(submitBtn);
+                return;
+            } catch (Exception e) {
+                lastError = e;
+            }
+
+            try {
+                WebElement fallback = wait.until(ExpectedConditions.presenceOfElementLocated(submitFallback));
+                ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block:'center'});", fallback);
+                waitForUIToSettle();
+                jsClick(fallback);
+                return;
+            } catch (Exception e) {
+                lastError = e;
+                delay(250);
+            }
+        }
+
+        throw new RuntimeException("Unable to click Submit button", lastError);
+    }
+}

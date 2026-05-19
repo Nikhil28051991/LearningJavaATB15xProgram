@@ -1,0 +1,177 @@
+package com.everycred.pages;
+
+import java.time.Duration;
+
+import org.openqa.selenium.*;
+import org.openqa.selenium.support.ui.*;
+
+public class LoginPage {
+
+    private WebDriver driver;
+    private WebDriverWait wait;
+
+    // Locators
+    private By emailField = By.id("email");
+    private By passwordField = By.cssSelector("input[type='password']");
+    private By submitButton = By.xpath("//button[@type='submit']");
+    private By dashboardLink = By.xpath("//a[contains(@href,'subjects')]");
+
+    // OPTIONAL CAPTCHA LOCATOR (if exists)
+    private By captchaFrame = By.xpath("//iframe[contains(@src,'captcha')]");
+
+    public LoginPage(WebDriver driver) {
+        this.driver = driver;
+
+        // ✅ OPTIMIZED WAIT (FASTER + ENTERPRISE)
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+    }
+
+    // ======================================
+    // MAIN LOGIN METHOD
+    // ======================================
+
+    public void login(String username, String password) {
+
+        System.out.println("Waiting for login page...");
+
+        wait.until(ExpectedConditions.urlContains("login"));
+        waitForPageReady();
+
+        // ✅ ENSURE PAGE IS STABLE
+        wait.until(ExpectedConditions.visibilityOfElementLocated(emailField));
+
+        // Enter Email
+        WebElement email = wait.until(ExpectedConditions.visibilityOfElementLocated(emailField));
+        email.clear();
+        email.sendKeys(username);
+
+        // Enter Password
+        WebElement pass = wait.until(ExpectedConditions.visibilityOfElementLocated(passwordField));
+        pass.clear();
+        pass.sendKeys(password);
+
+        // Handle CAPTCHA if present (manual fallback)
+        if (!driver.findElements(captchaFrame).isEmpty()) {
+            handleCaptchaIfPresent();
+        }
+
+        // Click Login (Stable)
+        clickWithRetry(submitButton);
+
+        System.out.println("Login clicked");
+
+        // Wait for navigation (MOST IMPORTANT)
+        wait.until(ExpectedConditions.or(
+                ExpectedConditions.urlContains("dashboard"),
+                ExpectedConditions.presenceOfElementLocated(dashboardLink)
+        ));
+
+        waitForPageReady();
+
+        System.out.println("Login successful");
+    }
+
+    // ======================================
+    // CLICK WITH RETRY (CORE FIX)
+    // ======================================
+
+    private void clickWithRetry(By locator) {
+
+        int attempts = 0;
+
+        while (attempts < 5) {
+            try {
+
+                WebElement element = wait.until(
+                        ExpectedConditions.presenceOfElementLocated(locator));
+
+                scrollToElement(element);
+
+                // Try normal click
+                wait.until(ExpectedConditions.elementToBeClickable(locator));
+                element.click();
+
+                return;
+
+            } catch (Exception e) {
+
+                System.out.println("Normal click failed, trying JS click...");
+
+                try {
+                    WebElement element = driver.findElement(locator);
+
+                    ((JavascriptExecutor) driver)
+                            .executeScript("arguments[0].click();", element);
+
+                    return;
+
+                } catch (Exception ex) {
+
+                    System.out.println("Retrying click attempt: " + (attempts + 1));
+
+                    sleep(300);   // ✅ OPTIMIZED (FASTER RETRY)
+                }
+            }
+
+            attempts++;
+        }
+
+        throw new RuntimeException("Failed to click element after retries: " + locator);
+    }
+
+    // ======================================
+    // CAPTCHA HANDLER (SAFE FALLBACK)
+    // ======================================
+
+    private void handleCaptchaIfPresent() {
+
+        try {
+
+            if (!driver.findElements(captchaFrame).isEmpty()) {
+
+                System.out.println("⚠ CAPTCHA detected! Please solve manually...");
+
+                // Wait up to 60 seconds for user to solve captcha
+                new WebDriverWait(driver, Duration.ofSeconds(60))
+                        .until(driver -> driver.findElements(captchaFrame).isEmpty());
+
+                System.out.println("✅ CAPTCHA solved, continuing...");
+
+            }
+
+        } catch (Exception e) {
+
+            System.out.println("No CAPTCHA detected, continuing...");
+        }
+    }
+
+    // ======================================
+    // SCROLL HELPER
+    // ======================================
+
+    private void scrollToElement(WebElement element) {
+
+        ((JavascriptExecutor) driver)
+                .executeScript("arguments[0].scrollIntoView({block:'center'});", element);
+    }
+
+    // ======================================
+    // PAGE LOAD WAIT
+    // ======================================
+
+    private void waitForPageReady() {
+
+        wait.until(driver ->
+                ((JavascriptExecutor) driver)
+                        .executeScript("return document.readyState")
+                        .equals("complete"));
+    }
+
+    // ======================================
+    // SLEEP HELPER
+    // ======================================
+
+    private void sleep(int ms) {
+        try { Thread.sleep(ms); } catch (Exception ignored) {}
+    }
+}
