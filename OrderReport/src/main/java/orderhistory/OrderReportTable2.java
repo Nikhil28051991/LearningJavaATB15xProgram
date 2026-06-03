@@ -20,22 +20,29 @@ public class OrderReportTable2 {
             discount += disc;
         }
 
-        // 🔥 compact format (reduced width)
         String format() {
             return String.format("%d(%.0f|%.0f)", count, amount, discount);
         }
     }
 
     private static final String[] PAYMENT_ORDER = {
-            "UPI", "CC", "UPIPPI", "UPICC", "NB", "UPI SALE", "CARD", "CASH"
+            "UPI",
+            "CC",
+            "DC",
+            "UPIPPI",
+            "UPICC",
+            "NB",
+            "UPI SALE",
+            "CARD",
+            "CASH"
     };
 
-    // 🔥 CONTROL WIDTH HERE (reduce/increase if needed)
     private static final int MAX_WIDTH = 18;
 
     public static void main(String[] args) {
 
-        String filePath = "C:\\Users\\Nikhil Sonawane\\eclipse-workspace\\OrderReport\\2026-05-01 to 2026-05-15_Order_History.xlsx";
+        String filePath =
+                "C:\\Users\\Nikhil Sonawane\\eclipse-workspace\\OrderReport\\2026-05-16 to 2026-05-31_Order_History.xlsx";
 
         Map<LocalDate, Map<String, Stats>> daily = new TreeMap<>();
         Map<String, Stats> grand = new HashMap<>();
@@ -54,7 +61,10 @@ public class OrderReportTable2 {
             Map<String, Integer> cols = new HashMap<>();
 
             for (Cell c : header) {
-                cols.put(c.getStringCellValue().toLowerCase().trim(), c.getColumnIndex());
+                cols.put(
+                        c.getStringCellValue().toLowerCase().trim(),
+                        c.getColumnIndex()
+                );
             }
 
             System.out.println("Available Columns:");
@@ -67,59 +77,119 @@ public class OrderReportTable2 {
             int priceCol = findColumnFlexible(cols, "ticket", "price", "amount");
             int discountCol = findColumnFlexible(cols, "discount", "disc");
 
-            System.out.println("\nUsing columns -> Date:" + dateCol +
+            System.out.println(
+                    "\nUsing columns -> Date:" + dateCol +
                     " Payment:" + payCol +
                     " Price:" + priceCol +
-                    " Discount:" + discountCol);
+                    " Discount:" + discountCol
+            );
 
             for (int r = 1; r <= sheet.getLastRowNum(); r++) {
 
                 Row row = sheet.getRow(r);
                 if (row == null) continue;
 
-                Cell dc = row.getCell(dateCol);
-                if (dc == null) continue;
+                Cell dateCell = row.getCell(dateCol);
+                if (dateCell == null) continue;
 
                 LocalDate date;
+
                 try {
-                    if (dc.getCellType() == CellType.NUMERIC) {
-                        date = dc.getLocalDateTimeCellValue().toLocalDate();
+                    if (dateCell.getCellType() == CellType.NUMERIC) {
+                        date = dateCell.getLocalDateTimeCellValue().toLocalDate();
                     } else {
-                        String d = dc.toString().trim();
+                        String d = dateCell.toString().trim();
                         date = LocalDate.parse(d.substring(0, 10));
                     }
                 } catch (Exception e) {
                     continue;
                 }
 
-                if (minDate == null || date.isBefore(minDate)) minDate = date;
-                if (maxDate == null || date.isAfter(maxDate)) maxDate = date;
+                if (minDate == null || date.isBefore(minDate))
+                    minDate = date;
+
+                if (maxDate == null || date.isAfter(maxDate))
+                    maxDate = date;
 
                 String payment = "UNKNOWN";
-                Cell pc = row.getCell(payCol);
-                if (pc != null) {
-                    payment = pc.toString().toUpperCase().trim().replace("_", " ");
+
+                Cell payCell = row.getCell(payCol);
+
+                if (payCell != null) {
+
+                    payment = payCell.toString()
+                            .toUpperCase()
+                            .trim()
+                            .replace("_", " ")
+                            .replaceAll("\\s+", " ");
+
+                    if (payment.equals("CREDIT CARD")
+                            || payment.equals("CREDITCARD")
+                            || payment.equals("CC")) {
+                        payment = "CC";
+                    }
+
+                    else if (payment.equals("DEBIT CARD")
+                            || payment.equals("DEBITCARD")
+                            || payment.equals("DC")) {
+                        payment = "DC";
+                    }
+
+                    else if (payment.equals("NET BANKING")
+                            || payment.equals("NETBANKING")
+                            || payment.equals("NB")) {
+                        payment = "NB";
+                    }
+
+                    else if (payment.equals("UPI PPI")) {
+                        payment = "UPIPPI";
+                    }
+
+                    else if (payment.equals("UPI CC")) {
+                        payment = "UPICC";
+                    }
+
+                    else if (payment.contains("UPI SALE")) {
+                        payment = "UPI SALE";
+                    }
                 }
 
                 double price = 0;
-                Cell pr = row.getCell(priceCol);
-                if (pr != null) {
+
+                Cell priceCell = row.getCell(priceCol);
+
+                if (priceCell != null) {
                     try {
-                        price = (pr.getCellType() == CellType.NUMERIC)
-                                ? pr.getNumericCellValue()
-                                : Double.parseDouble(pr.toString().replace(",", "").trim());
-                    } catch (Exception ignored) {}
+                        price =
+                                (priceCell.getCellType() == CellType.NUMERIC)
+                                        ? priceCell.getNumericCellValue()
+                                        : Double.parseDouble(
+                                                priceCell.toString()
+                                                        .replace(",", "")
+                                                        .trim()
+                                        );
+                    } catch (Exception ignored) {
+                    }
                 }
 
                 double discount = 0;
+
                 if (discountCol != -1) {
-                    Cell dcCell = row.getCell(discountCol);
-                    if (dcCell != null) {
+
+                    Cell discountCell = row.getCell(discountCol);
+
+                    if (discountCell != null) {
                         try {
-                            discount = (dcCell.getCellType() == CellType.NUMERIC)
-                                    ? dcCell.getNumericCellValue()
-                                    : Double.parseDouble(dcCell.toString().replace(",", "").trim());
-                        } catch (Exception ignored) {}
+                            discount =
+                                    (discountCell.getCellType() == CellType.NUMERIC)
+                                            ? discountCell.getNumericCellValue()
+                                            : Double.parseDouble(
+                                                    discountCell.toString()
+                                                            .replace(",", "")
+                                                            .trim()
+                                            );
+                        } catch (Exception ignored) {
+                        }
                     }
                 }
 
@@ -128,8 +198,14 @@ public class OrderReportTable2 {
                         .computeIfAbsent(payment, k -> new Stats())
                         .add(price, discount);
 
-                dayTotal.computeIfAbsent(date, k -> new Stats()).add(price, discount);
-                grand.computeIfAbsent(payment, k -> new Stats()).add(price, discount);
+                dayTotal
+                        .computeIfAbsent(date, k -> new Stats())
+                        .add(price, discount);
+
+                grand
+                        .computeIfAbsent(payment, k -> new Stats())
+                        .add(price, discount);
+
                 overall.add(price, discount);
             }
 
@@ -141,90 +217,156 @@ public class OrderReportTable2 {
         List<String[]> table = new ArrayList<>();
 
         String[] headerRow = new String[PAYMENT_ORDER.length + 3];
+
         headerRow[0] = "Date";
-        System.arraycopy(PAYMENT_ORDER, 0, headerRow, 1, PAYMENT_ORDER.length);
+
+        System.arraycopy(
+                PAYMENT_ORDER,
+                0,
+                headerRow,
+                1,
+                PAYMENT_ORDER.length
+        );
+
         headerRow[headerRow.length - 2] = "Discount";
         headerRow[headerRow.length - 1] = "Total";
+
         table.add(headerRow);
 
-        for (LocalDate d = minDate; !d.isAfter(maxDate); d = d.plusDays(1)) {
+        for (LocalDate d = minDate;
+             !d.isAfter(maxDate);
+             d = d.plusDays(1)) {
 
-            Map<String, Stats> map = daily.getOrDefault(d, new HashMap<>());
-            Stats t = dayTotal.getOrDefault(d, new Stats());
+            Map<String, Stats> map =
+                    daily.getOrDefault(d, new HashMap<>());
 
-            String[] row = new String[PAYMENT_ORDER.length + 3];
+            Stats total =
+                    dayTotal.getOrDefault(d, new Stats());
+
+            String[] row =
+                    new String[PAYMENT_ORDER.length + 3];
+
             row[0] = d.toString();
 
             for (int i = 0; i < PAYMENT_ORDER.length; i++) {
+
                 Stats s = map.get(PAYMENT_ORDER[i]);
-                row[i + 1] = (s != null) ? s.format() : "0(0|0)";
+
+                row[i + 1] =
+                        (s != null)
+                                ? s.format()
+                                : "0(0|0)";
             }
 
-            row[row.length - 2] = String.format("%.0f", t.discount);
-            row[row.length - 1] = t.format();
+            row[row.length - 2] =
+                    String.format("%.0f", total.discount);
+
+            row[row.length - 1] =
+                    total.format();
 
             table.add(row);
         }
 
-        String[] g = new String[PAYMENT_ORDER.length + 3];
-        g[0] = "GRAND TOTAL";
+        String[] grandRow =
+                new String[PAYMENT_ORDER.length + 3];
+
+        grandRow[0] = "GRAND TOTAL";
 
         for (int i = 0; i < PAYMENT_ORDER.length; i++) {
-            g[i + 1] = grand.getOrDefault(PAYMENT_ORDER[i], new Stats()).format();
+
+            grandRow[i + 1] =
+                    grand.getOrDefault(
+                            PAYMENT_ORDER[i],
+                            new Stats()
+                    ).format();
         }
 
-        g[g.length - 2] = String.format("%.0f", overall.discount);
-        g[g.length - 1] = overall.format();
-        table.add(g);
+        grandRow[grandRow.length - 2] =
+                String.format("%.0f", overall.discount);
 
-        String totalStr = overall.format();
-        String[] totalRow = new String[PAYMENT_ORDER.length + 3];
+        grandRow[grandRow.length - 1] =
+                overall.format();
+
+        table.add(grandRow);
+
+        String totalString = overall.format();
+
+        String[] totalRow =
+                new String[PAYMENT_ORDER.length + 3];
+
         totalRow[0] = "TOTAL";
-        Arrays.fill(totalRow, 1, totalRow.length, totalStr);
+
+        Arrays.fill(
+                totalRow,
+                1,
+                totalRow.length,
+                totalString
+        );
+
         table.add(totalRow);
 
         printTable(table);
     }
 
-    private static int findColumnFlexible(Map<String, Integer> map, String... keywords) {
+    private static int findColumnFlexible(
+            Map<String, Integer> map,
+            String... keywords) {
+
         for (String key : map.keySet()) {
+
             for (String k : keywords) {
+
                 if (key.contains(k)) {
                     return map.get(key);
                 }
             }
         }
+
         return -1;
     }
 
-    // 🔥 UPDATED PRINT METHOD (FIX APPLIED)
     private static void printTable(List<String[]> rows) {
 
         int cols = rows.get(0).length;
+
         int[] widths = new int[cols];
 
         for (String[] row : rows) {
+
             for (int c = 0; c < cols; c++) {
-                widths[c] = Math.min(Math.max(widths[c], row[c].length()), MAX_WIDTH);
+
+                widths[c] =
+                        Math.min(
+                                Math.max(
+                                        widths[c],
+                                        row[c].length()
+                                ),
+                                MAX_WIDTH
+                        );
             }
         }
 
         StringBuilder line = new StringBuilder("+");
-        for (int w : widths) line.append("-".repeat(w + 2)).append("+");
+
+        for (int w : widths) {
+            line.append("-".repeat(w + 2)).append("+");
+        }
 
         System.out.println(line);
+
         printRow(rows.get(0), widths);
+
         System.out.println(line);
 
         for (int i = 1; i < rows.size(); i++) {
 
-            if (rows.get(i)[0].equals("GRAND TOTAL")) {
+            if ("GRAND TOTAL".equals(rows.get(i)[0])) {
                 System.out.println(line);
             }
 
             printRow(rows.get(i), widths);
 
-            if (rows.get(i)[0].equals("GRAND TOTAL")) {
+            if ("GRAND TOTAL".equals(rows.get(i)[0])) {
                 System.out.println(line);
             }
         }
@@ -232,21 +374,34 @@ public class OrderReportTable2 {
         System.out.println(line);
     }
 
-    private static void printRow(String[] row, int[] widths) {
+    private static void printRow(
+            String[] row,
+            int[] widths) {
+
         System.out.print("|");
 
         for (int c = 0; c < row.length; c++) {
 
-            String val = row[c];
+            String value = row[c];
 
-            if (val.length() > widths[c]) {
-                val = val.substring(0, widths[c] - 2) + "..";
+            if (value.length() > widths[c]) {
+                value =
+                        value.substring(
+                                0,
+                                widths[c] - 2
+                        ) + "..";
             }
 
             if (c == 0) {
-                System.out.printf(" %-"+widths[c]+"s |", val);
+                System.out.printf(
+                        " %-"+widths[c]+"s |",
+                        value
+                );
             } else {
-                System.out.printf(" %"+widths[c]+"s |", val);
+                System.out.printf(
+                        " %"+widths[c]+"s |",
+                        value
+                );
             }
         }
 
