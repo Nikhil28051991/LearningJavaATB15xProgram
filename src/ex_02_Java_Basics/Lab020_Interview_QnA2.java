@@ -7,6 +7,10 @@ public class Lab020_Interview_QnA2 {
            int Enum = 20;
        System.out.println(Enum);
 
+       int nikhil$sonawane =90;
+       int Lab020_Interview_QnA2 = 123;
+       System.out.println(Lab020_Interview_QnA2);
+
 
     }
 }
