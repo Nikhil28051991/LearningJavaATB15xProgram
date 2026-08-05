@@ -10,6 +10,6 @@ public class Lab036_Operators_Assignment {
         // 10     -> Literal or Value
 
         // RHV to the LH
-
+        System.out.println(age);
     }
 }
