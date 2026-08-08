@@ -10,5 +10,24 @@ public class Lab021_Boolean {
         System.out.println(is_nikhil_married);
         System.out.println(this_is_a_long_name_that_student_asked_from_us_that_it_is_possible);
 
+        //    Java Primitive Data Types                               Primitive Types
+        //    Primitive Types                                               │
+        //      Boolean Types                                               ├──────────────────→ Boolean Types ─────────────→ boolean
+        //           boolean                                                │
+        //
+        //    Numeric Types                                                 └──────────────────→ Numeric Types
+        //      Integral Types                                                                        │
+        //          byte                                                                              ├──→ Integral Types
+        //          short                                                                             │        ├──→ byte
+        //          int                                                                               │        ├──→ short
+        //          long                                                                              │        ├──→ int
+        //          char                                                                              │        ├──→ long
+        //      Floating Point Types                                                                  │        └──→ char
+        //          float                                                                             │
+        //          double                                                                            └──→ Floating Point Types
+        //                                                                                                     ├──→ float
+        //                                                                                                     └──→ double
+
+
     }
 }
