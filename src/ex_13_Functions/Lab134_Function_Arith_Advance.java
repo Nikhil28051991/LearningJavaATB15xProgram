@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
-public class Lab134_Function_Arith_Advance {
+public class Lab134_Function_Arith_Advance {       // with try catch, Map and HashMap
 // Create a Function of Sub, Sum, Mul and Div
     // with parameter a, b and c (take the parameter from the User)
 

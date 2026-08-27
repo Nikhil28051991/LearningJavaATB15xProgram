@@ -2,7 +2,7 @@ package ex_13_Functions;
 
 import java.util.Scanner;
 
-public class Lab134_Function_Arith_Advance1 {
+public class Lab134_Function_Arith_Advance1 {         // with try catch and throw Exception
     public static void main(String[] args) {
 
         Scanner scanner = new Scanner(System.in);
