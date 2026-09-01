@@ -15,7 +15,7 @@ public class Lab150_ArraysCodeStudio {
   //      roll[3] = 45; //4th element
  //       roll[4] = 25; //5th element
 
-        int[] roll = {12,22,32,45,25};  // or we can use this in one line Initialization and Depolarization
+        int[] roll = {12,22,32,45,25};  // // or we can use this in one line - Declaration and Initialization
 
         //read values from array
         System.out.println("size of array:" + roll.length);
