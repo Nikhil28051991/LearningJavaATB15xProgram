@@ -5,11 +5,11 @@ public class Lab164_Car {
 
         Car t = new Car();
         System.out.println(t.name);
-
         Car p = new Car("xuv");
         System.out.println(p.name);
 
         Car p1 = new Car("tesla","2016");
+
         System.out.println(p1.name);
         System.out.println(p1.model);
 
