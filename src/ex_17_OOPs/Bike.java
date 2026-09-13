@@ -6,11 +6,13 @@ public class Bike {
 
 
     Bike() {                                         // Constructor 1: No arguments
+
         brand = "Pulsar";                            // Default bike is Pulsar
     }
 
 
     Bike(String brandGiven) {                        // Constructor 2: One argument
+
         brand = brandGiven;                          // Assigning given brand
     }
 
