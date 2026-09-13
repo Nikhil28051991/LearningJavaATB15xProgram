@@ -1,33 +1,19 @@
-// ============================================================
-// Part 1: Package
-// ============================================================
-
 package ex_21_OOPs_Encapsulation;
 
-
-// ============================================================
-// Part 2: Main Class
-// ============================================================
-
 public class NoEncapsulation_1 {
-
-
-// ============================================================
-// Part 3: main() Method
-// ============================================================
 
     public static void main(String[] args) {
 
 
 // ============================================================
-// Part 7: Create Object
+// Part 4: Create Object
 // ============================================================
 
         ICICIBank_5 nikhil = new ICICIBank_5("Nikhil", 500);  // Creating ICICIBank_5 object
 
 
 // ============================================================
-// Part 8: Directly Access Data
+// Part 5: Directly Access Data
 // ============================================================
 
         System.out.println(nikhil.name5);  // Directly accessing public name5
@@ -35,7 +21,7 @@ public class NoEncapsulation_1 {
 
 
 // ============================================================
-// Part 9: Directly Modify Data
+// Part 6: Directly Modify Data
 // ============================================================
 
         nikhil.bal5 = 1000;                // Directly modifying public bal5
@@ -48,14 +34,14 @@ public class NoEncapsulation_1 {
 
 
 // ============================================================
-// Part 4: Supporting Class
+// Part 1: Supporting Class
 // ============================================================
 
 class ICICIBank_5 {
 
 
 // ============================================================
-// Part 5: Public Data Members
+// Part 2: Public Data Members
 // ============================================================
 
     public String name5;  // Public variable → directly accessible
@@ -63,7 +49,7 @@ class ICICIBank_5 {
 
 
 // ============================================================
-// Part 6: Parameterized Constructor
+// Part 3: Parameterized Constructor
 // ============================================================
 
     public ICICIBank_5(String name, long bal) {  // Constructor with 2 arguments

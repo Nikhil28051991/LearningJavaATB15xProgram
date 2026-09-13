@@ -4,6 +4,7 @@ public class Lab190_REAL_BANK {
 
     public static void main(String[] args) {
 
+        // Part 2:
         ICICIBank amit = new ICICIBank("Amit",100);
         long bal = amit.getBal();
         System.out.println(bal);
@@ -23,7 +24,7 @@ public class Lab190_REAL_BANK {
     }
 }
 
-
+// Part 1:
 class ICICIBank{
     private String name;
     private long bal;

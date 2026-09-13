@@ -1,33 +1,19 @@
-// ============================================================
-// Part 1: Package
-// ============================================================
-
 package ex_21_OOPs_Encapsulation;
 
-
-// ============================================================
-// Part 2: Main Class
-// ============================================================
-
 public class FullEncapsulation_6 {
-
-
-// ============================================================
-// Part 3: main() Method
-// ============================================================
 
     public static void main(String[] args) {
 
 
 // ============================================================
-// Part 9: Create Object
+// Part 6: Create Object
 // ============================================================
 
         ICICIBank_6 nikhil = new ICICIBank_6("Nikhil", 500);  // Creating ICICIBank_6 object
 
 
 // ============================================================
-// Part 10: Read Data Using Getter
+// Part 7: Read Data Using Getter
 // ============================================================
 
         System.out.println(nikhil.getName6());  // Reading private name6 using getter
@@ -35,7 +21,7 @@ public class FullEncapsulation_6 {
 
 
 // ============================================================
-// Part 11: Modify Data Using Setter
+// Part 8: Modify Data Using Setter
 // ============================================================
 
         nikhil.setName6("Rahul");               // Modifying private name6 using setter
@@ -43,7 +29,7 @@ public class FullEncapsulation_6 {
 
 
 // ============================================================
-// Part 12: Print Updated Data
+// Part 9: Print Updated Data
 // ============================================================
 
         System.out.println(nikhil.getName6());  // Printing updated name6
@@ -53,14 +39,14 @@ public class FullEncapsulation_6 {
 
 
 // ============================================================
-// Part 4: Supporting Class
+// Part 1: Supporting Class
 // ============================================================
 
 class ICICIBank_6 {
 
 
 // ============================================================
-// Part 5: Private Data Members
+// Part 2: Private Data Members
 // ============================================================
 
     private String name6;  // private → name6 cannot be directly accessed outside the class
@@ -68,7 +54,7 @@ class ICICIBank_6 {
 
 
 // ============================================================
-// Part 6: Parameterized Constructor
+// Part 3: Parameterized Constructor
 // ============================================================
 
     public ICICIBank_6(String name6, long bal6) {  // Parameterized constructor with 2 arguments
@@ -79,7 +65,7 @@ class ICICIBank_6 {
 
 
 // ============================================================
-// Part 7: Getter Methods
+// Part 4: Getter Methods
 // ============================================================
 
     public String getName6() {  // Getter method for name6
@@ -92,7 +78,7 @@ class ICICIBank_6 {
 
 
 // ============================================================
-// Part 8: Setter Methods
+// Part 5: Setter Methods
 // ============================================================
 
     public void setName6(String name6) {  // Setter method for name6
