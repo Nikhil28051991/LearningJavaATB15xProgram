@@ -11,3 +11,19 @@ public class Lab185_Abstract {
 
 }
 
+
+abstract class Father{
+    abstract void loan50K();
+    // concrete - complete method
+    void load10K(){
+        System.out.println("Given!");
+    }
+}
+
+class Son extends Father{
+
+    @Override
+    void loan50K() {
+        System.out.println("Given by Son!");
+    }
+}
