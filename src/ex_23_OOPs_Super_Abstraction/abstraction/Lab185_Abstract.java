@@ -5,7 +5,7 @@ public class Lab185_Abstract {
     public static void main(String[] args) {
         Son s1  = new Son();
         s1.loan50K();
-        s1.load10K();
+        s1.loan10K();
     }
 
 
@@ -13,9 +13,11 @@ public class Lab185_Abstract {
 
 
 abstract class Father{
-    abstract void loan50K();
+
+    abstract void loan50K();    // Abstract Method
+
     // concrete - complete method
-    void load10K(){
+    void loan10K(){
         System.out.println("Given!");
     }
 }
